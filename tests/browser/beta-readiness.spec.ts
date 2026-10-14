@@ -53,7 +53,9 @@ test('public beta information architecture is truthful and connected', async ({ 
 
   await page.goto('/known-limitations');
   await expect(page.getByText('REDACT-001')).toBeVisible();
-  await expect(page.getByText(/does not yet edit existing PDF text/i)).toBeVisible();
+  await expect(
+    page.getByText(/Edit existing text changes supported original string operators/i),
+  ).toBeVisible();
 });
 
 test('local support and feedback intake accept only structured content-free fields', async ({

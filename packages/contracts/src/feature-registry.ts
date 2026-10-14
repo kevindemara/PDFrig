@@ -127,7 +127,7 @@ export const FEATURE_REGISTRY = {
   'OCR-002': feature('OCR-002', 'OCR selected pages', 'P', 'Phase 3'),
   'OCR-003': feature('OCR-003', 'Local Windows OCR', 'P', 'Phase 3'),
   'EDIT-001': feature('EDIT-001', 'Add text overlay', 'L', 'Launch', 'fixture_verified'),
-  'EDIT-002': feature('EDIT-002', 'Edit existing PDF text', 'N', 'Phase 2'),
+  'EDIT-002': feature('EDIT-002', 'Edit existing PDF text', 'N', 'Phase 2', 'fixture_verified'),
   'EDIT-003': feature('EDIT-003', 'Edit images', 'N', 'Phase 2'),
   'EDIT-004': feature('EDIT-004', 'Add and edit links', 'N', 'Phase 2'),
   'EDIT-005': feature('EDIT-005', 'Add simple shapes and objects', 'N', 'Phase 2'),

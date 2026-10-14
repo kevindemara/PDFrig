@@ -13,7 +13,7 @@ const limits = [
   [
     'VIEW-008 · EDIT-001 · EDIT-002 · OCR-001',
     'Selecting, adding and editing text',
-    'Choose Select text (or Pages) to drag-select source text; focus the page text layer and use Ctrl+A/Ctrl+C to select and copy the current page locally. Copy restrictions are honored. Image-only scans have no text to select; opening a PDF does not run OCR. Added text overlays share point sizes, wrapping, alignment and baselines with export. Overflow or unsupported standard-font characters stop export rather than shrinking, substituting or truncating text. Preview uses Helvetica-compatible system glyphs with matching advance widths; exact glyph outlines can vary by device. Custom fonts, automatic OCR and editing the original text are not implemented. The isolated OCR worker is not connected to file opening and adds a searchable layer, not editable original text.',
+    'Choose Select text (or Pages) to copy searchable source text locally; copy restrictions are honored. Text → Edit existing text supports bounded printable ASCII runs in unambiguous original fonts, retaining font, size and placement without overlays or reflow. Replacements must fit and require actual-PDF review. Text → OCR this page runs English/French recognition locally on unrotated, image-only pages; it adds invisible search/copy text without changing the scan visually. OCR is not automatic, can misread words, and does not make scanned words visually editable. Unknown glyphs, ambiguous accessibility text and unsafe structures refuse editing. Added overlays share point sizes, wrapping, alignment and baselines with export; system glyph outlines can vary. No universal PDF editing, OCR accuracy or accessibility certification is claimed.',
   ],
   [
     'SEC-001 · SEC-002 · SEC-003',
@@ -68,7 +68,7 @@ const limits = [
   [
     'EDIT-002',
     'Text changes',
-    'Add text creates a new overlay. PDFrig does not yet edit existing PDF text. Exported overlay text currently has a conservative character set.',
+    'Add text creates a new overlay; Edit existing text changes supported original string operators using the original font. It does not edit text inside form XObjects, substitute fonts, add missing glyphs or reflow paragraphs. OCR leaves scanned words visually unchanged. Both paths require review of the actual output and preserve originals with undo.',
   ],
   [
     'EDIT-006',

@@ -1,4 +1,4 @@
-name: PDFMason CI
+name: PDFrig CI
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes poppler-utils qpdf
-          python -m pip install --disable-pip-version-check pypdf==6.16.1 cryptography==50.0.0
+          python -m pip install --disable-pip-version-check pypdf==6.16.1 cryptography==50.0.0 Pillow==12.3.0
       - name: Check formatting
         run: pnpm format:check
       - name: Check publication tree hygiene
@@ -56,6 +56,8 @@ jobs:
         run: pnpm test:pdf-decorations
       - name: Verify password roles, permission flags and rendered fidelity independently
         run: pnpm test:pdf-permissions
+      - name: Verify original-text font, geometry and unrelated pixels independently
+        run: pnpm test:local-text
       - name: Check deny-by-default desktop surface
         run: pnpm desktop:surface-check
       - name: Check dependency licences
@@ -97,7 +99,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes poppler-utils qpdf
-          python -m pip install --disable-pip-version-check pypdf==6.16.1
+          python -m pip install --disable-pip-version-check pypdf==6.16.1 Pillow==12.3.0
       - name: Run browser smoke tests
         run: pnpm test:browser
       - name: Retain synthetic browser failure evidence

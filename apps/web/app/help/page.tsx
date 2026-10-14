@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const helpTopics = [
   [
     'Select source text',
-    'Choose Select text above the page, then drag to select. Focus the text layer and use Ctrl+A/Ctrl+C to copy the current page. Scans need OCR; Add text creates overlays, not edits to original text.',
+    'Choose Select text above the page, then drag to select. Focus the text layer and use Ctrl+A/Ctrl+C to copy the current page. For a scan, choose Text → OCR this page; visible artwork stays unchanged. Text → Edit existing text changes supported original runs with actual-output review. Add text creates overlays.',
     'VIEW-008',
     '/workspace',
   ],

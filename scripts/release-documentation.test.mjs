@@ -6,8 +6,12 @@ import test from 'node:test';
 test('VIEW-001 release README links resolve and do not claim unfinished editor capabilities', async () => {
   const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
   assert.ok(readme.includes('development preview, not a public release'));
-  assert.ok(readme.includes('there is no editor OCR action yet'));
-  assert.ok(readme.includes('not approved or connected to the editor'));
+  assert.ok(readme.includes('Text → OCR this page'));
+  assert.ok(readme.includes('Edit existing text'));
+  assert.ok(readme.includes('printable ASCII only'));
+  assert.ok(readme.includes('not visibly editable'));
+  assert.ok(readme.includes('Code → Download ZIP is source code'));
+  assert.ok(readme.includes('No paid code-signing certificate'));
   assert.ok(readme.includes('source-available'));
   assert.ok(readme.includes('UNLICENSED'));
   for (const match of readme.matchAll(/\]\(([^)]+)\)/gu)) {

@@ -6,9 +6,10 @@ A local-first PDF workspace for viewing, organizing, annotating, filling forms
 and creating new copies of your documents. Shared web and Windows editor code;
 no account is needed to try the local browser tools.
 
-**Status: development preview, not a public release.** Existing-text editing and
-in-editor OCR are still being developed. Do not mistake the **Add text** tool for
-editing the original text. There is no supported public Windows installer yet.
+**Status: development preview, not a public release.** Bounded existing-text editing
+and local OCR are connected to the editor with actual-PDF output review and undo.
+Do not mistake **Add text** overlays for **Edit existing text**. Not every font or
+PDF is editable. There is no supported public Windows installer yet.
 
 [Quick start](#quick-start) · [Windows](#windows) ·
 [Self-hosting](#self-hosting) · [Release checklist](#roadmap-and-launch) ·
@@ -30,15 +31,17 @@ _Local tools create new copies. Screenshots contain no customer documents._
 
 These are bounded, fixture-tested capabilities—not a claim that every PDF is supported.
 
-| Job              | Current support                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Read             | Render, search, select/copy searchable text, measured full-page fit, outline navigation and virtualized thumbnails |
-| Organize         | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages, with undo/redo              |
-| Add marks        | Text boxes/callouts, markup, comments, live freehand drawing, shapes and stamps; drag/resize added items           |
-| Fill & sign      | Supported AcroForm fields; typed script-font, drawn or uploaded **visual** signatures                              |
-| Create & convert | Blank PDFs, supported images/text to PDF, selected PDF pages to PNG/JPEG                                           |
-| Refine           | Lossless compression, metadata tools, page/Bates numbering, headers/footers, crop and bounded resize               |
-| Protect          | Bounded password/encryption and permission tools, with authority checks and explicit limitations                   |
+| Job                | Current support                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Read               | Render, search, select/copy searchable text, measured full-page fit, outline navigation and virtualized thumbnails |
+| Edit original text | Supported original text runs, retaining original fonts, size and position; actual-PDF review and undo/redo         |
+| OCR a scan         | Local English/French recognition of the current unrotated page; invisible search/copy text, unchanged visible scan |
+| Organize           | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages, with undo/redo              |
+| Add marks          | Text boxes/callouts, markup, comments, live freehand drawing, shapes and stamps; drag/resize added items           |
+| Fill & sign        | Supported AcroForm fields; typed script-font, drawn or uploaded **visual** signatures                              |
+| Create & convert   | Blank PDFs, supported images/text to PDF, selected PDF pages to PNG/JPEG                                           |
+| Refine             | Lossless compression, metadata tools, page/Bates numbering, headers/footers, crop and bounded resize               |
+| Protect            | Bounded password/encryption and permission tools, with authority checks and explicit limitations                   |
 
 Existing tags/bookmarks can be retained on the supported unchanged-page annotation
 path and are checked on export. Page organizing has stricter support limits.
@@ -46,11 +49,23 @@ Every operation can refuse a document it cannot safely preserve.
 
 ### Important limitations
 
-- **Original text:** engine research now repairs a demonstrated accessibility-text
-  failure, but the candidate binary is not approved or connected to the editor.
-- **Scans:** opening a scan does not automatically run OCR. The isolated OCR worker
-  is tested, but there is no editor OCR action yet. Intended behavior is searchable/
-  copyable invisible text with the original scan visually unchanged.
+- **Original text:** choose **Text → Edit existing text**, select a supported run,
+  enter the replacement, build/review the actual PDF and apply it. The original
+  font must have an unambiguous supported encoding; printable ASCII only, using
+  existing glyphs. Current font support is non-symbolic Base-14 Type1 fonts or
+  Identity-H CID fonts with one-to-one supported ToUnicode mappings; unknown simple
+  embedded fonts remain read-only. Replacement must fit the original advance. No paragraph reflow,
+  font substitution, XObject editing or covering rectangle. Unsupported text stays
+  read-only; uniquely owned accessibility text is repaired, not stripped.
+- **Scans:** choose **Text → OCR this page**, select English/French and review
+  recognized words and the actual output before applying. OCR runs on this device,
+  not automatically on open. Scanned words are **not visibly editable**: the scan
+  image remains unchanged, as requested. OCR adds invisible, untagged search/copy
+  text. Rotated pages, already-searchable pages and unsupported OCR glyphs refuse
+  the operation. OCR can misread words; recognition accuracy is not guaranteed.
+- These actions retain up to eight in-session source copies for undo; reopen a
+  saved copy to begin another session. Cancel terminates OCR workers; recognition
+  has a three-minute deadline. Large/complex pages may exceed the 20-megapixel limit.
 - **Signatures:** visual signatures are not certificate-backed signatures or proof
   of identity. Editing may invalidate existing digital signatures.
 - **Redaction:** the separately gated raster-removal beta is not a black-box overlay;
@@ -82,6 +97,12 @@ Open [the workspace](http://127.0.0.1:3000/workspace) or
 [local utilities](http://127.0.0.1:3000/tools). Keep the terminal open.
 Press Ctrl+C there to stop the server.
 
+The first build downloads pinned, SHA-256-verified English/French OCR models from
+the upstream public repository. Worker/core assets come from locked npm packages.
+After preparation, OCR uses only local `/ocr/` assets—no runtime CDN or document
+upload. The Windows bundle includes these assets for offline use. Asset preparation
+fails if required versions or hashes differ; do not disable its checks.
+
 No credentials or paid services are needed for this loopback development preview.
 Do not expose the development server to the internet. The repository retains its
 internal PDFMason package/directory names; PDFrig is the display brand.
@@ -111,9 +132,9 @@ pnpm --filter @pdfmason/web dev --port 3101
 
 Stop with Ctrl+C; do not stop unrelated processes to free a port. If installation
 fails, check the pinned versions and lockfile rather than upgrading dependencies
-indiscriminately. A scan with no selectable text needs OCR, which is not yet
-connected to this editor. **Add text** creates an overlay, not original-text
-replacement. If an export refuses a risky structure, keep the original and
+indiscriminately. A scan with no selectable text needs **Text → OCR this page**.
+Use **Select text** to copy searchable text; use **Edit existing text** to change
+supported original runs. **Add text** creates an overlay. If an export refuses a risky structure, keep the original and
 inspect the warning; do not bypass preservation checks.
 
 ## Privacy and hosting
@@ -166,7 +187,32 @@ pnpm desktop:dev
 ```
 
 Native save creates a new file and refuses overwriting an existing file. The
-shell shares the same feature limits; worker tests do not enable editor OCR.
+shell shares the same feature limits and local OCR assets. Native installed-app
+offline OCR still requires reference-machine verification before release.
+
+### What GitHub users will download
+
+**Code → Download ZIP is source code, not an installed Windows app.** It requires
+the development tools and commands above. Once a reviewed installer is published,
+ordinary users will instead open this repository's **Releases**, download the
+Windows x64 `.exe` installer and its checksum, and run the installer. They will
+not need Node.js, pnpm, Rust, C++ Build Tools, Docker or a server. Releases remain
+access-controlled while the repository is private; no installer is published yet.
+
+The planned NSIS installer installs for the current Windows user and creates a
+Start-menu shortcut. It installs WebView2 if missing (that bootstrap can need an
+internet connection); afterwards bundled local editing/OCR needs no account or
+paid service. Save/export work before installing a newer version, close PDFrig,
+then run the new approved installer. Uninstall through Windows **Installed apps**.
+Your PDFs and exported files must remain untouched. These install/upgrade/uninstall
+claims must be confirmed on clean reference machines before publishing artifacts.
+
+With the no-cost unsigned route, Windows may show an unknown-publisher/SmartScreen
+warning; another extension does not remove trust checks. A SHA-256 checksum checks
+download integrity, not publisher identity. Never disable Windows protections or
+circumvent organizational policy. If installation is blocked, use source/browser
+testing instead. No paid code-signing certificate is required to build an internal
+installer, and none has been purchased.
 
 ### Internal installer testing
 
@@ -218,7 +264,8 @@ pnpm test:browser
 `pnpm check` runs formatting, lint, strict types, unit/component tests, native
 surface restrictions, license/secret checks and builds. Browser verification also
 needs Playwright Chromium, qpdf **12.4.0**, Poppler (`pdftoppm`, `pdftotext`) and
-Python with `pypdf` **6.16.1** / `cryptography` **50.0.0**. Install Chromium with
+Python with `pypdf` **6.16.1** / `cryptography` **50.0.0**. Browser original-text
+render verification also uses Pillow **12.3.0**. Install Chromium with
 `pnpm exec playwright install chromium`. Configure `PDFMASON_QPDF_PATH`,
 `PDFMASON_PYTHON_PATH` and put Poppler tools on PATH; individual verification
 harnesses also support `PDFMASON_PDFTOPPM_PATH`. The bounded prerequisite probe never installs tools.
@@ -226,7 +273,8 @@ Browser tests own port 3100 and an isolated cache; choose another port with
 `PDFMASON_BROWSER_TEST_PORT` (1024–65535) if needed. Never point QA at a user tab.
 Docker is required for
 `pnpm test:ocr-worker` and `pnpm test:office-worker`; these verify isolated workers,
-not editor integration or public availability.
+not approval of the native image for public availability. Editor OCR tests use
+the separate local WASM path and do not require Docker.
 
 Use synthetic/licensed fixtures only. Never put PDFs, extracted text, filenames,
 passwords or signature data into logs, issue attachments or analytics. Report
@@ -237,26 +285,30 @@ records in its fixture manifests; Office sandbox samples have a separate
 
 Additional environment-dependent checks include `pnpm test:pdf-corpus`,
 `pnpm test:pdf-utilities`, `pnpm test:pdf-decorations`, `pnpm test:pdf-permissions`,
+`pnpm test:local-text` (original font/geometry, following-text advance and pixels),
 `pnpm security:audit` and native Rust checks. Database tests require local Docker/
 Supabase: `pnpm db:start`, `pnpm db:test`, `pnpm test:db-concurrency`,
 `pnpm db:advisors`, then `pnpm db:stop`. Use isolated synthetic accounts only.
 
 ## Roadmap and launch
 
-Next: approve a traceable text engine, broaden font/layout/tag fidelity checks,
-connect genuine source-text editing with actual-export preview, and integrate
-appearance-preserving OCR through a reviewed local/self-hosted path.
+Implemented: bounded original-operator editing through the existing MIT PDF
+library, repaired accessibility text, local scan-preserving OCR, actual-PDF review,
+undo/redo and independent export checks. Next: broaden font/language/layout/tag
+coverage, verify native installed-app OCR and complete standalone distribution.
 
 Also required: the chosen source license, complete third-party notices/SBOM,
 secure standalone distribution, Windows reference-machine checks, broader
 accessibility/security testing and reproducible release artifacts. The
 following launch blockers must be resolved with actual evidence, not merely flags:
 
-- Approve an exact, traceable source-text engine and complete broad font/layout/tag
-  verification and editor integration. The [candidate assessment](docs/dependencies/source-text-engine-review.json)
-  remains not approved; four passing research cases are not production coverage.
-- Integrate scan-preserving OCR with reviewed licensing, sandbox/cleanup, consent,
-  cancellation, alignment/recognition benchmarks and actual-output preview.
+- Broaden original-text Unicode/font/reflow coverage and manual accessibility
+  verification. The [assessment](docs/dependencies/source-text-engine-review.json)
+  records the selected existing-library alternative; unbound PDFium remains rejected.
+- Broaden OCR alignment/recognition benchmarks and refresh or independently clear
+  the exact native WASM dependency graph. [OCR review](docs/dependencies/ocr-engine-review.json)
+  records retained notices, source binding, known older native components and
+  bounded input mitigations; it is not blanket legal/security certification.
 - Implement the chosen free local/self-hosted distribution mode without exposing
   development fakes or bypassing trusted-service authorization.
 - Approve the project's source-available legal terms and third-party obligations;
@@ -338,4 +390,9 @@ still say `UNLICENSED`. This README does not grant new use or redistribution rig
 Third-party components retain their own licenses and rights regardless of the
 application's eventual license. See [third-party notices](docs/dependencies/THIRD_PARTY_NOTICES.txt)
 and the [text-engine technical review](docs/dependencies/source-text-engine-review.json).
+Local OCR full texts are retained in [native notices](docs/dependencies/LOCAL_OCR_NOTICES.txt)
+and [JavaScript notices](docs/dependencies/LOCAL_OCR_JS_NOTICES.txt), also bundled
+alongside local OCR assets. The selected local engines have a technical licensing
+review; final installer/server SBOMs and the project's own licence remain launch
+decisions. The isolated native OCR/Office images have separate unresolved obligations.
 Brand assets and trademarks are separate from code licensing.
