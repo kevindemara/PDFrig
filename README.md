@@ -49,8 +49,17 @@ Every operation can refuse a document it cannot safely preserve.
 
 ### Important limitations
 
-- **Original text:** choose **Text → Edit existing text**, select a supported run,
-  enter the replacement, build/review the actual PDF and apply it. The original
+- **Original text:** use **Select text**, highlight words on the page, then choose
+  **Edit selected text**. Alternatively choose **Text → Edit existing text** and
+  pick a supported logical line (adjacent letter fragments are grouped together).
+  A selection is matched by text and page location; ambiguous/unmatched selections
+  are refused rather than silently choosing another occurrence. Repeated words
+  within the same logical line currently require a unique phrase or explicit line choice.
+  The dialog separates the exact selected text from its full source-line context.
+  Enter the replacement and click **Build actual PDF preview**. Review and apply
+  stay unavailable until a preview succeeds; after reviewing it, check the review
+  box and apply. Changing the replacement invalidates the previous preview/review.
+  A too-wide replacement explains the failure instead of enabling an unsafe apply. The original
   font must have an unambiguous supported encoding; printable ASCII only, using
   existing glyphs. Current font support is non-symbolic Base-14 Type1 fonts or
   Identity-H CID fonts with one-to-one supported ToUnicode mappings; unknown simple
@@ -66,6 +75,9 @@ Every operation can refuse a document it cannot safely preserve.
 - These actions retain up to eight in-session source copies for undo; reopen a
   saved copy to begin another session. Cancel terminates OCR workers; recognition
   has a three-minute deadline. Large/complex pages may exceed the 20-megapixel limit.
+  OCR receives only a bounded, generated P6 RGB raster, not user image headers or
+  compressed image streams. Older codecs remain compiled into the pinned runtime;
+  this mitigation is not native security clearance for public distribution.
 - **Signatures:** visual signatures are not certificate-backed signatures or proof
   of identity. Editing may invalidate existing digital signatures.
 - **Redaction:** the separately gated raster-removal beta is not a black-box overlay;

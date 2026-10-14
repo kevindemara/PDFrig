@@ -17,11 +17,15 @@ const cli = path.join(
   path.dirname(desktopRequire.resolve('@tauri-apps/cli/package.json')),
   'tauri.js',
 );
-const version = '0.1.0-alpha.20261012.1';
-const output = path.join(root, 'apps/desktop/src-tauri/target/internal-pdfrig-20261012');
+const qa = process.argv.includes('--installer-qa');
+const version = qa ? '0.1.0-alpha.20261014.1' : '0.1.0-alpha.20261012.1';
+const buildId = qa ? 'installer-qa-20261014' : 'internal-pdfrig-20261012';
+const productName = qa ? 'PDFrig Installer QA' : 'PDFrig Internal Test';
+const output = path.join(root, 'apps/desktop/src-tauri/target', buildId);
 const privateDirectory = path.join(
   root,
-  'apps/desktop/src-tauri/target/local-alpha-signing/internal-pdfrig-20261012',
+  'apps/desktop/src-tauri/target/local-alpha-signing',
+  buildId,
 );
 const privateKeyPath = path.join(privateDirectory, 'updater.key');
 for (const keyFile of [privateKeyPath, `${privateKeyPath}.pub`]) {
@@ -54,7 +58,9 @@ try {
   Object.assign(environment, {
     CARGO_NET_OFFLINE: 'true',
     PDFMASON_ALLOW_UNSIGNED_INTERNAL_ALPHA: 'true',
-    PDFMASON_DESKTOP_IDENTIFIER: 'com.pdfmason.desktop.internal',
+    PDFMASON_DESKTOP_IDENTIFIER: qa
+      ? 'com.pdfmason.desktop.installerqa'
+      : 'com.pdfmason.desktop.internal',
     PDFMASON_RELEASE_CHANNEL: 'alpha',
     PDFMASON_RELEASE_VERSION: version,
     PDFMASON_UPDATER_ENDPOINT:
@@ -77,6 +83,7 @@ try {
   });
   const config = JSON.parse(await readFile(environment.PDFMASON_RELEASE_CONFIG_OUTPUT, 'utf8'));
   config.productName = 'PDFrig Internal Test';
+  if (qa) config.productName = productName;
   config.app = {
     windows: [
       {
@@ -92,6 +99,7 @@ try {
     ],
   };
   config.bundle.fileAssociations = [];
+  if (qa) config.app.windows[0].title = 'PDFrig — Installer QA';
   config.bundle.longDescription =
     'PDFrig internal test build. Not approved for public distribution.';
   await copyFile(
@@ -176,7 +184,7 @@ try {
         bomFormat: 'CycloneDX',
         specVersion: '1.5',
         version: 1,
-        metadata: { component: { type: 'application', name: 'PDFrig Internal Test', version } },
+        metadata: { component: { type: 'application', name: productName, version } },
         components,
       },
       null,
@@ -208,7 +216,7 @@ try {
     { cwd: path.join(root, 'apps/desktop'), env: environment, stdio: 'inherit' },
   );
   const bundle = path.join(root, 'apps/desktop/src-tauri/target/release/bundle/nsis');
-  const name = `PDFrig Internal Test_${version}_x64-setup.exe`;
+  const name = `${productName}_${version}_x64-setup.exe`;
   for (const suffix of ['', '.sig'])
     await copyFile(path.join(bundle, `${name}${suffix}`), path.join(output, `${name}${suffix}`));
   await copyFile(`${privateKeyPath}.pub`, path.join(output, 'updater-test-public-key.pub'));

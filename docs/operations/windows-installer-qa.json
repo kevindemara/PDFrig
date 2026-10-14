@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "publicReleaseApproved": false,
+  "featureIds": ["OCR-003", "OCR-001", "EDIT-002"],
+  "scope": "Isolated internal current-user QA installer, separate product/identifier, no PDF associations, no production updater or billing changes",
+  "command": "pnpm desktop:internal-build --installer-qa",
+  "verified": [
+    "shared editor TypeScript/Vite production build with local OCR assets",
+    "575 declared dependency build-input records inventoried",
+    "test signing keys removed after failure"
+  ],
+  "buildResult": "blocked-by-Windows-Application-Control",
+  "safeDiagnostic": "Rust serde_json build helper was never executed: os error 4551, An Application Control policy has blocked this file.",
+  "installerProduced": false,
+  "installedAppTested": false,
+  "unresolvedLicenseTextGaps": 51,
+  "notAttempted": [
+    "install/upgrade/uninstall",
+    "installed shortcuts/taskbar icon",
+    "installed offline OCR",
+    "clean-machine WebView2 bootstrap"
+  ],
+  "nextAction": "Build and test on an approved Windows developer/reference host under its normal security policy. Do not disable protections, relocate/recompile to evade this block, or infer that a previous installer verifies the new source.",
+  "remainingGates": [
+    "resolve final distribution license-text gaps and complete SBOM review",
+    "patched/minimal native OCR runtime or independent exact-binary security clearance",
+    "project source-available license approval",
+    "clean-machine installer and installed offline/editor/export verification"
+  ]
+}
