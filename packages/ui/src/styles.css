@@ -3710,6 +3710,37 @@ button:disabled {
   backdrop-filter: blur(3px);
 }
 
+.source-text-dialog {
+  background: var(--surface-panel, #fff);
+  color: var(--brand-ink, #17232d);
+  padding: 1.25rem;
+  border-radius: 12px;
+  width: min(760px, 96vw);
+  max-height: 94vh;
+  overflow: auto;
+  display: grid;
+  gap: 0.8rem;
+}
+.source-text-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.source-text-dialog h2,
+.source-text-dialog p {
+  margin: 0;
+}
+.source-text-preview {
+  overflow: auto;
+  max-height: 45vh;
+  background: #e7ebed;
+}
+.source-text-preview canvas {
+  display: block;
+  margin: 0 auto;
+}
+
 .editor-dialog {
   display: grid;
   width: min(560px, 100%);

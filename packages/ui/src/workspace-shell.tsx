@@ -1,6 +1,7 @@
 'use client';
 
 import { DocumentNotice } from './document-notice.js';
+import { SourceTextDialog } from './source-text-dialog.js';
 import {
   addAnnotationCommand,
   createCommentSummaryReport,
@@ -1701,6 +1702,7 @@ export const WorkspaceShell = ({
   const [inkEraserRadius, setInkEraserRadius] = useState(0.04);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [sourceTextMode, setSourceTextMode] = useState<'edit' | 'ocr' | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [pendingSignatureRepeat, setPendingSignatureRepeat] = useState<{
@@ -1903,7 +1905,10 @@ export const WorkspaceShell = ({
           ({ pageIndex }) => pageIndex === selectedPage.sourcePageIndex,
         );
   const hasForms = [...sources.values()].some(({ formFields }) => formFields.length > 0);
-  const primarySource = sources.size === 1 ? [...sources.values()][0] : undefined;
+  const activeSources = [...sources.values()].filter((source) =>
+    pages.some((page) => page.sourceId === source.sourceId),
+  );
+  const primarySource = activeSources.length === 1 ? activeSources[0] : undefined;
   const redactionDocumentEligible =
     primarySource === undefined
       ? false
@@ -2117,7 +2122,7 @@ export const WorkspaceShell = ({
       setSources(new Map(sourcesRef.current));
       return source;
     },
-    [prepareSource],
+    [prepareSource, setSources],
   );
 
   const disposePendingPdfInsert = useCallback(async (): Promise<void> => {
@@ -2184,6 +2189,7 @@ export const WorkspaceShell = ({
       setActiveTool(source.formFields.length > 0 ? 'fill' : 'pages');
       setFlattenForms(false);
       setShowExportDialog(false);
+      setSourceTextMode(null);
       closePrintDialog();
       setShowRedactionDialog(false);
       setShowSignatureDialog(false);
@@ -2527,7 +2533,12 @@ export const WorkspaceShell = ({
   const assemblySources = (): readonly {
     readonly bytes: Uint8Array;
     readonly sourceId: string;
-  }[] => [...sourcesRef.current.values()].map(({ bytes, sourceId }) => ({ bytes, sourceId }));
+  }[] =>
+    [...sourcesRef.current.values()]
+      .filter((source) =>
+        currentState().pageGraph.pages.some((page) => page.sourceId === source.sourceId),
+      )
+      .map(({ bytes, sourceId }) => ({ bytes, sourceId }));
 
   const saveOutput = async (
     bytes: Uint8Array,
@@ -2788,6 +2799,7 @@ export const WorkspaceShell = ({
     try {
       const results: SearchResult[] = [];
       for (const source of sourcesRef.current.values()) {
+        if (!pages.some((page) => page.sourceId === source.sourceId)) continue;
         for (const result of await source.document.search(query)) {
           const graphIndex = pages.findIndex(
             (page) =>
@@ -3405,11 +3417,24 @@ export const WorkspaceShell = ({
                 ) : activeTool === 'text' || activeTool === 'callout' ? (
                   <div className="tool-options">
                     <p>
-                      Drag to add a text overlay. This does not change the PDF’s existing text. To
-                      select or copy source text, choose Select text above the page. Image-only
-                      scans need OCR; automatic OCR and original-text editing are not connected to
-                      this editor yet.
+                      Choose original-text editing, OCR search/copy for a scan, or drag to add an
+                      overlay. Original-text replacements preserve the existing font and must fit;
+                      OCR leaves scanned artwork unchanged.
                     </p>
+                    <button
+                      type="button"
+                      disabled={!allSourcesAnnotatable || !selectedSource || sources.size >= 8}
+                      onClick={() => setSourceTextMode('edit')}
+                    >
+                      Edit existing text
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!allSourcesAnnotatable || !selectedSource || sources.size >= 8}
+                      onClick={() => setSourceTextMode('ocr')}
+                    >
+                      OCR this page
+                    </button>
                     {(['text', 'callout'] as const).map((tool) => (
                       <button
                         aria-pressed={activeTool === tool}
@@ -4750,8 +4775,8 @@ export const WorkspaceShell = ({
                     )}
                     {query.length > 0 && !searching && searchResults.length === 0 && (
                       <p className="search-empty">
-                        No searchable text. This may be an image-only scan; OCR is not available
-                        yet.
+                        No matching searchable text. For an image-only scan, choose Text → OCR this
+                        page to add local search/copy text without changing its appearance.
                       </p>
                     )}
                   </section>
@@ -5005,6 +5030,55 @@ export const WorkspaceShell = ({
           markCount={redactionMarks.length}
           onApply={() => void onApplyRedactions()}
           onClose={() => setShowRedactionDialog(false)}
+        />
+      )}
+      {sourceTextMode !== null && selectedSource !== undefined && selectedPage !== undefined && (
+        <SourceTextDialog
+          key={`${selectedSource.sourceId}:${selectedPage.sourcePageIndex}:${sourceTextMode}`}
+          bytes={selectedSource.bytes}
+          document={selectedSource.document}
+          pageIndex={selectedPage.sourcePageIndex}
+          mode={sourceTextMode}
+          onClose={() => setSourceTextMode(null)}
+          onApply={async (bytes, signal) => {
+            const before = currentState();
+            const previousId = selectedSource.sourceId;
+            if (
+              !allSourcesAnnotatable ||
+              signal.aborted ||
+              sourcesRef.current.size >= 8 ||
+              !before.pageGraph.pages.some((page) => page.sourceId === previousId)
+            )
+              throw new Error('SOURCE_REVISION_STALE');
+            const nextId = crypto.randomUUID();
+            const source = await prepareSource(bytes, nextId);
+            // AbortSignal may change while PDF.js prepares the candidate revision.
+            const cancelled = () => signal.aborted;
+            if (cancelled() || currentState() !== before || !source.inspection.canAnnotateSafely) {
+              await source.document.destroy();
+              throw new Error('SOURCE_REVISION_STALE');
+            }
+            sourcesRef.current.set(nextId, source);
+            setSources(new Map(sourcesRef.current));
+            const after: EditorDocumentState = {
+              ...before,
+              pageGraph: {
+                pages: before.pageGraph.pages.map((page) =>
+                  page.sourceId === previousId ? { ...page, sourceId: nextId } : page,
+                ),
+              },
+              formValues: before.formValues.map((value) =>
+                value.sourceId === previousId ? { ...value, sourceId: nextId } : value,
+              ),
+            };
+            execute({
+              id: `source-revision:${nextId}`,
+              version: 1,
+              apply: () => after,
+              revert: () => before,
+            });
+            setSearchResults([]);
+          }}
         />
       )}
     </main>
