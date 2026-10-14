@@ -2,6 +2,7 @@ import type { BrowserPdfDocument } from './browser-document.js';
 import type { LocalOcrWord } from './local-ocr-compose.js';
 import type { Page } from 'tesseract.js';
 import { runLocalOcrWorker } from './local-ocr-worker-client.js';
+import { encodeOcrPixels } from './local-ocr-pixels.js';
 /** OCR-001: only a locally rendered canvas enters OCR; URLs/documents never do. */
 export async function recognizeLocalPage(
   document: BrowserPdfDocument,
@@ -23,13 +24,14 @@ export async function recognizeLocalPage(
   try {
     await document.renderPage(canvas, pageIndex, scale, 0, 1, 'opaque', signal);
     if (isCancelled()) throw new Error('OCR_CANCELLED');
-    const blob = await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(
-        (value) => (value ? resolve(value) : reject(new Error('OCR_IMAGE_FAILED'))),
-        'image/png',
-      ),
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('OCR_IMAGE_FAILED');
+    const image = encodeOcrPixels(
+      canvas.width,
+      canvas.height,
+      context.getImageData(0, 0, canvas.width, canvas.height).data,
+      signal,
     );
-    const image = new Uint8Array(await blob.arrayBuffer());
     const raw = await runLocalOcrWorker(image, language, base, signal, progress);
     if (isCancelled()) throw new Error('OCR_CANCELLED');
     if (

@@ -30,11 +30,24 @@
       "npmAuditHighSeverityPassed": true,
       "completeNativeVulnerabilityClearance": false,
       "knownAdvisory": "https://github.com/madler/zlib/releases/tag/v1.2.13",
-      "assessment": "Core links zlib 1.2.12. CVE-2022-37434 concerns gzip header extra fields via inflateGetHeader. No calls were found in the selected Leptonica/libpng/libtiff/Tesseract sources. This path accepts only browser-generated PNG canvas bytes and pinned raw (not gzip) language models, never arbitrary native image/PDF/URL inputs. This is bounded risk reduction, not proof of absence of all native vulnerabilities. A refreshed native graph or independent exact-binary clearance remains a public-release blocker."
+      "assessment": "Core includes older codecs: libpng 1.6.38.git, libwebp 1.2.2, libtiff 4.3.0, giflib 5.1.4, IJG jpeg 9a, Leptonica 1.83.0 and zlib 1.2.12. Native review found libpng advisories and CVE-2023-4863 affecting older WebP versions; npm audit cannot clear these compiled libraries. The editor now serializes its bounded opaque canvas as fixed P6 RGB (20 million pixels maximum), not PNG. User-provided image headers, ancillary chunks, compression streams, native PDF files and URLs never enter this OCR path. Pinned language models are raw, not gzip. This avoids those compressed-image decoder entry paths in the editor but does not remove the old codecs from the binary, assess all PNM/Tesseract/model code, or certify exact-binary safety. A refreshed minimal native graph or independent exact-binary clearance remains a public-release blocker.",
+      "advisorySources": [
+        "https://www.libpng.org/pub/png/libpng.html",
+        "https://github.com/pnggroup/libpng/security/advisories",
+        "https://nvd.nist.gov/vuln/detail/CVE-2023-4863",
+        "https://github.com/madler/zlib/releases/tag/v1.2.13"
+      ],
+      "controlledInput": "local-ocr-pixels.ts emits a fixed P6 header, exact bounded RGB byte count and explicit white alpha composition; no arbitrary raster input is accepted by the editor",
+      "remainingReview": [
+        "patched/minimal reproducible native build and source-to-binary binding",
+        "PNM and trained-model parser/fuzzer review",
+        "exact final WASM and Windows artifact SBOM/security clearance"
+      ]
     },
     "verification": [
       "local-ocr-compose.test.ts",
       "local-ocr-worker-client.test.ts",
+      "local-ocr-pixels.test.ts",
       "tests/browser/local-text.spec.ts"
     ],
     "windowsStatus": "Shared Vite build includes local assets; native WebView2 offline installation smoke remains a separate release check",
