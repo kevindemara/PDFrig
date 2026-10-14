@@ -98,7 +98,7 @@ jobs:
             ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" } |
             Set-Content -LiteralPath (Join-Path $bundleRoot 'SHA256SUMS.txt') -Encoding utf8NoBOM
       - name: Generate SPDX SBOM
-        uses: anchore/sbom-action@v0.24.0
+        uses: anchore/sbom-action@v0.24.3
         with:
           path: apps/desktop/src-tauri/target/release/bundle/nsis
           format: spdx-json
