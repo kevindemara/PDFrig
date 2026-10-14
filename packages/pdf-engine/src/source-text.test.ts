@@ -6,6 +6,23 @@ import { embedSignatureFont } from './signature-font.js';
 const fixture = (name: string) =>
   readFile(new URL(`../../test-corpus/fixtures/${name}`, import.meta.url));
 describe('EDIT-002 genuine bounded source text replacement', () => {
+  it('does not guess geometry after unsupported quote operators or degenerate transforms', async () => {
+    const document = await PDFDocument.create(),
+      page = document.addPage();
+    const font = await document.embedFont(StandardFonts.Helvetica);
+    page.node.set(PDFName.of('Resources'), document.context.obj({ Font: { H: font.ref } }));
+    for (const content of [
+      "BT /H 18 Tf 54 600 Td 20 TL (OTHER) ' (UNSAFE) Tj ET",
+      '0 0 0 0 0 0 cm BT /H 18 Tf 54 600 Td (UNSAFE) Tj ET',
+      'BT /H 18 Tf 0 0 0 0 54 600 Tm (UNSAFE) Tj ET',
+    ]) {
+      page.node.set(
+        PDFName.of('Contents'),
+        document.context.register(document.context.flateStream(content)),
+      );
+      expect(await inspectSourceText(await document.save(), 0)).toEqual([]);
+    }
+  });
   it('replaces original text with the same font and keeps the source immutable', async () => {
     const source = await fixture('smoke-one-page.pdf');
     const before = new Uint8Array(source);
@@ -138,4 +155,47 @@ describe('EDIT-002 genuine bounded source text replacement', () => {
     expect(await inspectSourceText(await document.save(), 0)).toEqual([]);
     expect(page.node.lookup(PDFName.of('Contents'))).toBeInstanceOf(PDFArray);
   });
+  it.each(['TJ', 'Tj', 'positioned'])(
+    'groups %s letter fragments and edits only the selected word',
+    async (mode) => {
+      const document = await PDFDocument.create(),
+        page = document.addPage([612, 792]);
+      const font = await document.embedFont(StandardFonts.Helvetica);
+      page.node.set(PDFName.of('Resources'), document.context.obj({ Font: { H: font.ref } }));
+      const text = 'BEFORE SOURCE AFTER';
+      let content = 'BT /H 18 Tf 1 0 0 1 54 600 Tm ';
+      if (mode === 'TJ')
+        content += `[${Array.from(text, (character) => `(${character}) -1`).join(' ')}] TJ ET`;
+      else if (mode === 'Tj')
+        content += Array.from(text, (character) => `(${character}) Tj`).join(' ') + ' ET';
+      else {
+        let x = 54;
+        for (const character of text) {
+          content += `1 0 0 1 ${x.toFixed(6)} 600 Tm (${character}) Tj `;
+          x += font.widthOfTextAtSize(character, 18);
+        }
+        content += 'ET';
+      }
+      page.node.set(
+        PDFName.of('Contents'),
+        document.context.register(document.context.flateStream(content)),
+      );
+      const source = await document.save(),
+        runs = await inspectSourceText(source, 0);
+      expect(runs).toHaveLength(1);
+      const run = runs[0];
+      if (!run) throw new Error('Missing fragmented run');
+      expect(run.text).toBe(text);
+      const output = await replaceSourceText(source, run.id, run.text, 'EDIT', {
+        start: 7,
+        end: 13,
+      });
+      expect(
+        (await inspectSourceText(output, 0))
+          .map((item) => item.text)
+          .join('')
+          .replace(/\s/gu, ''),
+      ).toBe('BEFOREEDITAFTER');
+    },
+  );
 });

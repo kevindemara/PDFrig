@@ -15,7 +15,10 @@ describe('VIEW-008 source-text selection lifecycle', () => {
         }
         return Promise.resolve(result);
       });
-      const document = { renderSelectableText } as unknown as BrowserPdfDocument;
+      const document = {
+        renderSelectableText,
+        getPageMetrics: vi.fn(() => Promise.resolve({ rotation: 0, width: 612, height: 792 })),
+      } as unknown as BrowserPdfDocument;
       const view = render(
         <PdfTextLayer document={document} pageIndex={0} scale={1} rotation={0} enabled />,
       );
@@ -46,6 +49,7 @@ describe('VIEW-008 source-text selection lifecycle', () => {
   it('ignores late results after unmount without leaking parser details', async () => {
     let finish: ((value: 'ready') => void) | undefined;
     const document = {
+      getPageMetrics: vi.fn(() => Promise.resolve({ rotation: 0, width: 612, height: 792 })),
       renderSelectableText: vi.fn(
         () =>
           new Promise<'ready'>((resolve) => {

@@ -8,16 +8,26 @@ import {
   type SourceTextRun,
 } from '@pdfmason/pdf-engine/browser';
 import { useDialogFocus } from './dialog-focus.js';
+import { matchSourceTextSelection, type PdfTextSelection } from './source-text-selection.js';
 
 interface Props {
   bytes: Uint8Array;
   document: BrowserPdfDocument;
   pageIndex: number;
   mode: 'edit' | 'ocr';
+  initialSelection?: PdfTextSelection | null;
   onClose: () => void;
   onApply: (bytes: Uint8Array, signal: AbortSignal) => Promise<void>;
 }
-export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, onApply }: Props) {
+export function SourceTextDialog({
+  bytes,
+  document,
+  pageIndex,
+  mode,
+  initialSelection,
+  onClose,
+  onApply,
+}: Props) {
   const { closeRef, dialogRef } = useDialogFocus(onClose);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controller = useRef(new AbortController());
@@ -31,6 +41,7 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
   const [candidate, setCandidate] = useState<Uint8Array | null>(null);
   const [reviewed, setReviewed] = useState(false);
   const [recognized, setRecognized] = useState('');
+  const [range, setRange] = useState<{ start: number; end: number } | null>(null);
   useEffect(() => {
     const lifetime = new AbortController();
     controller.current = lifetime;
@@ -39,12 +50,27 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
         .then((items) => {
           if (!lifetime.signal.aborted) {
             setRuns(items);
-            setSelected(items[0]?.id ?? '');
-            setReplacement(items[0]?.text ?? '');
+            const match = initialSelection
+              ? matchSourceTextSelection(items, initialSelection)
+              : null;
+            const first = match
+              ? items.find((item) => item.id === match.id)
+              : initialSelection
+                ? undefined
+                : items[0];
+            setSelected(first?.id ?? '');
+            setRange(match ? { start: match.start, end: match.end } : null);
+            setReplacement(
+              first ? (match ? first.text.slice(match.start, match.end) : first.text) : '',
+            );
             setStatus(
-              items.length
-                ? ''
-                : 'No safely editable text runs on this page. Scans use OCR search/copy; unsupported fonts remain read-only.',
+              initialSelection
+                ? match
+                  ? 'Your selected text is ready to edit. Build the PDF preview below to enable review and apply.'
+                  : 'Your selection could not be matched safely to one supported line. Reselect a word or line, or explicitly choose a line below. No unrelated text was chosen.'
+                : items.length
+                  ? 'Choose a text line below, or select words on the page before opening this editor.'
+                  : 'No safely editable text runs on this page. Scans use OCR search/copy; unsupported fonts remain read-only.',
             );
           }
         })
@@ -60,12 +86,15 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
       lifetime.abort();
       void candidateRef.current?.destroy();
     };
-  }, [bytes, pageIndex, mode]);
+  }, [bytes, pageIndex, mode, initialSelection]);
   const invalidate = useCallback(() => {
     setCandidate(null);
     setReviewed(false);
     void candidateRef.current?.destroy();
     candidateRef.current = null;
+    const canvas = canvasRef.current;
+    if (canvas) canvas.width = canvas.height = 0;
+    setStatus('Preview needed. Build the actual PDF preview to enable review and apply.');
   }, []);
   const build = async () => {
     invalidate();
@@ -79,7 +108,14 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
         const run = runs.find((item) => item.id === selected);
         if (!run) throw new Error('SOURCE_TEXT_UNSUPPORTED');
         output = await runLocalTextOperation(
-          { kind: 'replace', bytes, id: selected, expectedText: run.text, replacement },
+          {
+            kind: 'replace',
+            bytes,
+            id: selected,
+            expectedText: run.text,
+            replacement,
+            ...(range ? { range } : {}),
+          },
           signal,
         );
       } else {
@@ -120,12 +156,17 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
       if (!controller.current.signal.aborted)
         setStatus(
           error instanceof Error && error.message === 'SOURCE_TEXT_REPLACEMENT_TOO_WIDE'
-            ? 'Replacement is too wide. Shorten it to preserve the original layout.'
+            ? 'Replacement is too wide for the selected area. Shorten it or select a larger text range. Nothing was changed; review and apply stay unavailable until a preview succeeds.'
             : error instanceof Error && error.message === 'SOURCE_TEXT_GLYPH_UNSUPPORTED'
               ? 'The original font does not contain these characters. No substitution was made.'
               : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
                 ? 'This page already contains searchable text. OCR was not added a second time; use Select text or Edit existing text.'
-                : 'Could not safely build this copy. The source is unchanged. Try a supported page or shorter text.',
+                : error instanceof Error && error.message === 'SOURCE_TEXT_SELECTION_UNSUPPORTED'
+                  ? 'This selection crosses an unsupported text boundary. Select a complete supported word or choose a line below. Nothing was changed.'
+                  : error instanceof Error &&
+                      error.message === 'SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED'
+                    ? 'This selection cannot yet be edited while preserving its accessibility text. Nothing was changed.'
+                    : 'Could not safely build this copy. The source is unchanged. Review and apply stay unavailable until a preview succeeds. Try a supported page or shorter text.',
         );
     } finally {
       if (!controller.current.signal.aborted) setBusy(false);
@@ -144,7 +185,12 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
           <h2 id="source-text-title">
             {mode === 'edit' ? 'Edit existing text' : 'OCR · search and copy'}
           </h2>
-          <button type="button" ref={closeRef} onClick={onClose}>
+          <button
+            className="button button--secondary"
+            type="button"
+            ref={closeRef}
+            onClick={onClose}
+          >
             Cancel
           </button>
         </header>
@@ -159,16 +205,18 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
               supported glyphs only; replacement must fit. No paragraph reflow or covering overlays.
             </p>
             <label className="field-stack">
-              Original text
+              {range ? 'Source line (context)' : 'Original text'}
               <select
                 disabled={busy}
                 value={selected}
                 onChange={(event) => {
                   invalidate();
                   setSelected(event.target.value);
+                  setRange(null);
                   setReplacement(runs.find((run) => run.id === event.target.value)?.text ?? '');
                 }}
               >
+                <option value="">Choose a text line</option>
                 {runs.map((run) => (
                   <option key={run.id} value={run.id}>
                     {run.text}
@@ -176,6 +224,18 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
                 ))}
               </select>
             </label>
+            {range && (
+              <label className="field-stack">
+                Selected text (only this will change)
+                <input
+                  readOnly
+                  value={
+                    runs.find((run) => run.id === selected)?.text.slice(range.start, range.end) ??
+                    ''
+                  }
+                />
+              </label>
+            )}
             <label className="field-stack">
               Replacement text
               <input
@@ -220,6 +280,7 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
           </>
         )}
         <button
+          className="button button--primary"
           type="button"
           disabled={busy || (mode === 'edit' && (!selected || !replacement))}
           onClick={() => void build()}
@@ -227,7 +288,14 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
           {busy ? 'Working…' : 'Build actual PDF preview'}
         </button>
         <p role="status">{status}</p>
+        {!candidate && !busy && (
+          <p className="source-text-review-help">
+            First build the preview. Once it appears, review it and check the box to enable Apply
+            reviewed copy.
+          </p>
+        )}
         <div
+          hidden={!candidate && !busy}
           className="source-text-preview"
           role="region"
           aria-label="Scrollable exported PDF preview"
@@ -235,7 +303,7 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
         >
           <canvas ref={canvasRef} aria-label="Actual exported PDF preview" />
         </div>
-        <label>
+        <label className="source-text-review">
           <input
             type="checkbox"
             disabled={!candidate || busy}
@@ -245,6 +313,7 @@ export function SourceTextDialog({ bytes, document, pageIndex, mode, onClose, on
           I reviewed the actual output and {mode === 'ocr' ? 'recognized text' : 'text layout'}.
         </label>
         <button
+          className="button button--primary"
           type="button"
           disabled={!candidate || !reviewed || busy}
           onClick={() => {

@@ -1,4 +1,4 @@
-import type { SourceTextRun } from './source-text.js';
+import type { SourceTextRun, SourceTextRange } from './source-text.js';
 import type { LocalOcrWord } from './local-ocr-compose.js';
 export type LocalTextRequest =
   | { readonly kind: 'inspect'; readonly bytes: Uint8Array; readonly pageIndex: number }
@@ -8,6 +8,7 @@ export type LocalTextRequest =
       readonly id: string;
       readonly expectedText: string;
       readonly replacement: string;
+      readonly range?: SourceTextRange;
     }
   | {
       readonly kind: 'ocr';

@@ -2,6 +2,7 @@
 
 import { DocumentNotice } from './document-notice.js';
 import { SourceTextDialog } from './source-text-dialog.js';
+import type { PdfTextSelection } from './source-text-selection.js';
 import {
   addAnnotationCommand,
   createCommentSummaryReport,
@@ -1703,6 +1704,14 @@ export const WorkspaceShell = ({
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [sourceTextMode, setSourceTextMode] = useState<'edit' | 'ocr' | null>(null);
+  const [sourceTextSelection, setSourceTextSelection] = useState<{
+    sourceId: string;
+    pageIndex: number;
+    value: PdfTextSelection;
+  } | null>(null);
+  const [sourceTextInitialSelection, setSourceTextInitialSelection] =
+    useState<PdfTextSelection | null>(null);
+  const sourceTextSelectionReader = useRef<(() => PdfTextSelection | null) | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [pendingSignatureRepeat, setPendingSignatureRepeat] = useState<{
@@ -3424,7 +3433,17 @@ export const WorkspaceShell = ({
                     <button
                       type="button"
                       disabled={!allSourcesAnnotatable || !selectedSource || sources.size >= 8}
-                      onClick={() => setSourceTextMode('edit')}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setSourceTextInitialSelection(
+                          sourceTextSelectionReader.current?.() ??
+                            (sourceTextSelection?.sourceId === selectedSource?.sourceId &&
+                            sourceTextSelection?.pageIndex === selectedPage?.sourcePageIndex
+                              ? (sourceTextSelection?.value ?? null)
+                              : null),
+                        );
+                        setSourceTextMode('edit');
+                      }}
                     >
                       Edit existing text
                     </button>
@@ -3907,6 +3926,28 @@ export const WorkspaceShell = ({
                       >
                         Select text
                       </button>
+                      <button
+                        disabled={
+                          !allSourcesAnnotatable ||
+                          sources.size >= 8 ||
+                          !selectedSource ||
+                          !selectedPage ||
+                          sourceTextSelection?.sourceId !== selectedSource.sourceId ||
+                          sourceTextSelection.pageIndex !== selectedPage.sourcePageIndex
+                        }
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => {
+                          setSourceTextInitialSelection(
+                            sourceTextSelectionReader.current?.() ??
+                              sourceTextSelection?.value ??
+                              null,
+                          );
+                          setSourceTextMode('edit');
+                        }}
+                        type="button"
+                      >
+                        Edit selected text
+                      </button>
                       <span className="viewer-toolbar__divider" />
                       <button
                         aria-label="Zoom out"
@@ -4057,11 +4098,23 @@ export const WorkspaceShell = ({
                       />
                       {selectedSource !== undefined && selectedPage !== undefined && (
                         <PdfTextLayer
+                          selectionReaderRef={sourceTextSelectionReader}
                           document={selectedSource.document}
                           pageIndex={selectedPage.sourcePageIndex}
                           scale={zoom}
                           rotation={selectedPage.rotation}
                           enabled={activeTool === 'pages'}
+                          onSelection={(value) =>
+                            setSourceTextSelection(
+                              value
+                                ? {
+                                    sourceId: selectedSource.sourceId,
+                                    pageIndex: selectedPage.sourcePageIndex,
+                                    value,
+                                  }
+                                : null,
+                            )
+                          }
                           key={`${selectedSource.sourceId}:${selectedPage.sourcePageIndex}:${selectedPage.rotation}:${zoom}`}
                         />
                       )}
@@ -5039,6 +5092,7 @@ export const WorkspaceShell = ({
           document={selectedSource.document}
           pageIndex={selectedPage.sourcePageIndex}
           mode={sourceTextMode}
+          initialSelection={sourceTextInitialSelection}
           onClose={() => setSourceTextMode(null)}
           onApply={async (bytes, signal) => {
             const before = currentState();

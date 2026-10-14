@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { BrowserPdfDocument } from '@pdfmason/pdf-engine/browser';
-import type { QuarterTurn } from '@pdfmason/editor-core';
+import { rotateNormalizedRect, type QuarterTurn } from '@pdfmason/editor-core';
+import type { PdfTextSelection } from './source-text-selection.js';
 
 export const PdfTextLayer = ({
   document,
@@ -8,23 +9,30 @@ export const PdfTextLayer = ({
   scale,
   rotation,
   enabled,
+  onSelection,
+  selectionReaderRef,
 }: {
   readonly document: BrowserPdfDocument;
   readonly pageIndex: number;
   readonly scale: number;
   readonly rotation: QuarterTurn;
   readonly enabled: boolean;
+  readonly onSelection?: (selection: PdfTextSelection | null) => void;
+  readonly selectionReaderRef?: RefObject<(() => PdfTextSelection | null) | null>;
 }) => {
   const container = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState('Preparing selectable text…');
+  const actualRotation = useRef<number | null>(null);
   useEffect(() => {
     const target = container.current;
     if (target === null) return;
     const controller = new AbortController();
     void document
       .renderSelectableText(target, pageIndex, scale, rotation, controller.signal)
-      .then((result) => {
+      .then(async (result) => {
+        const metrics = await document.getPageMetrics(pageIndex, rotation);
         if (controller.signal.aborted) return;
+        actualRotation.current = metrics.rotation;
         setStatus(
           result === 'ready'
             ? 'Text is selectable. Focus the text layer and press Ctrl+A to select this page; Ctrl+C copies locally.'
@@ -42,9 +50,66 @@ export const PdfTextLayer = ({
       });
     return () => {
       controller.abort();
+      actualRotation.current = null;
       target.replaceChildren();
     };
   }, [document, pageIndex, scale, rotation]);
+  const readSelection = useCallback((): PdfTextSelection | null => {
+    const target = container.current;
+    const selection = target?.ownerDocument.getSelection();
+    if (!target || selection?.rangeCount !== 1 || selection.isCollapsed) {
+      return null;
+    }
+    const range = selection.getRangeAt(0);
+    if (!target.contains(range.startContainer) || !target.contains(range.endContainer)) {
+      return null;
+    }
+    const page = target.parentElement?.getBoundingClientRect(),
+      box = range.getBoundingClientRect();
+    if (
+      !page?.width ||
+      !page.height ||
+      actualRotation.current === null ||
+      !box.width ||
+      !box.height
+    )
+      return null;
+    const rect = {
+      x: (box.x - page.x) / page.width,
+      y: (box.y - page.y) / page.height,
+      width: box.width / page.width,
+      height: box.height / page.height,
+    };
+    const inverse = ((360 - actualRotation.current) % 360) as QuarterTurn;
+    return {
+      text: selection.toString(),
+      rect: inverse === 0 ? rect : rotateNormalizedRect(rect, inverse),
+    };
+  }, []);
+  const captureSelection = useCallback(
+    (clearEmpty = false) => {
+      const value = readSelection();
+      const nativeSelection = container.current?.ownerDocument.getSelection();
+      if (value || clearEmpty || (nativeSelection && !nativeSelection.isCollapsed))
+        onSelection?.(value);
+    },
+    [onSelection, readSelection],
+  );
+  useEffect(() => {
+    if (!selectionReaderRef) return;
+    selectionReaderRef.current = readSelection;
+    return () => {
+      if (selectionReaderRef.current === readSelection) selectionReaderRef.current = null;
+    };
+  }, [selectionReaderRef, readSelection]);
+  useEffect(() => {
+    const target = container.current;
+    if (!target || !enabled) return;
+    const owner = target.ownerDocument;
+    const capture = () => captureSelection();
+    owner.addEventListener('selectionchange', capture);
+    return () => owner.removeEventListener('selectionchange', capture);
+  }, [enabled, captureSelection]);
   return (
     <>
       {/* A focusable document region intentionally supports page-scoped select/copy,
@@ -57,6 +122,8 @@ export const PdfTextLayer = ({
         ref={container}
         role="region"
         tabIndex={enabled ? 0 : -1}
+        onMouseUp={() => captureSelection(true)}
+        onKeyUp={() => captureSelection()}
         onKeyDown={(event) => {
           if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
             const target = container.current;

@@ -3740,6 +3740,19 @@ button:disabled {
   display: block;
   margin: 0 auto;
 }
+.source-text-review-help {
+  border-left: 3px solid var(--brand-accent);
+  padding: 0.65rem 0.8rem;
+  color: var(--text-secondary);
+}
+.source-text-review {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.source-text-dialog .source-text-preview[hidden] {
+  display: none;
+}
 
 .editor-dialog {
   display: grid;

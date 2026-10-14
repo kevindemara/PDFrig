@@ -21,6 +21,12 @@ import {
 } from './outline-preservation.js';
 import { snapshotTagStructures } from './tag-preservation.js';
 import { updateSourceTextAccessibility } from './source-text-accessibility.js';
+import {
+  IDENTITY_TEXT_MATRIX,
+  moveTextMatrix,
+  multiplyTextMatrices,
+  type TextMatrix,
+} from './source-text-layout.js';
 
 export interface SourceTextRun {
   readonly id: string;
@@ -28,6 +34,13 @@ export interface SourceTextRun {
   readonly text: string;
   readonly fontName: string;
   readonly fontSize: number;
+  /** Unrotated CropBox-relative, top-left coordinates for selection matching. */
+  readonly bounds?: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
 }
 interface Token {
   start: number;
@@ -38,11 +51,12 @@ interface Token {
 }
 interface Codec {
   name: string;
+  wordSpacing: boolean;
   decode(bytes: Uint8Array): string;
   encode(text: string): string;
   width(text: string): number;
 }
-interface Run extends SourceTextRun {
+interface Fragment extends SourceTextRun {
   stream: PDFRef;
   content: string;
   token: Token;
@@ -51,6 +65,16 @@ interface Run extends SourceTextRun {
   characterSpace: number;
   wordSpace: number;
   mcid: number | null;
+  matrix: TextMatrix;
+  horizontalScale: number;
+  boundary: number;
+}
+interface Run extends SourceTextRun {
+  fragments: { fragment: Fragment; start: number; end: number }[];
+}
+export interface SourceTextRange {
+  readonly start: number;
+  readonly end: number;
 }
 const fail = (code = 'SOURCE_TEXT_UNSUPPORTED'): never => {
   throw new Error(code);
@@ -280,6 +304,7 @@ function fontCodec(font: PDFDict): Codec | null {
   } else return null;
   return {
     name,
+    wordSpacing: codeBytes === 1,
     decode(bytes) {
       if (bytes.length % codeBytes) return fail();
       let text = '';
@@ -329,6 +354,112 @@ export async function loadLocalTextDocument(bytes: Uint8Array): Promise<PDFDocum
     return fail('SOURCE_TEXT_INPUT_UNSUPPORTED');
   return document;
 }
+const advanceText = (
+  fragment: Pick<Fragment, 'codec' | 'fontSize' | 'characterSpace' | 'wordSpace'>,
+  text: string,
+): number =>
+  (fragment.codec.width(text) * fragment.fontSize) / 1000 +
+  text.length * fragment.characterSpace +
+  (fragment.codec.wordSpacing ? (text.match(/ /gu)?.length ?? 0) * fragment.wordSpace : 0);
+const textPoint = (fragment: Fragment, offset: number): readonly [number, number] => {
+  const advance = advanceText(fragment, fragment.text.slice(0, offset)) * fragment.horizontalScale;
+  return [
+    fragment.matrix[4] + fragment.matrix[0] * advance,
+    fragment.matrix[5] + fragment.matrix[1] * advance,
+  ];
+};
+function groupFragments(
+  fragments: readonly Fragment[],
+  crop: { x: number; y: number; width: number; height: number },
+): Run[] {
+  const groups: Run[] = [];
+  for (const fragment of fragments) {
+    const group = groups.at(-1);
+    const last = group?.fragments.at(-1)?.fragment;
+    let separator = '';
+    let joins = false;
+    if (
+      last?.codec === fragment.codec &&
+      last.fontSize === fragment.fontSize &&
+      last.boundary === fragment.boundary &&
+      last.mcid === fragment.mcid &&
+      last.characterSpace === fragment.characterSpace &&
+      last.wordSpace === fragment.wordSpace &&
+      last.horizontalScale === fragment.horizontalScale &&
+      last.matrix
+        .slice(0, 4)
+        .every((value, index) => Math.abs(value - (fragment.matrix[index] ?? Infinity)) < 0.00001)
+    ) {
+      const end = textPoint(last, last.text.length);
+      const axis = Math.hypot(last.matrix[0], last.matrix[1]);
+      const dx = fragment.matrix[4] - end[0],
+        dy = fragment.matrix[5] - end[1];
+      const gap =
+        (dx * last.matrix[0] + dy * last.matrix[1]) / (axis * axis * last.horizontalScale);
+      const baseline = Math.abs(dx * last.matrix[1] - dy * last.matrix[0]) / axis;
+      joins =
+        axis > 0 &&
+        baseline < last.fontSize * 0.08 * Math.hypot(last.matrix[2], last.matrix[3]) &&
+        gap >= -last.fontSize * 0.15 &&
+        gap <= last.fontSize * 0.75 &&
+        (group?.text.length ?? 4096) + fragment.text.length < 4096;
+      if (
+        joins &&
+        gap > last.fontSize * 0.18 &&
+        !/\s$/u.test(last.text) &&
+        !/^\s/u.test(fragment.text)
+      )
+        separator = ' ';
+    }
+    if (joins && group) {
+      const start = group.text.length + separator.length;
+      groups[groups.length - 1] = {
+        ...group,
+        text: group.text + separator + fragment.text,
+        fragments: [...group.fragments, { fragment, start, end: start + fragment.text.length }],
+      };
+    } else
+      groups.push({
+        id: fragment.id,
+        pageIndex: fragment.pageIndex,
+        text: fragment.text,
+        fontName: fragment.fontName,
+        fontSize: fragment.fontSize,
+        fragments: [{ fragment, start: 0, end: fragment.text.length }],
+      });
+  }
+  return groups
+    .filter((group) => group.text.trim())
+    .map((group) => {
+      const points = group.fragments.flatMap(({ fragment }) => {
+        const start = textPoint(fragment, 0),
+          end = textPoint(fragment, fragment.text.length);
+        return [start, end].flatMap(([x, y]) => [
+          [
+            x + fragment.matrix[2] * fragment.fontSize * 0.85,
+            y + fragment.matrix[3] * fragment.fontSize * 0.85,
+          ],
+          [
+            x - fragment.matrix[2] * fragment.fontSize * 0.25,
+            y - fragment.matrix[3] * fragment.fontSize * 0.25,
+          ],
+        ]);
+      });
+      const left = Math.min(...points.map((point) => point[0] ?? Infinity)),
+        right = Math.max(...points.map((point) => point[0] ?? -Infinity));
+      const bottom = Math.min(...points.map((point) => point[1] ?? Infinity)),
+        top = Math.max(...points.map((point) => point[1] ?? -Infinity));
+      return {
+        ...group,
+        bounds: {
+          x: (left - crop.x) / crop.width,
+          y: (crop.y + crop.height - top) / crop.height,
+          width: (right - left) / crop.width,
+          height: (top - bottom) / crop.height,
+        },
+      };
+    });
+}
 function indexPage(document: PDFDocument, pageIndex: number): Run[] {
   if (!Number.isSafeInteger(pageIndex) || pageIndex < 0 || pageIndex >= document.getPageCount())
     return fail();
@@ -338,7 +469,16 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
   const raw = page.node.get(PDFName.of('Contents'));
   const resolved = document.context.lookup(raw);
   const refs = resolved instanceof PDFArray ? resolved.asArray() : [raw];
-  const runs: Run[] = [];
+  const runs: Fragment[] = [];
+  const fontCache = new WeakMap<PDFDict, Codec | null>();
+  let matrix = IDENTITY_TEXT_MATRIX,
+    line = IDENTITY_TEXT_MATRIX,
+    transform = IDENTITY_TEXT_MATRIX;
+  let horizontalScale = 1,
+    rise = 0,
+    leading = 0,
+    boundary = 0,
+    positionKnown = true;
   // A page's content streams are concatenated: text/graphics state can cross streams.
   let codec: Codec | null = null;
   let size = 0;
@@ -353,6 +493,10 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
     rendering: number;
     characterSpace: number;
     wordSpace: number;
+    transform: TextMatrix;
+    horizontalScale: number;
+    rise: number;
+    leading: number;
   }[] = [];
   for (const [streamIndex, ref] of refs.entries()) {
     if (!(ref instanceof PDFRef)) continue;
@@ -374,16 +518,38 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
       const op = operator.raw;
       if (op === 'q') {
         if (graphics.length >= 32) return [];
-        graphics.push({ codec, size, rendering, characterSpace, wordSpace });
+        graphics.push({
+          codec,
+          size,
+          rendering,
+          characterSpace,
+          wordSpace,
+          transform,
+          horizontalScale,
+          rise,
+          leading,
+        });
       }
       if (op === 'Q') {
         const saved = graphics.pop();
         if (!saved) return [];
-        ({ codec, size, rendering, characterSpace, wordSpace } = saved);
+        ({
+          codec,
+          size,
+          rendering,
+          characterSpace,
+          wordSpace,
+          transform,
+          horizontalScale,
+          rise,
+          leading,
+        } = saved);
       }
       if (op === 'BT') {
         if (inside) return [];
         inside = true;
+        matrix = line = IDENTITY_TEXT_MATRIX;
+        positionKnown = true;
       }
       if (op === 'ET') {
         if (!inside) return [];
@@ -392,6 +558,50 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
       if (op === 'Tr') rendering = Number(operands[0]?.raw);
       if (op === 'Tc') characterSpace = Number(operands[0]?.raw);
       if (op === 'Tw') wordSpace = Number(operands[0]?.raw);
+      if (op === 'Tz') horizontalScale = Number(operands[0]?.raw) / 100;
+      if (op === 'Ts') rise = Number(operands[0]?.raw);
+      if (op === 'TL') leading = Number(operands[0]?.raw);
+      if (op === 'cm' || op === 'Tm') {
+        const values = operands.map((token) => Number(token.raw));
+        if (values.length !== 6 || !values.every(Number.isFinite)) return [];
+        const next = values as unknown as TextMatrix;
+        if (op === 'cm') transform = multiplyTextMatrices(transform, next);
+        else {
+          matrix = line = next;
+          positionKnown = true;
+        }
+      }
+      if (op === 'Td' || op === 'TD' || op === 'T*') {
+        const x = op === 'T*' ? 0 : Number(operands[0]?.raw),
+          y = op === 'T*' ? -leading : Number(operands[1]?.raw);
+        if (![x, y].every(Number.isFinite)) return [];
+        if (op === 'TD') leading = -y;
+        matrix = line = moveTextMatrix(line, x, y);
+        positionKnown = true;
+      }
+      if (
+        ![
+          'q',
+          'Q',
+          'BT',
+          'ET',
+          'Tr',
+          'Tc',
+          'Tw',
+          'Tz',
+          'Ts',
+          'TL',
+          'cm',
+          'Tm',
+          'Td',
+          'TD',
+          'T*',
+          'Tf',
+          'Tj',
+          'TJ',
+        ].includes(op)
+      )
+        boundary++;
       if (op === 'BDC' || op === 'BMC') {
         const prop = operands[1];
         const entries = prop?.children ?? [];
@@ -415,17 +625,17 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
       if (op === 'Tf') {
         const font = resources.lookup(PDFName.of(operands[0]?.raw.slice(1) ?? ''));
         size = Number(operands[1]?.raw);
-        codec = font instanceof PDFDict ? fontCodec(font) : null;
+        if (font instanceof PDFDict) {
+          if (!fontCache.has(font)) fontCache.set(font, fontCodec(font));
+          codec = fontCache.get(font) ?? null;
+        } else codec = null;
       }
-      if (
-        inside &&
-        codec &&
-        size > 0 &&
-        size <= 1000 &&
-        rendering === 0 &&
-        !marked.some((item) => item.semanticOverride) &&
-        ['Tj', 'TJ'].includes(op)
-      ) {
+      if (![characterSpace, wordSpace, horizontalScale, rise, leading].every(Number.isFinite))
+        return [];
+      // Quote operators change both the line and text state. Until their full
+      // semantics are supported, require a fresh known matrix before indexing.
+      if (op === "'" || op === '"') positionKnown = false;
+      if (inside && codec && size > 0 && size <= 1000 && ['Tj', 'TJ'].includes(op)) {
         if (
           operands.length !== 1 ||
           (op === 'Tj' ? operands[0]?.kind !== 'string' : operands[0]?.kind !== 'array')
@@ -443,11 +653,23 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
         const strings =
           op === 'Tj'
             ? operands.filter((token) => token.kind === 'string')
-            : (operands[0]?.children?.filter((token) => token.kind === 'string') ?? []);
+            : (operands[0]?.children ?? []);
         for (const token of strings) {
+          if (token.kind === 'number') {
+            matrix = moveTextMatrix(matrix, (-Number(token.raw) * size * horizontalScale) / 1000);
+            continue;
+          }
           try {
             const text = codec.decode(bytesOf(token));
-            if (validText(text) && text.trim())
+            if (
+              validText(text) &&
+              rendering === 0 &&
+              positionKnown &&
+              horizontalScale > 0 &&
+              Math.abs(transform[0] * transform[3] - transform[1] * transform[2]) > 0.000001 &&
+              Math.abs(matrix[0] * matrix[3] - matrix[1] * matrix[2]) > 0.000001 &&
+              !marked.some((item) => item.semanticOverride)
+            )
               runs.push({
                 id: `${pageIndex}:${streamIndex}:${token.start}`,
                 pageIndex,
@@ -462,17 +684,28 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
                 characterSpace,
                 wordSpace,
                 mcid: marked.at(-1)?.mcid ?? null,
+                matrix: multiplyTextMatrices(transform, moveTextMatrix(matrix, 0, rise)),
+                horizontalScale,
+                boundary,
               });
+            const advance = advanceText({ codec, fontSize: size, characterSpace, wordSpace }, text);
+            matrix = moveTextMatrix(matrix, advance * horizontalScale);
           } catch {
             /* Unsupported glyphs are not editable. */
+            positionKnown = false;
+            boundary++;
           }
         }
       }
       operands = [];
-      if (runs.length > 4096) return fail('SOURCE_TEXT_LIMIT');
+      if (['Tj', 'TJ', "'", '"'].includes(op) && (!inside || !codec)) {
+        positionKnown = false;
+        boundary++;
+      }
+      if (runs.length > 20_000) return fail('SOURCE_TEXT_LIMIT');
     }
   }
-  return graphics.length || inside || marked.length ? [] : runs;
+  return graphics.length || inside || marked.length ? [] : groupFragments(runs, page.getCropBox());
 }
 
 export async function inspectSourceText(
@@ -480,7 +713,14 @@ export async function inspectSourceText(
   pageIndex: number,
 ): Promise<readonly SourceTextRun[]> {
   return indexPage(await loadLocalTextDocument(bytes), pageIndex).map(
-    ({ id, text, fontName, fontSize }) => ({ id, text, fontName, fontSize, pageIndex }),
+    ({ id, text, fontName, fontSize, bounds }) => ({
+      id,
+      text,
+      fontName,
+      fontSize,
+      pageIndex,
+      ...(bounds ? { bounds } : {}),
+    }),
   );
 }
 export async function replaceSourceText(
@@ -488,6 +728,7 @@ export async function replaceSourceText(
   id: string,
   expectedText: string,
   replacement: string,
+  range?: SourceTextRange,
 ): Promise<Uint8Array> {
   if (
     !validText(expectedText) ||
@@ -501,24 +742,41 @@ export async function replaceSourceText(
   const runs = indexPage(document, pageIndex);
   const run = runs.find((item) => item.id === id);
   if (run?.text !== expectedText) return fail('SOURCE_TEXT_STALE_CHANGE');
+  const startOffset = range?.start ?? 0,
+    endOffset = range?.end ?? run.text.length;
+  if (
+    !Number.isSafeInteger(startOffset) ||
+    !Number.isSafeInteger(endOffset) ||
+    startOffset < 0 ||
+    endOffset > run.text.length ||
+    startOffset >= endOffset
+  )
+    return fail('SOURCE_TEXT_INVALID_CHANGE');
+  const affected = run.fragments.filter((part) => part.end > startOffset && part.start < endOffset);
+  const first = affected[0],
+    last = affected.at(-1);
+  if (!first || !last || startOffset < first.start || endOffset > last.end)
+    return fail('SOURCE_TEXT_SELECTION_UNSUPPORTED');
   // Refuse streams used by another page; never mutate a shared resource by accident.
   for (const [index, page] of document.getPages().entries())
     if (index !== pageIndex) {
       const raw = page.node.get(PDFName.of('Contents'));
       const value = document.context.lookup(raw);
       if (
-        (value instanceof PDFArray ? value.asArray() : [raw]).some(
-          (ref) => ref?.toString() === run.stream.toString(),
+        (value instanceof PDFArray ? value.asArray() : [raw]).some((ref) =>
+          affected.some((part) => ref?.toString() === part.fragment.stream.toString()),
         )
       )
         return fail('SOURCE_TEXT_SHARED_STREAM');
     }
-  const advance = (text: string) =>
-    (run.codec.width(text) * run.fontSize) / 1000 +
-    text.length * run.characterSpace +
-    (text.match(/ /gu)?.length ?? 0) * run.wordSpace;
-  const oldWidth = advance(run.text);
-  const newWidth = advance(replacement);
+  const startPoint = textPoint(first.fragment, startOffset - first.start),
+    endPoint = textPoint(last.fragment, endOffset - last.start);
+  const basis = first.fragment.matrix,
+    axisSquared = basis[0] * basis[0] + basis[1] * basis[1];
+  const oldWidth =
+    ((endPoint[0] - startPoint[0]) * basis[0] + (endPoint[1] - startPoint[1]) * basis[1]) /
+    (axisSquared * first.fragment.horizontalScale);
+  const newWidth = advanceText(first.fragment, replacement);
   if (
     ![oldWidth, newWidth].every(Number.isFinite) ||
     oldWidth < 0 ||
@@ -527,32 +785,73 @@ export async function replaceSourceText(
   )
     return fail('SOURCE_TEXT_REPLACEMENT_TOO_WIDE');
   const outlines = snapshotOutlineStructures(document);
+  const changedText = run.text.slice(0, startOffset) + replacement + run.text.slice(endOffset);
+  const mcid = first.fragment.mcid;
   if (document.catalog.has(PDFName.of('StructTreeRoot'))) {
-    if (run.mcid === null || runs.filter((item) => item.mcid === run.mcid).length !== 1)
+    if (
+      mcid === null ||
+      runs.filter((item) => item.fragments.some((part) => part.fragment.mcid === mcid)).length !== 1
+    )
       return fail('SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED');
     updateSourceTextAccessibility(document, {
       pageIndex,
-      markedContentId: run.mcid,
+      markedContentId: mcid,
       expectedText,
-      replacementText: replacement,
+      replacementText: changedText,
     });
   }
   const expectedTags = (await snapshotTagStructures(document))?.graph;
-  const adjustment = -(((oldWidth - newWidth) * 1000) / run.fontSize);
-  const encoded = `${run.codec.encode(replacement)} ${adjustment.toFixed(8)}`;
-  const start = run.token.start;
-  const end = run.operator.raw === 'Tj' ? run.operator.end : run.token.end;
-  const changed =
-    run.content.slice(0, start) +
-    (run.operator.raw === 'Tj' ? `[${encoded}] TJ` : encoded) +
-    run.content.slice(end);
-  document.context.assign(run.stream, document.context.flateStream(changed));
+  const patches = new Map<
+    string,
+    { fragment: Fragment; start: number; end: number; value: string }[]
+  >();
+  for (const [index, part] of affected.entries()) {
+    const fragment = part.fragment,
+      from = Math.max(0, startOffset - part.start),
+      to = Math.min(fragment.text.length, endOffset - part.start);
+    const insertion = index === 0 ? replacement : '';
+    const removedWidth = advanceText(fragment, fragment.text.slice(from, to));
+    const adjustment = -(
+      ((removedWidth - advanceText(fragment, insertion)) * 1000) /
+      fragment.fontSize
+    );
+    const encoded = `${fragment.codec.encode(fragment.text.slice(0, from))} ${fragment.codec.encode(insertion)} ${adjustment.toFixed(8)} ${fragment.codec.encode(fragment.text.slice(to))}`;
+    const changes = patches.get(fragment.stream.toString()) ?? [];
+    changes.push({
+      fragment,
+      start: fragment.token.start,
+      end: fragment.operator.raw === 'Tj' ? fragment.operator.end : fragment.token.end,
+      value: fragment.operator.raw === 'Tj' ? `[${encoded}] TJ` : encoded,
+    });
+    patches.set(fragment.stream.toString(), changes);
+  }
+  for (const changes of patches.values()) {
+    const original = changes[0]?.fragment;
+    if (!original) return fail();
+    let changed = original.content;
+    for (const patch of changes.sort((a, b) => b.start - a.start))
+      changed = changed.slice(0, patch.start) + patch.value + changed.slice(patch.end);
+    document.context.assign(original.stream, document.context.flateStream(changed));
+  }
   const saved = await document.save({ updateFieldAppearances: false });
   const reopened = await PDFDocument.load(saved, { updateMetadata: false });
   assertOutlineStructuresPreserved(outlines, reopened);
   if (expectedTags !== (await snapshotTagStructures(reopened))?.graph)
     return fail('SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED');
-  if (!indexPage(reopened, pageIndex).some((item) => item.text === replacement))
-    return fail('SOURCE_TEXT_VERIFICATION_FAILED');
+  const verified = indexPage(reopened, pageIndex)
+    .filter((item) => {
+      if (!run.bounds || !item.bounds) return false;
+      return (
+        item.fontName === run.fontName &&
+        item.fontSize === run.fontSize &&
+        Math.abs(item.bounds.y - run.bounds.y) < 0.0001 &&
+        item.bounds.x >= run.bounds.x - 0.0001 &&
+        item.bounds.x + item.bounds.width <= run.bounds.x + run.bounds.width + 0.0001
+      );
+    })
+    .map((item) => item.text)
+    .join('')
+    .replace(/\s/gu, '');
+  if (verified !== changedText.replace(/\s/gu, '')) return fail('SOURCE_TEXT_VERIFICATION_FAILED');
   return saved;
 }

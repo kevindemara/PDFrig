@@ -40,9 +40,14 @@ for (const [index, mode] of [
     page.setRotation(degrees(90));
   }
   const source = await document.save();
-  const run = (await inspectSourceText(source, 0)).find((item) => item.text === 'SOURCE WORDS');
+  const run = (await inspectSourceText(source, 0)).find((item) =>
+    item.text.startsWith('SOURCE WORDS'),
+  );
   assert.ok(run, `Missing synthetic run ${index}`);
-  const output = await replaceSourceText(source, run.id, run.text, 'CHANGE');
+  const output = await replaceSourceText(source, run.id, run.text, 'CHANGE', {
+    start: 0,
+    end: 'SOURCE WORDS'.length,
+  });
   const originalPath = path.join(directory, `${index}-source.pdf`);
   const outputPath = path.join(directory, `${index}-output.pdf`);
   await writeFile(originalPath, source);
@@ -54,7 +59,14 @@ for (const [index, mode] of [
   const report = JSON.parse(
     execFileSync(
       process.env.PDFMASON_PYTHON_PATH ?? 'python',
-      ['scripts/verify-source-text-spike.py', originalPath, outputPath, run.text, 'CHANGE', 'auto'],
+      [
+        'scripts/verify-source-text-spike.py',
+        originalPath,
+        outputPath,
+        'SOURCE WORDS',
+        'CHANGE',
+        'auto',
+      ],
       { cwd: root, encoding: 'utf8', stdio: 'pipe', timeout: 30_000 },
     ),
   );

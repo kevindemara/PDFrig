@@ -17,9 +17,16 @@ if bounds == 'auto':
     matches = [line for line in tree.findall('.//x:line', ns)
                if original in ' '.join(word.text or '' for word in line.findall('x:word', ns))]
     assert len(matches) == 1
-    line = matches[0]
-    bounds = json.dumps({'renderBox': [float(line.attrib['xMin']), float(line.attrib['yMin']),
-                                       float(line.attrib['xMax']), float(line.attrib['yMax'])]})
+    line_words = matches[0].findall('x:word', ns)
+    markers = original.split()
+    starts = [index for index in range(len(line_words)-len(markers)+1)
+              if [word.text for word in line_words[index:index+len(markers)]] == markers]
+    assert len(starts) == 1
+    selected = line_words[starts[0]:starts[0]+len(markers)]
+    bounds = json.dumps({'renderBox': [min(float(word.attrib['xMin']) for word in selected),
+                                       min(float(word.attrib['yMin']) for word in selected),
+                                       max(float(word.attrib['xMax']) for word in selected),
+                                       max(float(word.attrib['yMax']) for word in selected)]})
 text = output.pages[0].extract_text()
 assert replacement in text and original not in text
 assert len(source.pages) == len(output.pages)
