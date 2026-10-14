@@ -200,4 +200,3 @@ Abuse and failure cases
 Independent test brief
 
 The public-beta penetration test must cover origin/CSRF behavior, parser/body limits, abuse/rate controls, stored/reflected injection, cache poisoning, session/PKCE handling, two-tenant RLS and object/job inference, presigned upload/download constraints, Stripe webhook replay/order, entitlement issuance, desktop IPC/path/token bounds, updater/signature tamper, and deletion/orphan reconciliation. Use synthetic fixtures and content-free evidence only.
-

@@ -2,3 +2,10 @@
 *.pdf binary
 *.png binary
 *.ico binary
+
+# Preserve canonical upstream license text and an already-applied migration.
+# These exact files have pre-existing whitespace; do not rewrite their bytes.
+apps/desktop/public/third-party/DancingScript-OFL.txt whitespace=-blank-at-eol
+apps/web/public/third-party/DancingScript-OFL.txt whitespace=-blank-at-eol
+docs/dependencies/DancingScript-OFL.txt whitespace=-blank-at-eol
+packages/db/supabase/migrations/20261005002010_authorize_cloud_job_replay.sql whitespace=-blank-at-eof
