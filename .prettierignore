@@ -15,3 +15,5 @@ test-results
 output
 artifacts
 releases
+apps/web/public/ocr
+apps/desktop/public/ocr

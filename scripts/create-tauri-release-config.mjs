@@ -75,8 +75,8 @@ const config = {
     category: 'Productivity',
     createUpdaterArtifacts: true,
     longDescription:
-      'PDFMason is a privacy-forward workspace for viewing, organizing, and improving PDF documents.',
-    publisher: publisher || 'PDFMason development',
+      'PDFrig is a privacy-forward workspace for viewing, organizing, and improving PDF documents.',
+    publisher: publisher || 'PDFrig development',
     shortDescription: 'Build better PDFs.',
     targets: ['nsis'],
     useLocalToolsDir: true,

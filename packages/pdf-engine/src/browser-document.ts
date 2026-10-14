@@ -804,6 +804,12 @@ export class BrowserPdfDocument {
     return isCancelled() ? 'cancelled' : 'ready';
   }
 
+  public async hasSearchableText(pageIndex: number): Promise<boolean> {
+    const page = await this.#document.getPage(pageIndex + 1);
+    const content = await page.getTextContent();
+    return content.items.some((item) => 'str' in item && item.str.trim().length > 0);
+  }
+
   public async search(query: string): Promise<readonly PdfSearchHit[]> {
     const needle = query.trim().toLocaleLowerCase();
     if (needle.length === 0) return [];

@@ -12,7 +12,7 @@
   "app": {
     "security": {
       "capabilities": ["foundation"],
-      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src ipc: http://ipc.localhost http://127.0.0.1:3000 http://localhost:3000 http://127.0.0.1:55321 http://localhost:55321 https://*.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' ipc: http://ipc.localhost http://127.0.0.1:3000 http://localhost:3000 http://127.0.0.1:55321 http://localhost:55321 https://*.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     },
     "windows": [
       {

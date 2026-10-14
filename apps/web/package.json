@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev --hostname 127.0.0.1",
+    "build": "node ../../scripts/prepare-local-ocr-assets.mjs && next build",
+    "dev": "node ../../scripts/prepare-local-ocr-assets.mjs && next dev --hostname 127.0.0.1",
     "start": "next start --hostname 127.0.0.1",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit"

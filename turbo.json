@@ -1,6 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "@pdfmason/web#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/prepare-local-ocr-assets.mjs",
+        "$TURBO_ROOT$/docs/dependencies/LOCAL_OCR_NOTICES.txt",
+        "$TURBO_ROOT$/docs/dependencies/LOCAL_OCR_JS_NOTICES.txt"
+      ],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "@pdfmason/desktop#build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/scripts/prepare-local-ocr-assets.mjs",
+        "$TURBO_ROOT$/docs/dependencies/LOCAL_OCR_NOTICES.txt",
+        "$TURBO_ROOT$/docs/dependencies/LOCAL_OCR_JS_NOTICES.txt"
+      ],
+      "outputs": ["dist/**"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]

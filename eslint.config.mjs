@@ -20,6 +20,7 @@ export default tseslint.config(
       '**/test-results/**',
       'apps/desktop/src-tauri/gen/**',
       'apps/web/next-env.d.ts',
+      '**/public/ocr/**',
     ],
   },
   eslint.configs.recommended,
@@ -57,6 +58,13 @@ export default tseslint.config(
     rules: {
       ...jsxA11y.flatConfigs.recommended.rules,
       ...reactHooks.configs.flat.recommended.rules,
+    },
+  },
+  {
+    files: ['packages/ui/src/source-text-dialog.tsx'],
+    rules: {
+      // A scrollable actual-PDF preview region must be keyboard-focusable (WCAG 2.1.1).
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { roles: ['region'] }],
     },
   },
   {

@@ -2,14 +2,14 @@
   "name": "pdfmason",
   "version": "0.0.0",
   "private": true,
-  "description": "PDFMason — Build better PDFs.",
+  "description": "PDFrig — Build better PDFs.",
   "license": "UNLICENSED",
   "packageManager": "pnpm@11.22.0",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "node scripts/prepare-local-ocr-assets.mjs && turbo run build",
     "build:packages": "pnpm --filter \"./packages/**\" --if-present build",
     "brand:generate": "node scripts/generate-brand-assets.mjs",
     "brand:check": "node --test scripts/brand-assets.test.mjs",
@@ -21,7 +21,7 @@
     "db:stop": "pnpm --filter @pdfmason/db db:stop",
     "db:advisors": "pnpm --filter @pdfmason/db db:advisors",
     "db:test": "pnpm --filter @pdfmason/db db:test",
-    "desktop:dev": "pnpm build:packages && pnpm --filter @pdfmason/desktop tauri:dev",
+    "desktop:dev": "node scripts/prepare-local-ocr-assets.mjs && pnpm build:packages && pnpm --filter @pdfmason/desktop tauri:dev",
     "desktop:internal-build": "node scripts/build-internal-windows.mjs",
     "desktop:surface-check": "node scripts/check-tauri-surface.mjs",
     "desktop:release-config": "node scripts/create-tauri-release-config.mjs",
@@ -35,7 +35,7 @@
     "repo:history": "node scripts/audit-repository-history.mjs",
     "secret:scan": "node scripts/check-sensitive-files.mjs",
     "security:audit": "pnpm audit --prod --audit-level high",
-    "test": "node --test scripts/workspace-scripts.test.mjs scripts/db-concurrency-session.test.mjs scripts/check-browser-verifiers.test.mjs scripts/brand-assets.test.mjs scripts/source-text-evaluation-policy.test.mjs scripts/release-documentation.test.mjs scripts/repository-hygiene.test.mjs && turbo run test",
+    "test": "node --test scripts/workspace-scripts.test.mjs scripts/db-concurrency-session.test.mjs scripts/check-browser-verifiers.test.mjs scripts/brand-assets.test.mjs scripts/source-text-evaluation-policy.test.mjs scripts/release-documentation.test.mjs scripts/repository-hygiene.test.mjs scripts/local-ocr-assets.test.mjs && turbo run test",
     "test:browser": "playwright test",
     "test:db-concurrency": "node scripts/test-db-concurrency.mjs",
     "test:component": "pnpm build:packages && pnpm --filter @pdfmason/ui test:component",
@@ -46,8 +46,9 @@
     "test:pdf-parser-security": "pnpm build:packages && node --test scripts/measure-pdf-parser-security.test.mjs && node scripts/measure-pdf-parser-security.mjs --output tmp/parser-security/report.json",
     "test:pdf-utilities": "pnpm build:packages && node scripts/verify-pdf-utilities.mjs",
     "test:pdf-permissions": "pnpm build:packages && node scripts/verify-pdf-permissions.mjs",
+    "test:local-text": "pnpm build:packages && node scripts/verify-local-text.mjs",
     "typecheck": "turbo run typecheck",
-    "web:dev": "pnpm build:packages && pnpm --filter @pdfmason/web dev",
+    "web:dev": "node scripts/prepare-local-ocr-assets.mjs && pnpm build:packages && pnpm --filter @pdfmason/web dev",
     "worker:dev": "pnpm build:packages && pnpm --filter @pdfmason/worker dev"
   },
   "devDependencies": {

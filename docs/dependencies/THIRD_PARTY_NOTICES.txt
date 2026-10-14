@@ -4,6 +4,16 @@ This development notice accompanies the Milestone 0–6 alpha dependency graph. 
 
 Top-level runtime selections:
 
+The local editor OCR path selects tesseract.js 7.0.0 and tesseract.js-core 7.0.0
+(Apache-2.0), with locally served tessdata_fast 4.1.0 English/French models
+(Apache-2.0). Native compiled libraries retain their individual permissive
+licences; full texts and source commit inventory are in LOCAL_OCR_NOTICES.txt,
+LOCAL_OCR_JS_NOTICES.txt and ocr-engine-review.json. Asset preparation ships
+these texts as public/ocr/NOTICES.txt alongside the unchanged worker notice.
+No Poppler/qpdf/native OCR container is included in the browser/Windows path.
+This technical adoption review is not a legal certification or a complete
+vulnerability clearance of the compiled native graph. Public release remains gated.
+
 Checkpoint 090 adds fontkit 2.0.4 (MIT, <https://github.com/foliojs/fontkit>) and
 development-only @types/fontkit 2.0.9 (MIT). The complete locked permissively
 licensed graph remains part of release SBOM/notices generation.

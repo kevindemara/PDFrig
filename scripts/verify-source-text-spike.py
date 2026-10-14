@@ -2,12 +2,24 @@
 import json
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from pypdf import PdfReader
 from PIL import Image, ImageChops, ImageDraw
 
 source_path, output_path, original, replacement, bounds = sys.argv[1:]
 source, output = [PdfReader(path, strict=True) for path in [source_path, output_path]]
+if bounds == 'auto':
+    raw = subprocess.run(['pdftotext', '-f', '1', '-l', '1', '-bbox-layout', source_path, '-'],
+                         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10).stdout
+    tree = ET.fromstring(raw)
+    ns = {'x': 'http://www.w3.org/1999/xhtml'}
+    matches = [line for line in tree.findall('.//x:line', ns)
+               if original in ' '.join(word.text or '' for word in line.findall('x:word', ns))]
+    assert len(matches) == 1
+    line = matches[0]
+    bounds = json.dumps({'renderBox': [float(line.attrib['xMin']), float(line.attrib['yMin']),
+                                       float(line.attrib['xMax']), float(line.attrib['yMax'])]})
 text = output.pages[0].extract_text()
 assert replacement in text and original not in text
 assert len(source.pages) == len(output.pages)
@@ -47,9 +59,14 @@ for index in range(len(source.pages)):
                        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
         images.append(Image.open(prefix + '.png').convert('RGB'))
     if index == 0:
-        left, bottom, right, top = json.loads(bounds)
-        height = float(source.pages[0].mediabox.height)
-        box = (int(left) - 4, int(height - top) - 4, int(right) + 4, int(height - bottom) + 4)
+        value = json.loads(bounds)
+        if isinstance(value, dict):
+            left, top, right, bottom = value['renderBox']
+        else:
+            left, bottom, right, top = value
+            height = float(source.pages[0].mediabox.height)
+            top, bottom = height-top, height-bottom
+        box = (int(left) - 4, int(top) - 4, int(right) + 4, int(bottom) + 4)
         for image in images:
             ImageDraw.Draw(image).rectangle(box, fill='white')
     outside_equal &= images[0].size == images[1].size and ImageChops.difference(*images).getbbox() is None

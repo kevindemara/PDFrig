@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "node ../../scripts/prepare-local-ocr-assets.mjs && tsc -p tsconfig.json && vite build",
     "dev": "vite",
     "tauri": "tauri",
     "tauri:build": "tauri build --no-bundle",

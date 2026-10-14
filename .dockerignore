@@ -7,6 +7,7 @@
 playwright-report
 **/coverage
 **/dist
+**/public/ocr
 **/node_modules
 **/target
 test-results

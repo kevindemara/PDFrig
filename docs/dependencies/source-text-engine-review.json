@@ -1,11 +1,28 @@
 {
   "schemaVersion": 1,
-  "reviewDate": "2026-10-13",
+  "reviewDate": "2026-10-14",
   "featureId": "EDIT-002",
   "package": "@embedpdf/pdfium",
   "version": "2.15.1",
   "runtimeApproved": false,
   "status": "not-approved-missing-binary-evidence",
+  "selectedAlternative": {
+    "package": "@cantoo/pdf-lib",
+    "version": "2.9.1",
+    "licence": "MIT",
+    "newNativeBinary": false,
+    "implementation": "Bounded in-place original Tj/TJ string-operator replacement; existing font encodings/metrics retained; compensating TJ advance retains following text placement",
+    "scope": "Printable ASCII runs in non-symbolic Base-14 Type1 fonts or Identity-H CID fonts with one-to-one ToUnicode maps; unknown simple embedded fonts remain read-only; replacement cannot exceed original advance; no substitution, reflow, XObject editing or visible scan reconstruction",
+    "accessibility": "Unique page MCID ownership and exact ActualText are verified and repaired; the reopened expected tag graph and outlines are checked. Ambiguous/shared semantics refuse editing.",
+    "verification": [
+      "source-text.test.ts",
+      "source-text-accessibility.test.ts",
+      "tests/browser/local-text.spec.ts"
+    ],
+    "integration": "Current-page editor dialog with actual exported-PDF preview, explicit review, immutable source revisions and undo/redo",
+    "publicReleaseApproved": false,
+    "remaining": "Broader Unicode/font/layout corpus and manual accessibility/Windows platform checks; no universal PDF editing claim"
+  },
   "npmDependencies": [],
   "wrapperLicense": "MIT",
   "packagedPdfiumNotice": "BSD-3-Clause and Apache-2.0 text",

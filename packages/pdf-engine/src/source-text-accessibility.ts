@@ -20,7 +20,7 @@ const fail = (): never => {
   throw new Error('SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED');
 };
 
-/** EDIT-002 engine evaluation support, not a shipped source-text editor.
+/** EDIT-002 accessibility preservation for the bounded original-text editor.
  * Only a uniquely owned page MCID with exact, single-content ActualText is
  * supported. Never replace a string globally, guess an ancestor's reading order,
  * remove tags or modify shared form-XObject semantics. Validate before mutation.

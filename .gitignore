@@ -61,3 +61,5 @@ releases/
 *.bak
 *.orig
 *.patch
+apps/web/public/ocr/
+apps/desktop/public/ocr/

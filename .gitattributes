@@ -9,3 +9,6 @@ apps/desktop/public/third-party/DancingScript-OFL.txt whitespace=-blank-at-eol
 apps/web/public/third-party/DancingScript-OFL.txt whitespace=-blank-at-eol
 docs/dependencies/DancingScript-OFL.txt whitespace=-blank-at-eol
 packages/db/supabase/migrations/20261005002010_authorize_cloud_job_replay.sql whitespace=-blank-at-eof
+# Preserve reviewed upstream notice formatting without broad whitespace exemptions.
+docs/dependencies/LOCAL_OCR_NOTICES.txt whitespace=-blank-at-eol
+docs/dependencies/LOCAL_OCR_JS_NOTICES.txt whitespace=-blank-at-eof

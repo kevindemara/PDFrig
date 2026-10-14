@@ -1,9 +1,45 @@
 {
   "schemaVersion": 1,
-  "reviewDate": "2026-10-13",
+  "reviewDate": "2026-10-14",
   "featureIds": ["OCR-001"],
-  "runtimeApproved": false,
-  "status": "technical-screening-only-integration-blocked",
+  "runtimeApproved": true,
+  "publicReleaseApproved": false,
+  "status": "local-development-adoption-reviewed-public-release-gated",
+  "selectedRuntime": {
+    "implementation": "PDF.js canvas -> owned local Tesseract v7 worker -> @cantoo/pdf-lib invisible text composition",
+    "scope": "User-requested current-page OCR, English/French, unrotated scan pages with no existing searchable text; no native document parser, upload or visible reconstruction",
+    "notices": ["LOCAL_OCR_NOTICES.txt", "LOCAL_OCR_JS_NOTICES.txt"],
+    "sourceBinding": "npm core gitHead equals v7.0.0 tag; all three shipped LSTM WASM binaries match upstream tag bytes; JS wrappers match after CRLF normalization",
+    "coreCommit": "acffef2b66eb44a31df297e11d905f4b39001068",
+    "emscriptenVersion": "4.0.15",
+    "linkedSources": {
+      "giflib": "fa37672085ce4b3d62c51627ab3c8cf2dda8009a",
+      "leptonica": "4af068b56a9674da915debea4ed7e1b9885b17e8",
+      "libjpeg": "6c0fcb8ddee365e7abc4d332662b06900612e923",
+      "libpng": "a37d4836519517bdce6cb9d956092321eca3e73b",
+      "libtiff": "b51bb157123264e26d34c09cc673d213aea61fc7",
+      "libwebp": "20ef03ee351d4ff03fc5ff3ec4804a879d1b9d5c",
+      "openlibm": "ae2d91698508701c83cab83714d42a1146dccf85",
+      "tesseract": "2a9c1c49c360462733c386d2a44fcd22c4e21411",
+      "zlib": "21767c654d31d2dccdde4330529775c6c5fd5389"
+    },
+    "modelVersion": "tessdata_fast/4.1.0",
+    "assetHashes": "scripts/prepare-local-ocr-assets.mjs verifies exact worker, core wrappers and raw models; compiled/model assets are build outputs, not Git source",
+    "licensingConclusion": "Reviewed linked components use Apache, MIT, BSD, ISC, zlib/libpng or IJG permissive terms. Preserve full copyright, licence and IJG acknowledgement texts. openlibm LGPL test-program notices are retained, but those test programs are not built by install-static. Project restrictions cannot override third-party rights.",
+    "security": {
+      "npmAuditHighSeverityPassed": true,
+      "completeNativeVulnerabilityClearance": false,
+      "knownAdvisory": "https://github.com/madler/zlib/releases/tag/v1.2.13",
+      "assessment": "Core links zlib 1.2.12. CVE-2022-37434 concerns gzip header extra fields via inflateGetHeader. No calls were found in the selected Leptonica/libpng/libtiff/Tesseract sources. This path accepts only browser-generated PNG canvas bytes and pinned raw (not gzip) language models, never arbitrary native image/PDF/URL inputs. This is bounded risk reduction, not proof of absence of all native vulnerabilities. A refreshed native graph or independent exact-binary clearance remains a public-release blocker."
+    },
+    "verification": [
+      "local-ocr-compose.test.ts",
+      "local-ocr-worker-client.test.ts",
+      "tests/browser/local-text.spec.ts"
+    ],
+    "windowsStatus": "Shared Vite build includes local assets; native WebView2 offline installation smoke remains a separate release check",
+    "legalCertification": false
+  },
   "currentWorker": {
     "imageId": "sha256:03e3de474e8ba3b60802e9aee48ecec6d823101156cbc91d3661cf11944fa677",
     "tested": "pnpm test:ocr-worker",
@@ -54,7 +90,7 @@
       "The native inventory above is partial, not an SBOM or a distribution approval.",
       "Base images are digest-pinned, but Debian apt dependencies are not individually pinned. Do not infer future rebuilt image identity from this test.",
       "The worker currently performs OCR on page renders then overlays a text-only PDF onto the source; visible scan preservation has one synthetic-case verification, not broad PDF/scan coverage.",
-      "No editor OCR action, production job orchestration or native Windows OCR integration has been completed."
+      "The local editor now uses the separate browser WASM path. This native container is not adopted for editor OCR and remains blocked for public distribution."
     ]
   },
   "browserCandidate": {
@@ -68,17 +104,17 @@
     "coreDeclaredLicense": "Apache-2.0",
     "coreGitHead": "acffef2b66eb44a31df297e11d905f4b39001068",
     "coreUnpackedBytes": 45262431,
-    "productionDependencyAdded": false,
+    "productionDependencyAdded": true,
     "completeCompiledLicenseInventoryVerified": false,
-    "artifactSourceBindingVerified": false,
+    "artifactSourceBindingVerified": true,
     "exactBinarySecurityReviewComplete": false,
     "browserAndWindowsCompatibilityVerified": false,
     "upstreamAttributionReview": "https://github.com/naptha/tesseract.js-core/issues/44",
     "localAssetConfiguration": "https://github.com/naptha/tesseract.js/blob/master/docs/local-installation.md",
     "notes": [
-      "Registry metadata and upstream documentation were inspected; no packages were installed or adopted.",
+      "Pinned dependencies are adopted for local development after artifact/source and linked-notice review. Complete final-distribution SBOM and native security clearance remain release work.",
       "The core maintainer identifies permissive compiled third-party libraries and asks that required attributions be included. An open issue is not proof that every current npm artifact lacks notices; the exact artifact still requires inspection.",
-      "A possible local-only route would use approved PDF.js rendering, reviewed OCR WASM/model assets and approved PDF composition. It requires a new dependency/architecture review and pixel/semantic/privacy/cancellation tests, not merely enabling a flag.",
+      "Implemented local-only route uses existing PDF.js rendering and PDF composition. Tests cover unchanged scan pixels, source immutability, actual-output review, undo/redo, independent extraction and immediate worker cleanup.",
       "All worker/core/model paths must be local or self-hosted; default CDN downloads are not an approved configuration. Scans must remain visually unchanged."
     ]
   }

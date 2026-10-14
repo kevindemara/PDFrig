@@ -4,6 +4,8 @@ packages:
 
 allowBuilds:
   esbuild: true
+  # Reviewed donation-only postinstall; no build is required or permitted.
+  tesseract.js: false
 
 catalog:
   '@axe-core/playwright': 4.13.0
@@ -23,6 +25,7 @@ catalog:
   typescript: 6.0.3
   vitest: 4.1.11
   zod: 4.4.3
+  tesseract.js: 7.0.0
 
 catalogMode: strict
 linkWorkspacePackages: false
@@ -37,6 +40,7 @@ onlyBuiltDependencies:
 overrides:
   pako: 2.2.0
   source-map-js: 1.2.2
+  tesseract.js-core: 7.0.0
 
 # Exact, reviewed security patches only; see checkpoint 058. No wildcard age exemption.
 minimumReleaseAgeExclude:

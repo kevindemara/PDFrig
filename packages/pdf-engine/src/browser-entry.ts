@@ -1,4 +1,8 @@
 export * from './browser-document.js';
+export * from './local-text-client.js';
+export * from './local-ocr.js';
+export type { SourceTextRun } from './source-text.js';
+export type { LocalOcrWord } from './local-ocr-compose.js';
 export * from './decoration-placement.js';
 export * from './decoration-text-areas.js';
 export { decoratePdf } from './decorations.js';
