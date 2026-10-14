@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "capturedOn": "2026-10-13",
+  "capture": "Isolated Playwright Chromium, document-notice.spec.ts",
+  "customerDocumentsIncluded": false,
+  "sourceFixture": "packages/test-corpus/fixtures/tagged-bookmarks.pdf",
+  "sourceCorpusLicense": "CC0-1.0",
+  "images": [
+    {
+      "filename": "workspace.png",
+      "width": 1600,
+      "height": 1000,
+      "sha256": "839107540844eb3825c4d9c02970e0224517082bdee7f62c152f5787f2d29264"
+    },
+    {
+      "filename": "local-tools.png",
+      "width": 1600,
+      "height": 1000,
+      "sha256": "7b9bbffbd778459d4513b193a857b8cc5999301e655f0b3ea85ef0a757aa4590"
+    }
+  ]
+}

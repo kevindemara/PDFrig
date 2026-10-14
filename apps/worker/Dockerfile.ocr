@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+FROM node:22.19.0-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9 AS build
+WORKDIR /workspace
+RUN corepack enable && corepack prepare pnpm@11.22.0 --activate
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @pdfmason/worker... build
+
+FROM node:22.19.0-bookworm-slim@sha256:4a4884e8a44826194dff92ba316264f392056cbe243dcc9fd3551e71cea02b90 AS runtime
+ARG TESSERACT_VERSION=5.5.3
+ARG TESSERACT_SHA256=9218e62793116d42a9f6d14cd9348518b27f382096eea3d0f2d1a24616bb5884
+ARG ENG_DATA_SHA256=7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2
+ARG FRA_DATA_SHA256=ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca
+ENV NODE_ENV=production \
+    PDFMASON_OCR_ENABLED=true \
+    PDFMASON_OCR_LANGUAGES=eng,fra \
+    TESSDATA_PREFIX=/usr/local/share/tessdata
+RUN apt-get update \
+  && apt-get install --yes --no-install-recommends \
+    autoconf automake build-essential ca-certificates curl libarchive-dev libcairo2-dev \
+    libcurl4-openssl-dev libleptonica-dev libpango1.0-dev libtool pkg-config \
+  && curl --fail --location --silent --show-error \
+    "https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz" \
+    --output /tmp/tesseract.tar.gz \
+  && echo "${TESSERACT_SHA256}  /tmp/tesseract.tar.gz" | sha256sum --check --strict \
+  && mkdir /tmp/tesseract \
+  && tar --extract --gzip --file /tmp/tesseract.tar.gz --directory /tmp/tesseract --strip-components=1 \
+  && cd /tmp/tesseract \
+  && ./autogen.sh \
+  && ./configure --disable-openmp --disable-shared --enable-static \
+  && make --jobs=2 \
+  && make install \
+  && ldconfig \
+  && mkdir --parents /usr/local/share/tessdata \
+  && curl --fail --location --silent --show-error \
+    https://github.com/tesseract-ocr/tessdata_fast/raw/refs/tags/4.1.0/eng.traineddata \
+    --output /usr/local/share/tessdata/eng.traineddata \
+  && echo "${ENG_DATA_SHA256}  /usr/local/share/tessdata/eng.traineddata" | sha256sum --check --strict \
+  && curl --fail --location --silent --show-error \
+    https://github.com/tesseract-ocr/tessdata_fast/raw/refs/tags/4.1.0/fra.traineddata \
+    --output /usr/local/share/tessdata/fra.traineddata \
+  && echo "${FRA_DATA_SHA256}  /usr/local/share/tessdata/fra.traineddata" | sha256sum --check --strict \
+  && apt-get purge --yes autoconf automake build-essential curl libarchive-dev libcairo2-dev libcurl4-openssl-dev libleptonica-dev libpango1.0-dev libtool pkg-config \
+  && apt-get autoremove --yes \
+  && apt-get update \
+  && apt-get install --yes --no-install-recommends liblept5 libarchive13 libcurl4 libcairo2 libpango-1.0-0 poppler-utils qpdf \
+  && rm --recursive --force /tmp/tesseract /tmp/tesseract.tar.gz /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /workspace/apps/worker/dist/ocr-cli.js ./ocr-cli.js
+COPY --from=build /workspace/apps/worker/dist/ocr.js ./ocr.js
+USER node
+ENTRYPOINT ["node", "/app/ocr-cli.js"]

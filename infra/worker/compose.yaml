@@ -1,0 +1,53 @@
+services:
+  worker:
+    build:
+      context: ../..
+      dockerfile: apps/worker/Dockerfile
+    cap_drop:
+      - ALL
+    cpus: 1.0
+    environment:
+      NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV:-development}
+      PDFMASON_PROVIDER_MODE: ${PDFMASON_PROVIDER_MODE:-fake}
+      WORKER_HOST: 0.0.0.0
+      WORKER_PORT: 8787
+    init: true
+    mem_limit: 512m
+    pids_limit: 64
+    ports:
+      - 127.0.0.1:8787:8787
+    read_only: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1770,uid=1000,gid=1000,size=128m
+    ulimits:
+      nofile:
+        hard: 2048
+        soft: 1024
+  office-worker:
+    profiles: [office-beta]
+    build:
+      context: ../..
+      dockerfile: apps/worker/Dockerfile.office
+    cap_drop:
+      - ALL
+    command: [/job/input/source.docx]
+    cpus: 1.0
+    init: true
+    mem_limit: 768m
+    network_mode: none
+    pids_limit: 64
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:mode=1770,uid=1000,gid=1000,size=256m
+    ulimits:
+      nofile:
+        hard: 2048
+        soft: 1024
+    volumes:
+      - ../../tmp/office/input:/job/input:ro
+      - ../../tmp/office/output:/job/output:rw

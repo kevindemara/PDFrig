@@ -1,0 +1,63 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Build output and caches
+.next/
+.next-qa/
+apps/web/next-env.d.ts
+dist/
+coverage/
+__pycache__/
+*.py[cod]
+playwright-report/
+test-results/
+tmp/
+.turbo/
+*.tsbuildinfo
+target/
+
+# Local toolchains and platform output
+.tooling/
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/target/
+
+# Local services
+packages/db/supabase/.branches/
+packages/db/supabase/.temp/
+
+# Environment and secrets (the documented template is safe)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+*.pdf
+!packages/test-corpus/fixtures/*.pdf
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Public tree: root README only; local agent notes and research remain private.
+*.md
+*.markdown
+*.mdx
+!/README.md
+output/
+artifacts/
+releases/
+*.exe
+*.msi
+*.msix
+*.zip
+*.tar
+*.gz
+*.log
+*.bak
+*.orig
+*.patch

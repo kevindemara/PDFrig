@@ -1,0 +1,17 @@
+.git
+.next
+.next-qa
+.pnpm-store
+.tooling
+apps/web/next-env.d.ts
+coverage
+dist
+node_modules
+packages/db/supabase/.temp
+playwright-report
+target
+test-results
+*.pdf
+output
+artifacts
+releases

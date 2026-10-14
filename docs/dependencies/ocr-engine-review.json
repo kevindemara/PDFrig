@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-13",
+  "featureIds": ["OCR-001"],
+  "runtimeApproved": false,
+  "status": "technical-screening-only-integration-blocked",
+  "currentWorker": {
+    "imageId": "sha256:03e3de474e8ba3b60802e9aee48ecec6d823101156cbc91d3661cf11944fa677",
+    "tested": "pnpm test:ocr-worker",
+    "syntheticFullMarkerRecognized": true,
+    "visibleRenderUnchanged": true,
+    "contentFreeMetricsVerified": true,
+    "killSwitchVerified": true,
+    "tesseract": {
+      "version": "5.5.3",
+      "license": "Apache-2.0"
+    },
+    "languageModels": {
+      "version": "4.1.0",
+      "languages": ["eng", "fra"],
+      "license": "Apache-2.0"
+    },
+    "partialNativeInventory": [
+      {
+        "name": "poppler-utils",
+        "version": "22.12.0-2+deb12u3"
+      },
+      {
+        "name": "qpdf",
+        "version": "11.3.0-1+deb12u1"
+      },
+      {
+        "name": "liblept5",
+        "version": "1.82.0-3+b3"
+      },
+      {
+        "name": "libarchive13",
+        "version": "3.6.2-1+deb12u5"
+      },
+      {
+        "name": "libcairo2",
+        "version": "1.16.0-7"
+      },
+      {
+        "name": "libpango-1.0-0",
+        "version": "1.50.12+ds-1"
+      }
+    ],
+    "popplerLicenseReviewRequired": true,
+    "completeImageSbomReviewed": false,
+    "completeNoticesAndSourceObligationsReviewed": false,
+    "exactImageVulnerabilityReviewComplete": false,
+    "notes": [
+      "The native inventory above is partial, not an SBOM or a distribution approval.",
+      "Base images are digest-pinned, but Debian apt dependencies are not individually pinned. Do not infer future rebuilt image identity from this test.",
+      "The worker currently performs OCR on page renders then overlays a text-only PDF onto the source; visible scan preservation has one synthetic-case verification, not broad PDF/scan coverage.",
+      "No editor OCR action, production job orchestration or native Windows OCR integration has been completed."
+    ]
+  },
+  "browserCandidate": {
+    "package": "tesseract.js",
+    "version": "7.0.0",
+    "declaredLicense": "Apache-2.0",
+    "gitHead": "42eae669e4b3a66429d8516f078912cc747a89df",
+    "unpackedBytes": 1411341,
+    "corePackage": "tesseract.js-core",
+    "coreVersion": "7.0.0",
+    "coreDeclaredLicense": "Apache-2.0",
+    "coreGitHead": "acffef2b66eb44a31df297e11d905f4b39001068",
+    "coreUnpackedBytes": 45262431,
+    "productionDependencyAdded": false,
+    "completeCompiledLicenseInventoryVerified": false,
+    "artifactSourceBindingVerified": false,
+    "exactBinarySecurityReviewComplete": false,
+    "browserAndWindowsCompatibilityVerified": false,
+    "upstreamAttributionReview": "https://github.com/naptha/tesseract.js-core/issues/44",
+    "localAssetConfiguration": "https://github.com/naptha/tesseract.js/blob/master/docs/local-installation.md",
+    "notes": [
+      "Registry metadata and upstream documentation were inspected; no packages were installed or adopted.",
+      "The core maintainer identifies permissive compiled third-party libraries and asks that required attributions be included. An open issue is not proof that every current npm artifact lacks notices; the exact artifact still requires inspection.",
+      "A possible local-only route would use approved PDF.js rendering, reviewed OCR WASM/model assets and approved PDF composition. It requires a new dependency/architecture review and pixel/semantic/privacy/cancellation tests, not merely enabling a flag.",
+      "All worker/core/model paths must be local or self-hosted; default CDN downloads are not an approved configuration. Scans must remain visually unchanged."
+    ]
+  }
+}

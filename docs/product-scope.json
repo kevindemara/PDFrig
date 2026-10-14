@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "product": "PDFrig",
+  "publicReleaseApproved": false,
+  "stateModel": [
+    "catalogued",
+    "researched",
+    "engine_selected",
+    "implemented",
+    "fixture_verified",
+    "beta",
+    "verified"
+  ],
+  "priorityLegend": {
+    "L": "Launch core; a gate can keep a capability unavailable",
+    "N": "Next; targeted or controlled beta",
+    "P": "Popular extra; requires validated demand and engine/provider review",
+    "O": "Optional; separate discovery and privacy review"
+  },
+  "notes": [
+    "Planning targets are not release dates or public availability promises.",
+    "Every behavior change keeps stable feature IDs and adds executable verification. State promotion requires security, fidelity, licensing, accessibility and platform evidence.",
+    "EDIT-002 is research-only: exact binary provenance/licensing, broad fonts/layout/tags, editor/undo and actual-export-preview integration remain incomplete.",
+    "OCR-001 editor integration is unavailable. Scanned PDFs must keep their visible appearance; only invisible search/copy text is approved. OCR-002 visible reconstruction is not approved.",
+    "Existing unchanged-page annotation exports compare original tags/bookmarks/content streams; added content is untagged and tagged form flattening remains unsupported.",
+    "Historical design/checkpoint Markdown has been removed from the publication tree; executable tests remain the verification source, not a release certification."
+  ],
+  "features": [
+    {
+      "id": "VIEW-001",
+      "name": "Open and render PDFs",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Multi-page rendering, progressive loading, reliable errors, no active-content execution",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-002",
+      "name": "Password-protected PDF opening",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Prompt locally; never log or persist passwords",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-003",
+      "name": "Zoom, fit, rotate view, and presentation modes",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Keyboard, pointer, and accessible controls",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-004",
+      "name": "Thumbnails and page navigation",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Virtualized for large documents",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-005",
+      "name": "Text search and result navigation",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Explain when an image-only scan has no searchable text",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-006",
+      "name": "Outline/bookmark navigation",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Preserve destination behaviour and hierarchy",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-007",
+      "name": "Attachments and layers read-only inspection",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Do not silently discard these structures during edits",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "VIEW-008",
+      "name": "Select and copy existing document text",
+      "priority": "N",
+      "target": "Next local milestone",
+      "supportContract": "Aligned selectable text layer, explicit local copy, keyboard access, rotation/zoom fidelity, no content persistence or telemetry; explain image-only scans and honor document copy restrictions",
+      "state": "implemented"
+    },
+    {
+      "id": "PRINT-001",
+      "name": "Standard print and print-range controls",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Browser/native print with clear limitations",
+      "state": "implemented"
+    },
+    {
+      "id": "PRINT-002",
+      "name": "Booklet, multiple-pages-per-sheet, and poster printing",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Windows-first evaluation with fixture testing",
+      "state": "catalogued"
+    },
+    {
+      "id": "PRINT-003",
+      "name": "Print to PDFrig PDF virtual printer",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Only after driver signing, support, and maintenance spike",
+      "state": "catalogued"
+    },
+    {
+      "id": "ORG-001",
+      "name": "Merge PDFs",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Preserve page fidelity and warn about incompatible structures",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-002",
+      "name": "Split by range or individual pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Validate ranges before processing",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-003",
+      "name": "Reorder pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Keyboard and pointer operation with undo",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-004",
+      "name": "Rotate pages permanently",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Correct page boxes and orientation metadata",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-005",
+      "name": "Delete and duplicate pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Non-destructive working copy and undo",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-006",
+      "name": "Extract selected pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Preserve compatible annotations and resources",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-007",
+      "name": "Insert PDF pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Page-position preview and failure-safe output",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-008",
+      "name": "Insert images as pages",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "JPEG, PNG, and WebP with EXIF orientation handling",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-009",
+      "name": "Crop pages",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Visual crop box; never imply removed content is redacted",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-010",
+      "name": "Resize pages and normalize mixed sizes",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Fit/fill controls with preview",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-011",
+      "name": "Add page labels and page numbers",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Deterministic placement and range controls",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ORG-012",
+      "name": "Bates numbering",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Stable sequencing, preview, and export report",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CREATE-001",
+      "name": "Create a blank PDF",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Common page sizes, orientation, and margins",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CREATE-002",
+      "name": "Images to PDF",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Ordering, page sizing, quality, and metadata controls",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CREATE-003",
+      "name": "Scan to PDF in Windows",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "WIA/TWAIN feasibility spike and local import",
+      "state": "catalogued"
+    },
+    {
+      "id": "CONV-001",
+      "name": "PDF pages to PNG or JPEG",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Page range, resolution, quality, and transparent-background behaviour",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CONV-002",
+      "name": "Word to PDF",
+      "priority": "N",
+      "target": "Paid beta",
+      "supportContract": "Isolated conversion worker with published fidelity limits",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CONV-003",
+      "name": "Excel to PDF",
+      "priority": "N",
+      "target": "Paid beta",
+      "supportContract": "Sheet/range behaviour and print-layout limitations documented",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CONV-004",
+      "name": "PowerPoint to PDF",
+      "priority": "N",
+      "target": "Paid beta",
+      "supportContract": "Slide size, fonts, notes, and transition limitations documented",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "CONV-005",
+      "name": "Common image and text files to PDF",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Explicit supported formats; no silent data loss",
+      "state": "implemented"
+    },
+    {
+      "id": "CONV-006",
+      "name": "PDF to Word",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Commercial SDK/vendor evaluation and fidelity benchmark",
+      "state": "catalogued"
+    },
+    {
+      "id": "CONV-007",
+      "name": "PDF to Excel",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Table extraction benchmark and fallback behaviour",
+      "state": "catalogued"
+    },
+    {
+      "id": "CONV-008",
+      "name": "PDF to PowerPoint",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Editable output expectations defined honestly",
+      "state": "catalogued"
+    },
+    {
+      "id": "OCR-001",
+      "name": "Scan/image OCR to searchable PDF",
+      "priority": "N",
+      "target": "Paid beta",
+      "supportContract": "Language selection, invisible text alignment, confidence/error handling",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "OCR-002",
+      "name": "OCR selected pages and replace/correct text",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Preserve visible scan; track reviewed corrections",
+      "state": "catalogued"
+    },
+    {
+      "id": "OCR-003",
+      "name": "Local Windows OCR",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Installer size, model licence, languages, updates, and performance approved",
+      "state": "catalogued"
+    },
+    {
+      "id": "EDIT-001",
+      "name": "Add text overlay",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Honest label; typography, colour, alignment, and undo",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "EDIT-002",
+      "name": "Edit existing PDF text",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Font substitution rules, reflow limits, and broad corpus validation",
+      "state": "catalogued"
+    },
+    {
+      "id": "EDIT-003",
+      "name": "Add, move, resize, rotate, and delete images",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Preserve transparency and page coordinates",
+      "state": "catalogued"
+    },
+    {
+      "id": "EDIT-004",
+      "name": "Add and edit links",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Safe URL handling and page destinations",
+      "state": "catalogued"
+    },
+    {
+      "id": "EDIT-005",
+      "name": "Add simple shapes and objects",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Fill, stroke, ordering, alignment, and undo",
+      "state": "catalogued"
+    },
+    {
+      "id": "EDIT-006",
+      "name": "Headers and footers",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Page range, preview, and conflict handling",
+      "state": "implemented"
+    },
+    {
+      "id": "EDIT-007",
+      "name": "Watermarks and backgrounds",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Opacity, layer/order, range, and removal of PDFMason-created items",
+      "state": "engine_selected"
+    },
+    {
+      "id": "EDIT-008",
+      "name": "Find and replace text",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Only where true-text editing supports a safe replacement",
+      "state": "catalogued"
+    },
+    {
+      "id": "ANNO-001",
+      "name": "Highlight, underline, and strikeout",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Text and area markup with keyboard alternatives",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-002",
+      "name": "Sticky notes and comments",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Author, date, status, and export preservation",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-003",
+      "name": "Freehand drawing and eraser",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Colour, thickness, pressure where supported, and undo",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-004",
+      "name": "Rectangle, ellipse, line, and arrow",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Style controls and accessible names",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-005",
+      "name": "Text boxes and callouts",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Rich-enough formatting without pretending to edit source text",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-006",
+      "name": "Stamps and custom stamps",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Local-first storage; team sharing only with consent",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-007",
+      "name": "Comment list, filters, status, and export",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Stable comment identity and summary export",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "ANNO-008",
+      "name": "Distance, perimeter, and area measurement",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Calibration, units, and precision clearly displayed",
+      "state": "implemented"
+    },
+    {
+      "id": "COMPARE-001",
+      "name": "Visual and text-aware PDF comparison",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Defined change classes, false-positive evaluation, and report export",
+      "state": "catalogued"
+    },
+    {
+      "id": "FORM-001",
+      "name": "Fill existing AcroForm fields",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Text, checkbox, radio, dropdown, and button support",
+      "state": "implemented"
+    },
+    {
+      "id": "FORM-002",
+      "name": "Save and export filled forms",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Appearance streams render in common readers",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "FORM-003",
+      "name": "Import/export form data",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Documented FDF/XFDF/JSON support as selected",
+      "state": "implemented"
+    },
+    {
+      "id": "FORM-004",
+      "name": "Create and edit AcroForm fields",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Field properties, tab order, validation, preview, and undo",
+      "state": "catalogued"
+    },
+    {
+      "id": "FORM-005",
+      "name": "Automatic field detection",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Confidence display and mandatory human review",
+      "state": "catalogued"
+    },
+    {
+      "id": "FORM-006",
+      "name": "Basic calculations and field validation",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Safe supported expression set; no arbitrary PDF JavaScript",
+      "state": "catalogued"
+    },
+    {
+      "id": "FORM-007",
+      "name": "Flatten forms",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Warn about lost editability and semantics",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SIGN-001",
+      "name": "Type, draw, or upload a visual signature",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Clearly described as a visual signature, local by default",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SIGN-002",
+      "name": "Initials, date, checkmark, and saved signature assets",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Explicit opt-in for saved assets and encrypted storage if synced",
+      "state": "implemented"
+    },
+    {
+      "id": "SIGN-003",
+      "name": "Place signature on multiple pages",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Preview each placement and avoid accidental reuse",
+      "state": "implemented"
+    },
+    {
+      "id": "ESIGN-001",
+      "name": "Request signatures from other people",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Legal, consent, email, identity, tamper, audit, and retention review",
+      "state": "catalogued"
+    },
+    {
+      "id": "ESIGN-002",
+      "name": "Signature request status, reminders, and audit package",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Event integrity, recipient evidence, and downloadable record",
+      "state": "catalogued"
+    },
+    {
+      "id": "SEC-001",
+      "name": "Add an open password",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Modern supported encryption and password-strength guidance",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SEC-002",
+      "name": "Remove encryption with authorization",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "User supplies password or explicitly confirms authority",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SEC-003",
+      "name": "Set PDF permission flags",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Explain that permission flags are not unbreakable DRM",
+      "state": "implemented"
+    },
+    {
+      "id": "SEC-004",
+      "name": "View, edit, and remove metadata",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Common document-info and XMP fields",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SEC-005",
+      "name": "Detect and remove hidden metadata/content",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Sanitization report and fail-safe handling",
+      "state": "catalogued"
+    },
+    {
+      "id": "REDACT-001",
+      "name": "Mark and apply irreversible redaction",
+      "priority": "N",
+      "target": "Verified beta",
+      "supportContract": "Remove content, not cover it; pass release corpus and independent review",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "REDACT-002",
+      "name": "Search and redact repeated text or patterns",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Preview all matches; require explicit confirmation",
+      "state": "catalogued"
+    },
+    {
+      "id": "REDACT-003",
+      "name": "Redaction reason labels and export report",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Configurable labels without leaking redacted content",
+      "state": "catalogued"
+    },
+    {
+      "id": "SEC-006",
+      "name": "Safe handling of links, attachments, and active content",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Never execute arbitrary embedded scripts; explicit trust boundaries",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "SEC-007",
+      "name": "Detect existing signatures before modification",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Warn when an edit will invalidate a signature",
+      "state": "implemented"
+    },
+    {
+      "id": "OPT-001",
+      "name": "Compression presets",
+      "priority": "L",
+      "target": "Launch",
+      "supportContract": "Balanced, smaller, and highest-quality presets; preserve original",
+      "state": "fixture_verified"
+    },
+    {
+      "id": "OPT-002",
+      "name": "Advanced optimizer",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Image, font, object, and cleanup controls with estimates",
+      "state": "catalogued"
+    },
+    {
+      "id": "OPT-003",
+      "name": "Linearize for fast web view",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Validate structure after optimization",
+      "state": "catalogued"
+    },
+    {
+      "id": "BATCH-001",
+      "name": "Batch merge, convert, compress, protect, and rename",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Queue preview, per-file result, cancellation, and resumability",
+      "state": "catalogued"
+    },
+    {
+      "id": "BATCH-002",
+      "name": "Reusable action presets",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Versioned safe actions; no arbitrary scripting",
+      "state": "catalogued"
+    },
+    {
+      "id": "BATCH-003",
+      "name": "Watched folders in Windows",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Explicit folders, loop prevention, audit log, and safe failure recovery",
+      "state": "catalogued"
+    },
+    {
+      "id": "SHARE-001",
+      "name": "Share an expiring review link",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Access controls, expiry, revocation, and minimal retention",
+      "state": "catalogued"
+    },
+    {
+      "id": "SHARE-002",
+      "name": "Browser review comments and status",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Identity, concurrency, notifications, and content-safe logs",
+      "state": "catalogued"
+    },
+    {
+      "id": "SHARE-003",
+      "name": "Download/version history for shared reviews",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Immutable revisions and deletion behaviour",
+      "state": "catalogued"
+    },
+    {
+      "id": "INT-001",
+      "name": "Google Drive file picker and save-back",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Minimum OAuth scopes and explicit overwrite/version semantics",
+      "state": "catalogued"
+    },
+    {
+      "id": "INT-002",
+      "name": "Microsoft OneDrive file picker and save-back",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Minimum OAuth scopes and explicit overwrite/version semantics",
+      "state": "catalogued"
+    },
+    {
+      "id": "INT-003",
+      "name": "Dropbox file picker and save-back",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Minimum OAuth scopes and explicit overwrite/version semantics",
+      "state": "catalogued"
+    },
+    {
+      "id": "TEAM-001",
+      "name": "Team seats, roles, and centralized billing",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Tenant isolation, least privilege, and auditable membership changes",
+      "state": "catalogued"
+    },
+    {
+      "id": "TEAM-002",
+      "name": "Shared stamps and basic organization settings",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Scoped sharing and secure asset deletion",
+      "state": "catalogued"
+    },
+    {
+      "id": "A11Y-001",
+      "name": "Accessibility checker and issue report",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Clear scope; never claim certification from a single automated check",
+      "state": "catalogued"
+    },
+    {
+      "id": "A11Y-002",
+      "name": "Basic auto-tagging and reading-order suggestions",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Human review required; benchmark against representative documents",
+      "state": "catalogued"
+    },
+    {
+      "id": "A11Y-003",
+      "name": "Alt text and document-language editing",
+      "priority": "N",
+      "target": "Phase 2",
+      "supportContract": "Preserve structure where present and explain unsupported cases",
+      "state": "catalogued"
+    },
+    {
+      "id": "STD-001",
+      "name": "PDF/A conversion and validation",
+      "priority": "P",
+      "target": "Phase 3",
+      "supportContract": "Name exact conformance level and independent validator",
+      "state": "catalogued"
+    },
+    {
+      "id": "AI-001",
+      "name": "Opt-in document summary with citations",
+      "priority": "O",
+      "target": "Separate discovery",
+      "supportContract": "Separate consent, provider disclosure, retention, evaluation, and pricing",
+      "state": "catalogued"
+    },
+    {
+      "id": "AI-002",
+      "name": "Opt-in grounded questions across selected PDFs",
+      "priority": "O",
+      "target": "Separate discovery",
+      "supportContract": "Citation checks, prompt-injection controls, and strict document isolation",
+      "state": "catalogued"
+    }
+  ],
+  "excludedCapabilities": [
+    "3D/PRC/U3D authoring or advanced 3D measurement",
+    "geospatial PDF authoring, map registration, and coordinate-system workflows",
+    "embedded audio/video authoring and legacy multimedia playback",
+    "professional prepress production: separations, ink manager, trapping, output preview, print marks, hairline correction, and transparency-flattener tooling",
+    "advanced preflight profile/fixup authoring, PDF/X production workflows, and full ICC colour management",
+    "PDF Portfolios, catalogue indexing, and legacy article-thread authoring",
+    "Distiller/PostScript watched-folder workflows and Adobe-specific PDFMaker integrations",
+    "XFA form authoring or a general PDF JavaScript/plugin runtime",
+    "enterprise rights-management/AEM policy workflows",
+    "certificate-authority services, advanced PKI trust-list administration, or qualified electronic-signature infrastructure",
+    "native macOS, iOS, or Android applications in the committed roadmap",
+    "Adobe branding, interface, icons, copy, proprietary code, or compatibility claims without evidence and legal review"
+  ]
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128">
+  <title>PDFrig folded-page mark</title>
+  <g fill="#C65D3B">
+    <path d="M30 12H74V36Q74 44 82 44H108V104Q108 116 96 116H62V90C62 74 66 67 84 67V54C74 53 68 57 62 65V54H44V116H30Q20 116 20 104V24Q20 12 30 12Z" />
+    <path d="M80 12L104 38H86Q80 38 80 32Z" />
+  </g>
+</svg>

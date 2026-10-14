@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-cancel-pdf-write"
+description = "Enables the cancel_pdf_write command without any pre-configured scope."
+commands.allow = ["cancel_pdf_write"]
+
+[[permission]]
+identifier = "deny-cancel-pdf-write"
+description = "Denies the cancel_pdf_write command without any pre-configured scope."
+commands.deny = ["cancel_pdf_write"]

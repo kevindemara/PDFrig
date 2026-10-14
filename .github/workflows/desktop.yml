@@ -1,0 +1,62 @@
+name: Windows shell
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  tauri-windows:
+    name: Tauri 2 build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          version: 11.22.0
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - name: Install pinned Rust toolchain
+        shell: pwsh
+        run: rustup toolchain install 1.98.0 --profile minimal --component rustfmt,clippy
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build shared packages for clean-checkout adapter checks
+        run: pnpm build:packages
+      - name: Check desktop adapter types
+        run: pnpm --filter @pdfmason/desktop typecheck
+      - name: Test desktop adapter
+        run: pnpm --filter @pdfmason/desktop test
+      - name: Build shared desktop frontend
+        run: pnpm --filter @pdfmason/desktop... build
+      - name: Check Rust formatting
+        working-directory: apps/desktop/src-tauri
+        run: cargo fmt --check
+      - name: Run Rust lint
+        working-directory: apps/desktop/src-tauri
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Run Rust unit tests
+        working-directory: apps/desktop/src-tauri
+        run: cargo test --locked
+      - name: Check locked Rust build
+        working-directory: apps/desktop/src-tauri
+        run: cargo check --locked
+      - name: Check reviewed native command surface
+        run: pnpm desktop:surface-check
+      - name: Check Rust dependency licences
+        run: pnpm license:check:cargo
+      - name: Build Tauri application without installer bundling
+        run: pnpm --filter @pdfmason/desktop tauri:build

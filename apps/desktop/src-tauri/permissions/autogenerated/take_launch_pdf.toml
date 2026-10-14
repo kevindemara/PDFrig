@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-take-launch-pdf"
+description = "Enables the take_launch_pdf command without any pre-configured scope."
+commands.allow = ["take_launch_pdf"]
+
+[[permission]]
+identifier = "deny-take-launch-pdf"
+description = "Denies the take_launch_pdf command without any pre-configured scope."
+commands.deny = ["take_launch_pdf"]

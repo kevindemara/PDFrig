@@ -1,0 +1,37 @@
+{
+  "name": "@pdfmason/pdf-engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser-entry.d.ts",
+      "default": "./dist/browser-entry.js"
+    },
+    "./worker": {
+      "types": "./dist/worker-entry.d.ts",
+      "default": "./dist/worker-entry.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cantoo/pdf-lib": "catalog:",
+    "@pdfmason/contracts": "workspace:*",
+    "@pdfmason/editor-core": "workspace:*",
+    "fontkit": "catalog:",
+    "pdfjs-dist": "catalog:"
+  },
+  "devDependencies": {
+    "@types/fontkit": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PDFrig",
+  "version": "0.0.0",
+  "identifier": "com.pdfmason.desktop.dev",
+  "build": {
+    "beforeDevCommand": "pnpm dev --host 127.0.0.1",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "security": {
+      "capabilities": ["foundation"],
+      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src ipc: http://ipc.localhost http://127.0.0.1:3000 http://localhost:3000 http://127.0.0.1:55321 http://localhost:55321 https://*.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "PDFrig — Build better PDFs",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 760,
+        "minHeight": 600,
+        "dragDropEnabled": false,
+        "resizable": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "fileAssociations": [
+      {
+        "description": "PDF document",
+        "ext": ["pdf"],
+        "mimeType": "application/pdf",
+        "name": "PDF document",
+        "role": "Editor"
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" office:mimetype="application/vnd.oasis.opendocument.presentation" office:version="1.3">
+  <office:styles>
+    <style:style style:name="standard" style:family="graphic"/>
+  </office:styles>
+  <office:automatic-styles>
+    <style:style style:name="page" style:family="drawing-page"/>
+    <style:page-layout style:name="layout"><style:page-layout-properties svg:width="11in" svg:height="6.1875in"/></style:page-layout>
+  </office:automatic-styles>
+  <office:master-styles>
+    <style:master-page style:name="Default" style:page-layout-name="layout" draw:style-name="page"/>
+  </office:master-styles>
+  <office:body>
+    <office:presentation>
+      <draw:page draw:name="page1" draw:style-name="page" draw:master-page-name="Default">
+        <draw:frame draw:style-name="standard" svg:x="1in" svg:y="1in" svg:width="9in" svg:height="2in">
+          <draw:text-box><text:p>PDFMason synthetic presentation</text:p><text:p>Build better PDFs.</text:p></draw:text-box>
+        </draw:frame>
+      </draw:page>
+    </office:presentation>
+  </office:body>
+</office:document>

@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+FROM node:22.19.0-alpine3.22@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9 AS build
+WORKDIR /workspace
+RUN corepack enable && corepack prepare pnpm@11.22.0 --activate
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @pdfmason/worker... build
+
+FROM node:22.19.0-bookworm-slim@sha256:4a4884e8a44826194dff92ba316264f392056cbe243dcc9fd3551e71cea02b90 AS runtime
+ARG LIBREOFFICE_VERSION=26.2.5
+ARG LIBREOFFICE_SHA256=2f03bfb2ac9f33ea7c77331b4b7a23300fb0ed7443566046bf8b5bc51c1bed1e
+ENV NODE_ENV=production \
+    PDFMASON_OFFICE_CONVERSION_ENABLED=true
+RUN apt-get update \
+  && apt-get install --yes --no-install-recommends ca-certificates curl fontconfig fonts-dejavu-core fonts-liberation2 libcairo2 libice6 libsm6 libx11-6 libxinerama1 libxrandr2 libxrender1 libxt6 \
+  && curl --fail --location --silent --show-error \
+    "https://download.documentfoundation.org/libreoffice/stable/${LIBREOFFICE_VERSION}/deb/x86_64/LibreOffice_${LIBREOFFICE_VERSION}_Linux_x86-64_deb.tar.gz" \
+    --output /tmp/libreoffice.tar.gz \
+  && echo "${LIBREOFFICE_SHA256}  /tmp/libreoffice.tar.gz" | sha256sum --check --strict \
+  && mkdir /tmp/libreoffice \
+  && tar --extract --gzip --file /tmp/libreoffice.tar.gz --directory /tmp/libreoffice --strip-components=1 \
+  && (dpkg --install /tmp/libreoffice/DEBS/*.deb || apt-get install --fix-broken --yes --no-install-recommends) \
+  && rm --recursive --force /tmp/libreoffice /tmp/libreoffice.tar.gz /var/lib/apt/lists/*
+RUN apt-get update \
+  && apt-get install --yes --no-install-recommends libcups2 libdbus-1-3 libglib2.0-0 libnss3 libx11-xcb1 \
+  && rm --recursive --force /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /workspace/apps/worker/package.json ./package.json
+COPY --from=build /workspace/apps/worker/dist/office-cli.js ./office-cli.js
+COPY --from=build /workspace/apps/worker/dist/office-conversion.js ./office-conversion.js
+USER node
+ENTRYPOINT ["node", "/app/office-cli.js"]

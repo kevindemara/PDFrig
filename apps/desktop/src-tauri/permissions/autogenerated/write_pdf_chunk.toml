@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-write-pdf-chunk"
+description = "Enables the write_pdf_chunk command without any pre-configured scope."
+commands.allow = ["write_pdf_chunk"]
+
+[[permission]]
+identifier = "deny-write-pdf-chunk"
+description = "Denies the write_pdf_chunk command without any pre-configured scope."
+commands.deny = ["write_pdf_chunk"]

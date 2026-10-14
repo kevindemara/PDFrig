@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-13",
+  "featureId": "EDIT-002",
+  "package": "@embedpdf/pdfium",
+  "version": "2.15.1",
+  "runtimeApproved": false,
+  "status": "not-approved-missing-binary-evidence",
+  "npmDependencies": [],
+  "wrapperLicense": "MIT",
+  "packagedPdfiumNotice": "BSD-3-Clause and Apache-2.0 text",
+  "completeWasmLicenseInventoryVerified": false,
+  "artifactSourceBindingVerified": false,
+  "securityHistoryForExactBinaryVerified": false,
+  "browserAndWindowsCompatibilityVerified": false,
+  "unpackedBytes": 7554316,
+  "wasmBytes": 4646932,
+  "sha256": {
+    "wasm": "5e4cd023c3dad4a895b3571ca573d3fc51bac6de48360d95283134385b954eaa",
+    "nodeWrapper": "0e31ce6c207b371384392242c560b5e88d90221843dfbbaebf3f5cff1e22f2e0",
+    "browserWrapper": "2b8b6db33451f2599385697fe5bf634abdfbb093fec497febd7fb60b5aeea8ca",
+    "mitLicense": "f5031b66adba8ef5ef57666deff980a7f2ccff5c8a8c22a8117e854d2b8dfcd3",
+    "pdfiumNotice": "b033ffb8fc19c23ca81f7e98019ab658cc6f4cf14587c7c6a2a67fb0f6ac0f5a",
+    "olderV2150VendorWasm": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8"
+  },
+  "upstreamTag": {
+    "ref": "v2.15.1",
+    "commit": "176ec6daac51458c9e80733b9c92a66a3bc5e2d1",
+    "packagePathFromNpmExists": false,
+    "runtimePackageVersionAtTag": "3.0.0-next.13"
+  }
+}

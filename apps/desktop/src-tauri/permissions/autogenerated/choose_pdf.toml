@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-choose-pdf"
+description = "Enables the choose_pdf command without any pre-configured scope."
+commands.allow = ["choose_pdf"]
+
+[[permission]]
+identifier = "deny-choose-pdf"
+description = "Denies the choose_pdf command without any pre-configured scope."
+commands.deny = ["choose_pdf"]

@@ -1,0 +1,25 @@
+{
+  "name": "@pdfmason/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop --no-backup",
+    "db:advisors": "supabase db advisors --local --fail-on warn",
+    "db:test": "supabase test db",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

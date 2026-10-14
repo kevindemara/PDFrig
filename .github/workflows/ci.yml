@@ -1,0 +1,231 @@
+name: PDFMason CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  quality:
+    name: Format, lint, types, tests, licences, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          version: 11.22.0
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install independent PDF reader
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils qpdf
+          python -m pip install --disable-pip-version-check pypdf==6.16.1 cryptography==50.0.0
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Check publication tree hygiene
+        run: pnpm repo:check
+      - name: Lint
+        run: pnpm lint
+      - name: Check strict types
+        run: pnpm typecheck
+      - name: Run unit tests
+        run: pnpm test
+      - name: Run component tests
+        run: pnpm test:component
+      - name: Verify synthetic PDF corpus independently
+        run: pnpm test:pdf-corpus
+      - name: Verify utility outputs independently
+        run: pnpm test:pdf-utilities
+      - name: Verify ranged decorations and rendered placement independently
+        run: pnpm test:pdf-decorations
+      - name: Verify password roles, permission flags and rendered fidelity independently
+        run: pnpm test:pdf-permissions
+      - name: Check deny-by-default desktop surface
+        run: pnpm desktop:surface-check
+      - name: Check dependency licences
+        run: pnpm license:check
+      - name: Scan repository for sensitive files
+        run: pnpm secret:scan
+      - name: Audit production npm dependencies
+        run: pnpm security:audit
+      - name: Validate local public-beta readiness and economics
+        run: |
+          pnpm beta:economics
+          pnpm beta:readiness
+      - name: Build production shells and packages
+        run: pnpm build
+
+  browser:
+    name: Browser smoke
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          version: 11.22.0
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install independent PDF verifiers
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils qpdf
+          python -m pip install --disable-pip-version-check pypdf==6.16.1
+      - name: Run browser smoke tests
+        run: pnpm test:browser
+      - name: Retain synthetic browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: synthetic-browser-failures-${{ github.sha }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Retain synthetic thumbnail visual verification
+        if: success()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: synthetic-thumbnail-visuals-${{ github.sha }}
+          path: test-results/thumbnails-*/thumbnail-*.png
+          if-no-files-found: error
+          retention-days: 3
+
+  database:
+    name: Supabase RLS
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          version: 11.22.0
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Start local Supabase
+        run: pnpm db:start
+      - name: Run RLS tests
+        run: pnpm db:test
+      - name: Install PostgreSQL test client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+      - name: Verify deterministic concurrent database boundaries
+        run: pnpm test:db-concurrency
+      - name: Run database security and performance advisors
+        run: pnpm db:advisors
+      - name: Stop local Supabase
+        if: always()
+        run: pnpm db:stop
+
+  worker-container:
+    name: Sandboxed worker image
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Build pinned worker image
+        run: docker build --file apps/worker/Dockerfile --tag pdfmason-worker:ci .
+      - name: Validate constrained runtime and health
+        run: |
+          set -eu
+          trap 'docker rm --force pdfmason-worker-ci >/dev/null 2>&1 || true' EXIT
+          docker run --detach \
+            --name pdfmason-worker-ci \
+            --read-only \
+            --cap-drop ALL \
+            --cpus 1 \
+            --security-opt no-new-privileges:true \
+            --pids-limit 64 \
+            --memory 512m \
+            --ulimit nofile=1024:2048 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=128m \
+            --publish 127.0.0.1:18787:8787 \
+            pdfmason-worker:ci
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18787/health | grep --quiet '"status":"ready"'; then
+              break
+            fi
+            if [ "$attempt" = 20 ]; then
+              docker logs pdfmason-worker-ci
+              exit 1
+            fi
+            sleep 1
+          done
+          test "$(docker inspect --format '{{.Config.User}}' pdfmason-worker-ci)" = node
+          test "$(docker inspect --format '{{.HostConfig.ReadonlyRootfs}}' pdfmason-worker-ci)" = true
+
+  office-worker:
+    name: Office conversion sandbox
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+      - name: Install independent PDF verifiers
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils qpdf
+      - name: Build and test the networkless Office worker
+        run: node scripts/test-office-worker.mjs
+
+  ocr-worker:
+    name: OCR sandbox and searchable output
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+      - name: Install independent PDF verifiers
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes poppler-utils qpdf
+      - name: Build and test the networkless OCR worker
+        run: node scripts/test-ocr-worker.mjs

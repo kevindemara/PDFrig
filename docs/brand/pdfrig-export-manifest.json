@@ -1,0 +1,124 @@
+{
+  "brand": "PDFrig",
+  "approval": "Owner approved logo and site/favicon/Windows icon application on 2026-10-12.",
+  "source": {
+    "logo": "docs/brand/pdfrig-logo.png",
+    "mark": "docs/brand/pdfrig-mark.svg"
+  },
+  "method": "Approved imagegen wordmark retained unchanged; folded-page/r mark refined as repo-native SVG. Existing locked Tauri CLI rasterizes icon exports.",
+  "clearance": "Preliminary screen only; formal trademark and public-release gates remain outstanding.",
+  "exports": [
+    {
+      "path": "apps/desktop/src-tauri/icons/icon.ico",
+      "sha256": "cad5ed296fcaaf0e98a5f61bc1d4bf97462977aae36edfd32df44afae86feda8"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/icon.png",
+      "sha256": "90741f6f02ecf49eb8a83b30999077fd72a66f538e58e4532d6e36a26ada2c18"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/32x32.png",
+      "sha256": "703ec99006cb715071acdc401c756f61b8f9feada15bf2b251ba547bdbc42fc9"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/128x128.png",
+      "sha256": "6e3ad6d1bfe7cbfa1d69f2af1d5c9d170b94d80dff9256e4394782613c2f6cf8"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/128x128@2x.png",
+      "sha256": "af799a191a65e7bf3ba740b75e5ef39db785628d49e8fb1002a64322317bb50b"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/StoreLogo.png",
+      "sha256": "cb73f4acbf0a89bbc3aee9e8781a3091e1f5d8e9b3dcc91140d963e62a357bd6"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square30x30Logo.png",
+      "sha256": "8abd80bd447d4cd8de03a1c2fba4201ddc4a76ed66a220db99336e0b0634d291"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square44x44Logo.png",
+      "sha256": "47ccb51444cd179412569e1cd1c3846847def7754b6acb58797652840c6d40e8"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square71x71Logo.png",
+      "sha256": "d8104d513dbda4c7071f970b9ea45b1774de026d244464ac23b6b084cec4cdb0"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square89x89Logo.png",
+      "sha256": "6b684c3d6e213f3c6e98eb946df3d4ecbda9cf391a210292f5ddbab3430ccfe2"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square107x107Logo.png",
+      "sha256": "5d1a12013093ec84e6956c54b2912ca85ec6e8cec809289472d4164d7fca6464"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square142x142Logo.png",
+      "sha256": "eb5771c0aeac0401bea63df2da49670ba31f1703ed1164a16b4fc1eceb2b1f09"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square150x150Logo.png",
+      "sha256": "9aeff31a2eec94a5f5f7e79401c148aa2349ac257ff5c1ee5d7321951a415f22"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square284x284Logo.png",
+      "sha256": "f30140ee0df28baceccaffd8b5fa015f8e53f70823352bde13886646fe10c095"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/Square310x310Logo.png",
+      "sha256": "873ea238cec3a0a34a354544e17a33484526efccd2093656b353f91fbacf82ed"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/16x16.png",
+      "sha256": "27c8e8aee8301c87100b115e65b0ce278f1c025fc38103c3b362b44a8d1b472e"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/24x24.png",
+      "sha256": "b0062570d07b3494458290967761eea0a5721b9a63ee411be1bc956a48144511"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/48x48.png",
+      "sha256": "70a6ec92b37ce348155043d6d485e995891003a1e0babaef9ccace2d2691ad77"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/64x64.png",
+      "sha256": "c75c0e619e80fc406d0a4d91a88ace7d2602fc2b2555946b49dcfaa6e8697c05"
+    },
+    {
+      "path": "apps/desktop/src-tauri/icons/512x512.png",
+      "sha256": "90741f6f02ecf49eb8a83b30999077fd72a66f538e58e4532d6e36a26ada2c18"
+    },
+    {
+      "path": "apps/web/public/brand/pdfrig-logo.png",
+      "sha256": "d9b2ca9c129620bf356678cba7fe8ec8760ca1d2a5e88c093e63508c41c8d7d7"
+    },
+    {
+      "path": "apps/web/public/brand/pdfrig-mark.svg",
+      "sha256": "c383ebe22c32619f169d12ac1facf8625a0f079a99d003018ebb518190c4c732"
+    },
+    {
+      "path": "apps/desktop/public/brand/pdfrig-logo.png",
+      "sha256": "d9b2ca9c129620bf356678cba7fe8ec8760ca1d2a5e88c093e63508c41c8d7d7"
+    },
+    {
+      "path": "apps/desktop/public/brand/pdfrig-mark.svg",
+      "sha256": "c383ebe22c32619f169d12ac1facf8625a0f079a99d003018ebb518190c4c732"
+    },
+    {
+      "path": "apps/web/app/icon.svg",
+      "sha256": "c383ebe22c32619f169d12ac1facf8625a0f079a99d003018ebb518190c4c732"
+    },
+    {
+      "path": "apps/web/app/favicon.ico",
+      "sha256": "cad5ed296fcaaf0e98a5f61bc1d4bf97462977aae36edfd32df44afae86feda8"
+    },
+    {
+      "path": "apps/desktop/public/favicon.ico",
+      "sha256": "cad5ed296fcaaf0e98a5f61bc1d4bf97462977aae36edfd32df44afae86feda8"
+    },
+    {
+      "path": "apps/web/app/apple-icon.png",
+      "sha256": "d4580a5c6d3e5248de79e012b9ba19f70ec6b04d993aa41395accbe80cb54b4b"
+    }
+  ]
+}

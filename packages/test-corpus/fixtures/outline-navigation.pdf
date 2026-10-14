@@ -1,0 +1,238 @@
+%PDF-1.7
+%
+
+1 0 obj
+<<
+/Type /Pages
+/Kids [ 5 0 R 7 0 R 9 0 R ]
+/Count 3
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/Outlines 11 0 R
+/Names <<
+/Dests <<
+/Names [ (chapter-two) [ 7 0 R /Fit ] ]
+>>
+>>
+>>
+endobj
+
+3 0 obj
+<<
+/Producer <FEFF005000440046004D00610073006F006E002000730079006E00740068006500740069006300200063006F0072007000750073002000670065006E0065007200610074006F0072>
+/ModDate (D:20260821000000Z)
+/Creator <FEFF005000440046004D00610073006F006E002000730079006E00740068006500740069006300200063006F0072007000750073002000670065006E0065007200610074006F0072>
+/CreationDate (D:20260821000000Z)
+/Title <FEFF006F00750074006C0069006E0065002D006E0061007600690067006100740069006F006E002E007000640066>
+>>
+endobj
+
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+>>
+endobj
+
+5 0 obj
+<<
+/Type /Page
+/Parent 1 0 R
+/Resources <<
+/Font <<
+/Helvetica-7098480789 4 0 R
+/Helvetica-9742682568 4 0 R
+>>
+/XObject <<
+>>
+/ExtGState <<
+>>
+>>
+/MediaBox [ 0 0 612 792 ]
+/Annots [ ]
+/Contents [ 6 0 R ]
+>>
+endobj
+
+6 0 obj
+<<
+/Filter /FlateDecode
+/Length 179
+>>
+stream
+xœm1
+AEûœ"µàšÉÌ$ua. ²Š¢ÅŠx~³Û)ø!áÃ{¬+ó¼Àb×ßßıëz:Î•Š%#µ‚Á°Ö=„©0'T&¬XJ§Y“l¤H+™·AÅ/õ|wÒr«$Id…õum…»‰‚Ô¤8†ıHM,ÆYı•b“DêxÇ™ä	™\"3ÅÀTÜ×Õ:ÿgŞb•FÅğ¥õ¶;ú
+endstream
+endobj
+
+7 0 obj
+<<
+/Type /Page
+/Parent 1 0 R
+/Resources <<
+/Font <<
+/Helvetica-2000805986 4 0 R
+/Helvetica-9750469207 4 0 R
+>>
+/XObject <<
+>>
+/ExtGState <<
+>>
+>>
+/MediaBox [ 0 0 612 792 ]
+/Annots [ ]
+/Contents [ 8 0 R ]
+>>
+endobj
+
+8 0 obj
+<<
+/Filter /FlateDecode
+/Length 179
+>>
+stream
+xœmÎ±
+1à=O‘YğLÓ&iAÔ;\„¾€È)Š'âó›»M‘BBCÚÿ`]p<Ï,vııİ¿®§ãœ‰(“”¬2Ö3pÂº‡0­”„Æ„õKíL,éF‹¶*¼õLıfŞ“÷N[n4©®°Ş Î ­p€aÊn¢"5)%ÿ Š	ùL†ş"´ä	!Ñ<Şã²Êıip„0Ef*îuZçs±è[>sÒH_¬ú;İ
+endstream
+endobj
+
+9 0 obj
+<<
+/Type /Page
+/Parent 1 0 R
+/Resources <<
+/Font <<
+/Helvetica-7572533686 4 0 R
+/Helvetica-8450180107 4 0 R
+>>
+/XObject <<
+>>
+/ExtGState <<
+>>
+>>
+/MediaBox [ 0 0 612 792 ]
+/Annots [ ]
+/Contents [ 10 0 R ]
+>>
+endobj
+
+10 0 obj
+<<
+/Filter /FlateDecode
+/Length 177
+>>
+stream
+xœm1
+AEûœ"µ &™I2b¡îba#ÌDT-VÄó›İN‘@ÂŞëaUp˜çæÛÓı}z]‡©«‹¦dÅÖ3HÆº«ŒšÑ…°>`a]t³­­±ÖT6±Ù-’ÇÍq;k¥u²l¶Äzƒ:¶Âú‘=K†4ËiXåG¢d%.ÄäÈôWÂš2JhòÀ®˜Ğ$H	J‘šğµ.şê)Z"ƒÒ È_Zm;İ
+endstream
+endobj
+
+11 0 obj
+<<
+/Count 6
+/Type /Outlines
+/First 12 0 R
+/Last 17 0 R
+>>
+endobj
+
+12 0 obj
+<<
+/Dest [ 5 0 R /Fit ]
+/Parent 11 0 R
+/Title (Overview)
+/Count 4
+/First 13 0 R
+/Last 16 0 R
+/Next 17 0 R
+>>
+endobj
+
+13 0 obj
+<<
+/Dest (chapter-two)
+/Parent 12 0 R
+/Title <FEFF0043006800610070006900740072006500204E8C0020201400205B895168>
+/Next 14 0 R
+>>
+endobj
+
+14 0 obj
+<<
+/A <<
+/S /URI
+/URI (https://example.invalid/outline-action-must-not-open)
+>>
+/Parent 12 0 R
+/Title (External action is never followed)
+/Prev 13 0 R
+/Next 15 0 R
+>>
+endobj
+
+15 0 obj
+<<
+/Dest (missing-page)
+/Parent 12 0 R
+/Title (Missing destination)
+/Prev 14 0 R
+/Next 16 0 R
+>>
+endobj
+
+16 0 obj
+<<
+/Dest [ 7 0 R /Fit ]
+/Parent 12 0 R
+/Title (Long synthetic bookmark xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+/Prev 15 0 R
+>>
+endobj
+
+17 0 obj
+<<
+/Dest [ 9 0 R /Fit ]
+/Parent 11 0 R
+/Prev 12 0 R
+/Title (Final page)
+>>
+endobj
+
+xref
+0 18
+0000000000 65535 f 
+0000000016 00000 n 
+0000000088 00000 n 
+0000000221 00000 n 
+0000000721 00000 n 
+0000000819 00000 n 
+0000001042 00000 n 
+0000001294 00000 n 
+0000001517 00000 n 
+0000001769 00000 n 
+0000001993 00000 n 
+0000002244 00000 n 
+0000002319 00000 n 
+0000002445 00000 n 
+0000002590 00000 n 
+0000002774 00000 n 
+0000002888 00000 n 
+0000003214 00000 n 
+
+trailer
+<<
+/Size 18
+/Root 2 0 R
+/Info 3 0 R
+>>
+
+startxref
+3306
+%%EOF

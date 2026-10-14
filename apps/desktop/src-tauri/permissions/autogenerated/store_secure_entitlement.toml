@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-store-secure-entitlement"
+description = "Enables the store_secure_entitlement command without any pre-configured scope."
+commands.allow = ["store_secure_entitlement"]
+
+[[permission]]
+identifier = "deny-store-secure-entitlement"
+description = "Denies the store_secure_entitlement command without any pre-configured scope."
+commands.deny = ["store_secure_entitlement"]

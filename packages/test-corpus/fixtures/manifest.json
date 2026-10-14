@@ -1,0 +1,552 @@
+{
+  "fixtures": [
+    {
+      "expectedFeatures": ["single-page", "standard-font", "text-content"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "smoke-one-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "7bd33839cae371405db12e2cc61facffd12097bfb989a6ec57a9997c64979693"
+    },
+    {
+      "expectedFeatures": ["multi-page", "text-content"],
+      "expectedPageCount": 3,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001", "VIEW-004"],
+      "filename": "multipage-three.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "c2641000776dfca2b61ed95e873fbf0e840124b66a4704e237e883dd70a76112"
+    },
+    {
+      "expectedFeatures": ["mixed-page-sizes"],
+      "expectedPageCount": 3,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001", "ORG-001"],
+      "filename": "mixed-page-sizes.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "5bce54849d579d868e2e9ec3cbadc6b80cd86c0fb28acae3b2ba5083bc478acd"
+    },
+    {
+      "expectedFeatures": ["page-rotation"],
+      "expectedPageCount": 4,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-003", "ORG-004"],
+      "filename": "rotated-pages.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "f838b4d2b5ebd88e3587f9946f8eae73f7748d5bda77e7e858dc6e03fd739cff"
+    },
+    {
+      "expectedFeatures": ["landscape"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "landscape-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "3d7b710785e91ed5a439066ddfbe4566c0d3e168ab719002e860fa7dd73578c3"
+    },
+    {
+      "expectedFeatures": ["text-content", "search-target"],
+      "expectedPageCount": 2,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-005"],
+      "filename": "searchable-text.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "6f17f3694a3d6ff40d8b234b3e29039f3404633544721a53aa7533bfe43e3c81"
+    },
+    {
+      "expectedFeatures": ["acroform", "text-field", "checkbox", "radio-group", "dropdown"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["FORMS"],
+      "featureIds": [
+        "FORM-001",
+        "FORM-002",
+        "FORM-007",
+        "ORG-001",
+        "ORG-002",
+        "ORG-006",
+        "ORG-007"
+      ],
+      "filename": "acroform-text-field.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "87d0c68a640677a91d495d8b528409d91fbb3789c83ba7b485450f37020a011b"
+    },
+    {
+      "expectedFeatures": ["attachment"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ATTACHMENTS"],
+      "featureIds": ["SEC-006", "VIEW-007", "ORG-001", "ORG-002", "ORG-006", "ORG-007"],
+      "filename": "file-attachment.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "99f726069a9fb6d120183b126bd2ad08c2dced6334d654ecf31d7f741db1e04c"
+    },
+    {
+      "expectedFeatures": ["active-content", "javascript"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT"],
+      "featureIds": ["SEC-006", "ORG-001", "ORG-002", "ORG-006", "ORG-007"],
+      "filename": "embedded-javascript.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "4ee0efb1228f669d7529c1fe533beb080f1707fe0a34ff5a6dbae2cd04f235f3"
+    },
+    {
+      "expectedFeatures": ["document-metadata"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["SEC-004"],
+      "filename": "metadata.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "57552e0d57b8924cccc2674d8a166bc1d4403077d83bc68e2d9bbf45fb61cd05"
+    },
+    {
+      "expectedFeatures": ["raster-image"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001", "ORG-008"],
+      "filename": "embedded-png.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "9e9cf40d387c3d235029507bc819670cf54598da82ca71130e6687e834104ce6"
+    },
+    {
+      "expectedFeatures": ["vector-graphics"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "vector-shapes.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "d6320d303632a031c44d6440f86bee10631f7b89bc2db1fb87860a71a2ba07d1"
+    },
+    {
+      "expectedFeatures": ["crop-box", "media-box"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "cropped-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "a15e6721635606672ac9eec2e93661c09841f8cc1b13c3b94c6b69e1f31e3b08"
+    },
+    {
+      "expectedFeatures": ["many-pages", "lazy-thumbnails"],
+      "expectedPageCount": 25,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-004"],
+      "filename": "many-pages-25.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "5240da05d0d31fbd13c3993fef372b1905c1cd1ba0ed86ef6013a9b1801cf419"
+    },
+    {
+      "expectedFeatures": ["unusual-aspect-ratio"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "narrow-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "08a4e283abbb1669c63e713306224aee034475aed4360be725e829fb60fb964b"
+    },
+    {
+      "expectedFeatures": ["unusual-aspect-ratio"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "wide-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "91ce13bac05b8b9df34e13772f0d92f91fa9d498e89caa1a1c0ebf60caa0b5ef"
+    },
+    {
+      "expectedFeatures": ["large-page-dimensions"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "large-dimensions.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "70b4a46ab824b947870f1303ff97d3779806071cdb3d81e4612a9159ad1c3c57"
+    },
+    {
+      "expectedFeatures": ["blank-page"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-001"],
+      "filename": "blank-page.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "d225fdf46c6cc9620e3eb52118e4a0dace1128b4e98a5921af812dd81240dbac"
+    },
+    {
+      "expectedFeatures": ["duplicate-content"],
+      "expectedPageCount": 3,
+      "expectedWarnings": [],
+      "featureIds": ["ORG-005"],
+      "filename": "duplicate-source-pages.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "567d048995f8fe01db39f0660e99a396017a53aca8efc1fe0d41b7ba14001c9e"
+    },
+    {
+      "expectedFeatures": ["encrypted", "password-required"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ENCRYPTED"],
+      "featureIds": ["VIEW-002", "SEC-006"],
+      "filename": "password-aes256.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "77d9e26cf66da10bc0b38654fb6d1edd324885f95c75146bcc0823f4ff9e3c34"
+    },
+    {
+      "expectedFeatures": ["raster-image", "synthetic-scan", "no-text-layer"],
+      "expectedPageCount": 1,
+      "expectedWarnings": [],
+      "featureIds": ["OCR-001"],
+      "filename": "scanned-ocr.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "ada37f65e6c310c91ff4e4dcd9cd0dde3105c4fde8a57eb2e39f127b5bcf3212"
+    },
+    {
+      "expectedFeatures": [
+        "redaction-marker",
+        "metadata",
+        "acroform",
+        "attachment",
+        "active-content"
+      ],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT", "ATTACHMENTS", "FORMS"],
+      "featureIds": ["REDACT-001"],
+      "filename": "redaction-markers.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "944bd9126d8334fa56d0da80ab23691a09e0401da9e2a8fc6e62ea00e9f57f60"
+    },
+    {
+      "expectedFeatures": [
+        "placement-warning",
+        "text-content",
+        "vector-graphics",
+        "raster-image",
+        "acroform",
+        "page-rotation",
+        "crop-box",
+        "faint-content",
+        "intentional-background"
+      ],
+      "expectedPageCount": 11,
+      "expectedWarnings": ["FORMS"],
+      "featureIds": ["EDIT-006"],
+      "filename": "decoration-placement.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "4ae2e0ffc4b4b8cf218a3395920fbf2c530ce86a191dfc947952257f1936a27d"
+    },
+    {
+      "expectedFeatures": [
+        "text-content",
+        "document-metadata",
+        "xmp-metadata",
+        "acroform",
+        "annotation",
+        "link",
+        "tagged-content",
+        "outline",
+        "optional-content",
+        "nested-optional-content",
+        "optional-content-radio-groups",
+        "output-intent"
+      ],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["FORMS", "TAGGED_CONTENT"],
+      "featureIds": [
+        "OPT-001",
+        "SEC-004",
+        "FORM-001",
+        "ANNO-002",
+        "EDIT-004",
+        "VIEW-007",
+        "ORG-001",
+        "ORG-002",
+        "ORG-006",
+        "ORG-007"
+      ],
+      "filename": "compression-preservation.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "79544c5cb44c7933fd5e2478d1adb532848f10e1b27060dafed80812c63ffa6e"
+    },
+    {
+      "expectedFeatures": ["incremental-revision", "text-content", "document-metadata"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["INCREMENTAL_REVISIONS"],
+      "featureIds": ["OPT-001", "ORG-001", "ORG-002", "ORG-006", "ORG-007"],
+      "filename": "compression-incremental.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "d29ef372e6bd3bb7410495b7d4f0bc0d88d972db014089ba40540af1153ead99"
+    },
+    {
+      "expectedFeatures": [
+        "multi-page",
+        "text-content",
+        "outline",
+        "nested-outline",
+        "named-destination"
+      ],
+      "expectedPageCount": 3,
+      "expectedWarnings": ["OUTLINES"],
+      "featureIds": ["VIEW-006"],
+      "filename": "outline-navigation.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "29403168b61e18fa5c33c9e6949f3b3561eaf3838a7faa57e0b4422179ebee5a"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "unsigned-signature-fixture"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-field.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "ed345ec81380d876013b50adaa0d4d477d7529d69fb8cf86f258db9fe7938811"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "empty-signature-field"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-field-empty.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "d2d9687c1617fcce65ebd7a95dd02377fad42e3bf8379c64440ffc4c9814a995"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "explicit-field-action"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT", "SIGNATURES"],
+      "featureIds": ["SEC-006", "SEC-007"],
+      "filename": "signature-field-action.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "df6718e113dd0c66da57adcc0c0d214a0905886441eb064c8dbcbb5f02611080"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "signature-metadata-placeholder"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-metadata-placeholder.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "dec2b52a13ef334357fb973788e2625fba9353972582e17fab49aec372230171"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "mixed-signature-detection"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-mixed-fields.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "2670ab4348a4ce4107049be4202b139fc62b30cc07ab223d8fbd656bb9b5b970"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "out-of-bounds-signature-byte-range"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-byte-range-out-of-bounds.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "357c18b23c610ec3e552c891fb6f81288c79d5a96e7943d93746d21cfcf35c8d"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "parent-widget-signature-field"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-parent-widget.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "f69e66eb1bdc430d26f1bc0fc7109c519f7011398bbed3803c3b29f33f9d69e7"
+    },
+    {
+      "expectedFeatures": [
+        "acroform",
+        "signature-field",
+        "parent-widget-signature-field",
+        "explicit-field-action"
+      ],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT", "SIGNATURES"],
+      "featureIds": ["SEC-006", "SEC-007"],
+      "filename": "signature-parent-field-action.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "92b997ed242826c485fecba3adf76d1061d594bb39ca8b29000d37e7285f9f41"
+    },
+    {
+      "expectedFeatures": [
+        "acroform",
+        "signature-field",
+        "parent-widget-signature-field",
+        "explicit-field-action"
+      ],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT", "SIGNATURES"],
+      "featureIds": ["SEC-006", "SEC-007"],
+      "filename": "signature-child-widget-action.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "de1f241c3520a465ac53ad47121e6651c7b3610da9ee7def0cca4a74ddd55227"
+    },
+    {
+      "expectedFeatures": [
+        "acroform",
+        "signature-field",
+        "cross-page-action",
+        "explicit-annotation-action"
+      ],
+      "expectedPageCount": 2,
+      "expectedWarnings": ["ACTIVE_CONTENT", "SIGNATURES"],
+      "featureIds": ["SEC-006", "SEC-007"],
+      "filename": "signature-cross-page-action.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "a689bb70cf5ebe4f7c7c0456000032b04db6df05f4fb222cb90ccc677944424e"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "text-field", "mixed-form-fields"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-with-text-field.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "d691e36635be679f42b0ef748b6fae6695fb367be966b2dd7f0eae8357d85482"
+    },
+    {
+      "expectedFeatures": [
+        "acroform",
+        "signature-field",
+        "text-field",
+        "mixed-form-fields",
+        "explicit-field-action"
+      ],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["ACTIVE_CONTENT", "SIGNATURES"],
+      "featureIds": ["SEC-006", "SEC-007"],
+      "filename": "signature-with-text-field-action.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "a71f15c8ea89fa36ef80165c80970fe0ba3718ebe44ea859a242512568765ee2"
+    },
+    {
+      "expectedFeatures": ["acroform", "signature-field", "malformed-signature-value"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-malformed-value.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "0f5df7adc8bd2b65e938167a3bafa6b194b46c3d4ad0fa0697414bf31a8e6558"
+    },
+    {
+      "expectedFeatures": ["signature-field", "orphan-signature-widget"],
+      "expectedPageCount": 1,
+      "expectedWarnings": ["SIGNATURES"],
+      "featureIds": ["SEC-007"],
+      "filename": "signature-orphan-widget.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "3732026c7108fe1709e9866f5eebbd25b18b5bc085c9247e781bb9aa2f42e84e"
+    },
+    {
+      "expectedFeatures": ["many-pages", "virtual-thumbnails", "mixed-page-sizes", "rotated-pages"],
+      "expectedPageCount": 500,
+      "expectedWarnings": [],
+      "featureIds": ["VIEW-004", "ORG-003", "ORG-004", "ORG-005"],
+      "filename": "many-pages-500.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "bbb84bab5641bcc392b8fbe2d60bd00da58009f9f8a1e0d077cefde614c0cc62"
+    },
+    {
+      "expectedFeatures": [
+        "tagged-reading-order",
+        "mcid-content",
+        "parent-tree",
+        "role-map",
+        "class-map",
+        "id-tree",
+        "outline",
+        "tagged-form-widget",
+        "rotated-page"
+      ],
+      "expectedPageCount": 2,
+      "expectedWarnings": ["ADDED_CONTENT_UNTAGGED"],
+      "featureIds": ["EDIT-001", "ANNO-001", "ANNO-003", "VIEW-006", "FORM-001", "FORM-002"],
+      "filename": "tagged-bookmarks.pdf",
+      "license": "CC0-1.0",
+      "origin": "Purpose-created by the PDFMason project generator",
+      "sensitivity": "none",
+      "sha256": "2b99c1c5a0693bfdc761b04b6b025b8860f79503bc788af5c56a91039a724886"
+    }
+  ],
+  "schemaVersion": 1
+}

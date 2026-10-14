@@ -1,0 +1,53 @@
+Third-party notices — Foundation through public-beta hardening
+
+This development notice accompanies the Milestone 0–6 alpha dependency graph. Release automation must generate a complete SBOM and retain upstream licence texts before public distribution.
+
+Top-level runtime selections:
+
+Checkpoint 090 adds fontkit 2.0.4 (MIT, <https://github.com/foliojs/fontkit>) and
+development-only @types/fontkit 2.0.9 (MIT). The complete locked permissively
+licensed graph remains part of release SBOM/notices generation.
+
+Dancing Script, Copyright 2016 The Dancing Script Project Authors
+(<https://github.com/googlefonts/DancingScript>), Reserved Font Name 'Dancing Script',
+is bundled unmodified under SIL OFL-1.1. Full licence:
+DancingScript-OFL.txt, also shipped in both application
+public `third-party/DancingScript-OFL.txt` assets. Google Fonts git blob
+`9f521e7fb357ec9ea9820ebd36a9d7b1f72f2935`, 133,636 bytes. Include this non-npm
+asset in release SBOMs; the font retains OFL regardless of the project licence.
+
+| Component             | Licence           | Source                                            |
+| --------------------- | ----------------- | ------------------------------------------------- |
+| Next.js               | MIT               | <https://github.com/vercel/next.js>               |
+| React and React DOM   | MIT               | <https://github.com/facebook/react>               |
+| Zod                   | MIT               | <https://github.com/colinhacks/zod>               |
+| Tauri JavaScript API  | Apache-2.0 OR MIT | <https://github.com/tauri-apps/tauri>             |
+| Tauri Rust crates     | Apache-2.0 OR MIT | <https://github.com/tauri-apps/tauri>             |
+| Tauri dialog plugin   | Apache-2.0 OR MIT | <https://github.com/tauri-apps/plugins-workspace> |
+| Tauri updater plugin  | Apache-2.0 OR MIT | <https://github.com/tauri-apps/plugins-workspace> |
+| PDF.js (`pdfjs-dist`) | Apache-2.0        | <https://github.com/mozilla/pdf.js>               |
+| `@cantoo/pdf-lib`     | MIT               | <https://github.com/cantoo-scribe/pdf-lib>        |
+| pako                  | MIT AND Zlib      | <https://github.com/nodeca/pako>                  |
+| Supabase JavaScript   | MIT               | <https://github.com/supabase/supabase-js>         |
+| Supabase SSR          | MIT               | <https://github.com/supabase/ssr>                 |
+| Stripe Node SDK       | MIT               | <https://github.com/stripe/stripe-node>           |
+| aws4fetch             | MIT               | <https://github.com/mhart/aws4fetch>              |
+
+The installed web build graph also includes `caniuse-lite` data under CC-BY-4.0; attribution and its upstream licence must remain in release notices. All current production dependency licence groups are checked by `pnpm license:check`. AGPL, SSPL, unknown, unlicensed, and source-available categories fail the policy; any other unapproved category requires review before merge.
+
+Next.js 16.3.8 optionally installs platform-specific `@img/sharp-*` 0.35.5 packages for server-side image optimization. These packages declare `Apache-2.0 AND LGPL-3.0-or-later` because they include libvips. The narrowly version-bound licence-check exception permits this dependency only in the web graph. PDFrig currently uses no Next.js image optimization, and the desktop application is a separate Vite/Tauri build whose bundled frontend cannot include this Node package. Preserve the applicable Sharp/libvips notices in any server distribution; adding it to a Windows installer requires a separate legal review and compliance plan. The September security patch review is enforced by the exact-version license policy.
+
+PDF.js 6.2.108 and `@cantoo/pdf-lib` 2.9.1 are the reviewed browser and export engines through Milestone 2. PDF.js includes optional Node canvas packages for server environments; PDFrig does not import those native packages into the browser or Windows WebView bundle. Poppler and BSD-3-Clause `pypdf` 6.16.1 are test-only independent readers installed by CI and are not bundled or shipped. Detailed adoption and distribution review remains required.
+
+Milestone 3 adds `@supabase/supabase-js` 2.112.3, `@supabase/ssr` 0.12.4, Stripe Node 22.5.0, and `aws4fetch` 1.0.20. Each is MIT licensed, sourced from the public npm registry through the locked dependency graph, and used only at web/server or worker provider boundaries. No PDF engine or native PDF binary was added. Detailed adoption and distribution review remains required.
+
+Milestone 4 adds no npm PDF runtime package. qpdf 12.4.0 (Apache-2.0) is an independent development/CI verifier and is not bundled with the web or Windows product. `pypdf` 6.16.1 (BSD-3-Clause), `cryptography` 50.0.0 (Apache-2.0 OR BSD-3-Clause), and Poppler are also test-only tools. Applicable test-environment notices remain required for redistributed CI/dev images.
+
+The dedicated, server-only Office beta image installs the official LibreOffice 26.2.5 binary distribution, which reports 26.2.5.2. LibreOffice is MPL-2.0 at the project level and includes components, extensions, dictionaries, and other material under varying licences. The image also installs Debian runtime libraries and DejaVu and Liberation font packages under their respective licences. This development notice is not a complete inventory. Before an Office worker image is released or provided to customers, generate and archive a complete image SBOM/licence report, retain every applicable notice and source-offer obligation, review the exact image with counsel, scan it for vulnerabilities, and approve its fonts. The Office kill switch remains off by default until those gates pass. Detailed adoption and distribution review remains required.
+
+Milestone 5 adds Tesseract 5.5.3 and `tessdata_fast` 4.1.0 English/French models under Apache-2.0 to a separate server-only OCR image. The image also installs qpdf and Poppler command-line tools plus Debian runtime libraries. Poppler is GPL-licensed. None of these native binaries is linked into or distributed with the web client or Windows installer. Before the OCR image is released or provided to customers, generate and archive a complete image SBOM/licence report, retain all required notices and source obligations, scan the exact image for vulnerabilities, and obtain legal approval for the intended image distribution/service model. The OCR kill switches remain off until those gates pass. Detailed adoption and distribution review remains required.
+
+The Milestone 6 Windows alpha uses `tauri-plugin-dialog` 2.7.2, `tauri-plugin-single-instance` 2.4.3, and `tauri-plugin-updater` 2.10.1 under Apache-2.0 OR MIT. Its direct supporting Rust dependencies are permissively licensed: `serde_json` 1.0.151, `time` 0.3.55, `uuid` 1.25.0, `windows-sys` 0.61.2, and `zeroize` 1.9.0. Test-only `minisign` 0.9.1 and `minisign-verify` 0.2.5 are MIT. The dialog graph includes `rfd` and the official Tauri filesystem plugin as implementation dependencies, while the updater graph includes Rustls. The frontend receives no direct dialog, filesystem, HTTP, process, shell, logging, or updater plugin permission; all access is behind the exact reviewed Rust command surface. Preserve applicable notices in a Windows distribution. The protected alpha workflow generates an SPDX SBOM for the final installer bundle, but independent review remains mandatory before public release. Detailed adoption and distribution review remains required.
+
+Milestone 7 adds `@axe-core/playwright` 4.13.0 and its `axe-core` runtime under MPL-2.0 as development-only accessibility test tooling. It runs against local Playwright pages and is not imported by production web, worker, shared UI, or Windows application code. Retain its licence in development/CI distributions. Detailed adoption and distribution review remains required. No production PDF dependency or native binary was added.
+

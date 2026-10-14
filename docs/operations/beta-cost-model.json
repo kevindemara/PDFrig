@@ -1,0 +1,44 @@
+{
+  "name": "provisional local public-beta planning scenario",
+  "currency": "CAD",
+  "pricingStatus": "provisional",
+  "measurementStatus": "synthetic-assumptions",
+  "minimumContributionMarginPercent": 50,
+  "scenario": {
+    "paidAccounts": 100,
+    "monthlyPriceMinor": 699,
+    "fixedMonthlyCostMinor": 5000
+  },
+  "workloads": [
+    {
+      "name": "OCR pages",
+      "units": 2500,
+      "unitCostMinor": 1
+    },
+    {
+      "name": "Office documents",
+      "units": 300,
+      "unitCostMinor": 5
+    },
+    {
+      "name": "private storage GB-month",
+      "units": 200,
+      "unitCostMinor": 3
+    },
+    {
+      "name": "egress GB",
+      "units": 100,
+      "unitCostMinor": 12
+    },
+    {
+      "name": "support cases including labour",
+      "units": 12,
+      "unitCostMinor": 1200
+    }
+  ],
+  "notes": [
+    "Every amount is an explicit conservative local assumption, not a vendor quote or measured production cost.",
+    "Replace workloads and unit costs with staging measurements before pricing approval.",
+    "The public release gate rejects synthetic assumptions and provisional pricing."
+  ]
+}

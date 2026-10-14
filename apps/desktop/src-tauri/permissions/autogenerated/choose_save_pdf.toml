@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-choose-save-pdf"
+description = "Enables the choose_save_pdf command without any pre-configured scope."
+commands.allow = ["choose_save_pdf"]
+
+[[permission]]
+identifier = "deny-choose-save-pdf"
+description = "Denies the choose_save_pdf command without any pre-configured scope."
+commands.deny = ["choose_save_pdf"]

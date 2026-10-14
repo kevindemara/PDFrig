@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-read-pdf-chunk"
+description = "Enables the read_pdf_chunk command without any pre-configured scope."
+commands.allow = ["read_pdf_chunk"]
+
+[[permission]]
+identifier = "deny-read-pdf-chunk"
+description = "Denies the read_pdf_chunk command without any pre-configured scope."
+commands.deny = ["read_pdf_chunk"]

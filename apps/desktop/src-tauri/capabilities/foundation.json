@@ -1,0 +1,29 @@
+{
+  "identifier": "foundation",
+  "description": "Windows alpha with reviewed PDF and local comment-report transfer, launch, optional recent-file, and DPAPI-protected account commands.",
+  "windows": ["main"],
+  "platforms": ["windows"],
+  "permissions": [
+    "allow-choose-pdf",
+    "allow-read-pdf-chunk",
+    "allow-cancel-pdf-read",
+    "allow-take-launch-pdf",
+    "allow-get-recent-files",
+    "allow-set-recent-files-enabled",
+    "allow-clear-recent-files",
+    "allow-open-recent-pdf",
+    "allow-choose-save-pdf",
+    "allow-write-pdf-chunk",
+    "allow-cancel-pdf-write",
+    "allow-store-secure-session",
+    "allow-get-secure-session",
+    "allow-clear-secure-session",
+    "allow-store-secure-entitlement",
+    "allow-get-secure-entitlement",
+    "allow-clear-secure-entitlement",
+    "allow-check-for-update",
+    "allow-install-available-update",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten"
+  ]
+}

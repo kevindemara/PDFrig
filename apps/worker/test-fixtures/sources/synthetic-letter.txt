@@ -1,0 +1,5 @@
+PDFMason synthetic Office conversion fixture
+
+This document contains invented text only. It exists to verify local and sandboxed conversion.
+
+Build better PDFs.

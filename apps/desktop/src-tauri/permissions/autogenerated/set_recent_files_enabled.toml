@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-recent-files-enabled"
+description = "Enables the set_recent_files_enabled command without any pre-configured scope."
+commands.allow = ["set_recent_files_enabled"]
+
+[[permission]]
+identifier = "deny-set-recent-files-enabled"
+description = "Denies the set_recent_files_enabled command without any pre-configured scope."
+commands.deny = ["set_recent_files_enabled"]

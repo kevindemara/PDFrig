@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "filename": "plain-text-ascii.txt",
+  "mimeType": "text/plain",
+  "license": "CC0-1.0",
+  "origin": "Purpose-created synthetic PDFMason fixture; no real document or personal information.",
+  "sensitivity": "none",
+  "featureIds": ["CONV-005"],
+  "expectedPageCount": { "a4": 2, "letter": 2 },
+  "expectedFeatures": [
+    "all-printable-ascii",
+    "literal-markup",
+    "blank-lines",
+    "four-column-tabs",
+    "hard-wrap",
+    "pagination"
+  ],
+  "expectedWarnings": ["TEXT_LAYOUT_NORMALIZED", "OUTPUT_UNTAGGED", "STANDARD_COURIER_FONT"],
+  "sha256": "3da46e1cb50c738668cce0383011c431bf255a024418aee23d0bea3088d5d7d5"
+}

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-open-recent-pdf"
+description = "Enables the open_recent_pdf command without any pre-configured scope."
+commands.allow = ["open_recent_pdf"]
+
+[[permission]]
+identifier = "deny-open-recent-pdf"
+description = "Denies the open_recent_pdf command without any pre-configured scope."
+commands.deny = ["open_recent_pdf"]

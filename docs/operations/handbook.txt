@@ -1,0 +1,203 @@
+PDFrig operational handbook
+===========================
+
+Development guidance only. Public staging, legal, security and release approvals remain required.
+Sections below retain the existing operational controls; this consolidation does not approve release.
+
+
+SECTION: tabletop-2026-08-25
+Public-beta operational tabletop — 2026-08-25
+
+Status: local synthetic exercise complete; staging/provider exercises remain open.
+
+Participants: engineering owner role, security owner role, support owner role, and incident commander role were walked by one local operator. Named production owners and escalation contacts must replace these roles before release.
+
+No production system, credential, user record, document, or provider was used. The exercise used only repository contracts, synthetic identifiers, and the fake-provider modes.
+
+| Inject                                                | Expected decision                                                                                                           | Runbook used                                           | Local outcome                                                                                                      | Public-release follow-up                                        |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| A user appears able to infer another tenant's job     | Stop affected traffic, preserve content-free evidence, rotate exposed credentials if needed, verify RLS negatives           | section security-and-tenant-isolation                     | Pass: severity/containment path and 404-safe response are explicit; 126 pgTAP cases cover authorization boundaries | Independent penetration test and two-account staging replay     |
+| One deletion record reaches `deletion_attention`      | Disable new writes if systemic, reconcile metadata/object state, never guess object keys                                    | section deletion-reconciliation                           | Pass: alert, retry ceiling, orphan scan, and escalation path are linked                                            | Exercise a failed R2 deletion in isolated staging               |
+| Database restore is requested after an operator error | Freeze writes, choose a point-in-time target, restore into isolation, run tenant/RLS/integrity checks before cutover        | section backup-and-restore                                | Pass at decision-table level                                                                                       | Timed restore with the selected managed database plan           |
+| A secret is pasted into a support ticket              | Revoke first, establish scope using content-free IDs, avoid copying the secret into chat/logs                               | section credential-rotation                               | Pass: service-specific order and verification are defined                                                          | Rotate test credentials with selected providers                 |
+| Signed Windows update failures cross threshold        | Stop promotion, retain current channel, verify signatures/checksums, roll manifest back to last approved immutable artifact | section release-rollback                                  | Pass: update failure alert links to rollback and forbids rebuild-on-promotion                                      | Execute against approved HTTPS update host and signed artifacts |
+| Worker queue age rises while provider errors increase | Disable affected cloud capability, preserve local tools, classify retryable jobs, communicate on status page                | section job-backlog and section api-and-provider-degradation | Pass: kill-switch and customer communication path are explicit                                                     | Load-test real queue/provider limits and alert delivery         |
+
+Observations:
+
+- Repository runbooks agree on source-document immutability, content-free telemetry, and stopping affected cloud capabilities without disabling safe local tools.
+- Alert definitions contain only allowlisted dimensions and have an automated test proving every alert resolves to a runbook.
+- The exercise cannot prove backup timing, monitor delivery, provider credential rotation, or signed update rollback. The strict public-release gate keeps these as explicit approvals.
+
+SECTION: common-rules
+PDFMason runbooks
+
+These runbooks are safe operational decision paths. Replace role placeholders with named on-call owners and provider-specific, secret-manager-protected links before public release. Never paste a user document, filename, extracted text, signature, password, cookie, authorization header, storage key, presigned URL, or raw webhook body into an incident system.
+
+Common rules:
+
+1. Protect source documents and tenant isolation first.
+2. Disable the smallest affected cloud capability; keep safe local tools available when possible.
+3. Use UTC, safe request/job IDs, approved error codes, counts, buckets, and version numbers only.
+4. Record every privileged action in the content-free audit trail.
+5. Require a second reviewer before destructive provider actions or production cutover.
+6. Close only after detection, mitigation, recovery, customer communication, and follow-up ownership are recorded.
+
+The alert catalogue is typed in `packages/observability/src/index.ts`; automated readiness checks prove that every alert links to an existing runbook.
+
+SECTION: api-and-provider-degradation
+API and provider degradation
+
+Owner: application owner role; add billing, database, storage, or worker owner based on the failed boundary.
+
+1. Confirm the alert with content-free health, safe error codes, latency, and version. Do not inspect a user's PDF to prove an outage.
+2. Disable only the dependent cloud capability. Keep local workspace/tools and truthful public status available.
+3. Supabase: check auth/database health and RLS/advisors. R2: check private-object and short-grant paths. Stripe: preserve webhook verification/order and never grant entitlement from checkout redirect. Conversion/OCR: pause intake before queues exceed retention.
+4. Use bounded retries with idempotency. Do not retry deterministic input, authorization, quota, or fidelity failures.
+5. Update the status page/provider when selected with impact, start time, affected capability, and workaround; never include tenants or files.
+6. Restore with synthetic probes, negative authorization tests, and output verification; then drain jobs under controlled concurrency.
+
+Escalate to incident response for sustained error-budget burn, data integrity/security suspicion, deletion delay, or billing entitlement drift.
+
+SECTION: backup-and-restore
+Backup and restore
+
+Owner: database owner role. A second reviewer is mandatory for production restore/cutover.
+
+1. Classify the request: accidental logical change, migration failure, provider outage, or regional loss. Freeze writes if continued mutation would widen loss.
+2. Record the desired UTC recovery point and the managed backup/PITR inventory identifier without credentials or row data.
+3. Restore into an isolated project/network first. Never restore directly over the only production database.
+4. Apply only documented forward migrations/repair. Verify migration digests, foreign keys, job/object/deletion state invariants, membership/entitlement consistency, and webhook ordering.
+5. Run the complete RLS negative suite with two synthetic accounts and database advisors.
+6. Reconcile private object metadata against provider inventory using opaque counts/IDs. A database restore does not restore deleted object bytes.
+7. Obtain database, security, and incident-command approval before cutover. Rotate credentials if the recovery environment received temporary access.
+8. After cutover, watch error, denial, webhook-lag, queue-age, and deletion alerts; document actual RPO/RTO.
+
+Public gate: execute and time this runbook in isolated staging with the selected Supabase backup tier. A written runbook alone is not restore evidence.
+
+SECTION: credential-rotation
+Credential rotation
+
+Owner: security owner role. Never paste old/new material into issues, logs, commands captured by CI, or support tools.
+
+1. Identify the credential class and consumers from secret-manager metadata: Supabase trusted key, R2 key, Stripe key/webhook secret, entitlement signer, Tauri updater signer, Authenticode certificate, or deployment token.
+2. If exposure is plausible, revoke/disable first when a dual-key overlap is unsafe; otherwise create a second least-privilege credential and deploy consumers before revoking the first.
+3. Supabase/R2: confirm browser bundles contain only public values; validate RLS/private-bucket access with synthetic data.
+4. Stripe: rotate server/restricted keys separately from webhook secrets, preserve raw-body verification, and replay only signed test events.
+5. Entitlement/updater signers: publish the reviewed public-key transition before using the new private key. Do not silently replace a trusted key ID.
+6. Authenticode: use the certificate provider's revocation/timestamp process and stop distribution until signing identity is trustworthy.
+7. Verify old credentials fail, new credentials have minimal scope, logs contain no secret, and affected deployments are pinned to the intended version.
+
+Public gate: exercise each selected provider's test credential rotation and record safe evidence plus recovery time.
+
+SECTION: deletion-reconciliation
+Deletion reconciliation
+
+Owner: database/storage owner role. User deletion must not be reported complete until provider absence is observed.
+
+1. Query only bounded deletion state, attempt count, age, and safe job/request IDs. Never copy raw object keys or filenames into an incident.
+2. If attention records are increasing, disable new cloud intake while leaving local processing available.
+3. For each opaque record, use the trusted provider adapter to verify absence. Retry only the idempotent deletion contract with bounded exponential backoff.
+4. After three failed attempts, keep `deletion_attention`, page the owner, and retain the audit record. Never mark complete manually without provider absence evidence.
+5. Run the orphan inventory comparison: provider objects older than the safety-net retention must have live metadata or enter controlled deletion review.
+6. Reconcile account deletion only after jobs, private objects, billing linkage, and auth identity reach the documented terminal order.
+7. Close after the attention queue is zero, the oldest pending age is within objective, and a synthetic negative test confirms another tenant cannot observe the record.
+
+Escalate immediately if the provider reports an object after confirmed deletion, if metadata was removed first, or if cross-tenant identifiers appear.
+
+SECTION: incident-response
+Incident response
+
+Owner: incident commander role. Security/privacy incidents add the security owner; document loss/corruption adds the PDF fidelity owner.
+
+1. Acknowledge the page, name an incident commander, assign severity using the release/severity guidance in README.md, and start a UTC timeline with content-free facts.
+2. For suspected cross-tenant access, source overwrite, content exposure, recoverable redaction, arbitrary code execution, or signing/update compromise, declare Critical and stop the affected release or feature immediately.
+3. Preserve immutable infrastructure/audit evidence. Do not retrieve document content merely to diagnose an incident.
+4. Contain with the narrowest kill switch, origin restriction, queue pause, credential revocation, or release rollback. Never bypass RLS or entitlement checks as a workaround.
+5. Validate recovery with synthetic fixtures, negative tenant tests, safe status checks, and independent PDF verification where output fidelity is involved.
+6. Notify the approved legal/privacy/support owners using the jurisdiction-specific decision tree once selected. Do not make unapproved breach claims or promises.
+7. Resolve only when alerts are normal, queued/deletion work is reconciled, customer-facing status is accurate, and follow-ups have owners/dates.
+
+Evidence: alert ID, UTC timestamps, application/worker versions, bounded counts, safe error codes, mitigation decision, verification command results, and approval roles.
+
+SECTION: job-backlog
+Job backlog
+
+Owner: worker owner role.
+
+1. Identify operation/version, oldest age, bounded ready/running/retry counts, and safe error-code distribution.
+2. If age exceeds the operation objective, pause new intake for that capability and preserve local tools. Do not increase retries blindly.
+3. Separate retryable provider/transient failures from deterministic invalid/risky inputs. Preserve idempotency keys and immutable sources.
+4. Scale only within tested database/provider limits; validate lease expiry and cancellation before changing concurrency.
+5. If a provider is degraded, follow section api-and-provider-degradation. If deletion jobs are involved, follow section deletion-reconciliation.
+6. Drain using synthetic canaries first. Confirm outputs structurally/rendered where applicable and ensure no duplicate charge/export.
+
+Close when queue age, error rate, retry count, and provider health remain normal for two alert windows.
+
+SECTION: release-rollback
+Release rollback
+
+Owner: release owner role. Security incidents also require the security owner.
+
+1. Stop promotion and freeze the affected web/worker/desktop channel. Keep the last approved immutable artifact and manifest available.
+2. Web/worker: disable the smallest feature flag, then redeploy the exact last approved digest. Do not roll the database backward destructively; use documented forward repair.
+3. Desktop: verify Authenticode, updater signature, checksum, version/channel, and manifest URL. Point the channel only to a previously approved immutable artifact; never rebuild an older version and call it the same release.
+4. If the updater/signing key is suspect, stop update publication and follow section credential-rotation. Do not publish a bypassing unsigned update.
+5. Validate synthetic open/export, account entitlement, content-free status, RLS negative cases, and updater tamper rejection.
+6. Communicate the affected surface, safe workaround, and next update without exposing document/account details.
+
+Public gate: exercise exact-artifact rollback on the approved hosting channel and clean Windows reference machines.
+
+SECTION: security-and-tenant-isolation
+Security and tenant-isolation response
+
+Trigger: an unexpected authorization-denial spike, suspected cross-tenant inference/access, leaked signing/provider material, or a security report.
+
+1. Treat plausible cross-tenant access as Critical. Disable the affected trusted route or cloud capability and freeze promotion.
+2. Capture only request ID, safe error code, route class, UTC time, version, and tenant-neutral counts. Never place both users' identifiers in a shared incident record.
+3. Reproduce with two synthetic staging accounts. Test read, update, delete, export, and inference paths; expect safe denial/404 outside the owner tenant.
+4. Run database RLS tests/advisors and inspect the exact deployed migration digest. Do not use a service-role client to “confirm” user authorization.
+5. If credentials may be involved, follow section credential-rotation. If a release artifact may be involved, follow section release-rollback.
+6. Restore service only after the negative case, audit trail, and independent security reviewer pass.
+
+Public gate: an independent penetration test must cover account/session boundaries, object grants, job/status routes, webhooks, desktop entitlement issuance, and stale/deleted membership.
+
+SECTION: milestone-7-threat-review
+Milestone 7 public-beta threat review
+
+Status: local engineering review complete on 2026-08-25; independent penetration test and production configuration review remain release blockers.
+
+Scope: public information routes, structured support/feedback, optional content-free analytics, operational alerting/runbooks, and the existing web/worker/Windows boundaries. This review advances no PDF feature verification state.
+
+New beta surfaces
+
+| Surface                           | Primary threats                                                                                          | Implemented controls                                                                                                                                                | Evidence                                         | Remaining gate                                                         |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- |
+| Public policy/pricing/help routes | Misleading legal/security/price claims, script injection, stale policy                                   | Server-rendered fixed copy; draft/provisional states are visible; production config requires approved states; no user HTML                                          | browser IA/axe tests, `check-beta-readiness.mjs` | Counsel/brand/pricing approval and review of exact deployed copy       |
+| Support and feedback API          | Customer submits document content, attachment malware, PII overcollection, spam, cross-origin submission | Strict schemas accept no message or file; unexpected keys fail; only reply email plus safe diagnostic enums/IDs; origin check; fake discards email after validation | contract/web/browser negative tests              | Rate limit/bot control, real provider DPA/retention, abuse test        |
+| Optional analytics API            | PDF/filename/account/session content leaks, fingerprinting, consent bypass                               | Explicit separate consent; closed event/surface/outcome enums; random per-event ID only; no account/document/session ID; strict object schemas                      | browser consent test and contract tests          | Privacy/legal approval, real sink/retention, consent audit             |
+| Status API/page                   | Tenant/provider disclosure, uptime misrepresentation, denial of service                                  | Content-free local report and build state; no production uptime claim; bounded local burst test                                                                     | `/api/v1/status`, browser burst test             | Provider selection, caching/rate limit/load test, incident integration |
+| Alert catalogue                   | Sensitive dimensions leak; unactionable paging                                                           | Allowlist-first logger dimensions; typed catalogue; every alert links to a repository runbook                                                                       | observability unit test and readiness script     | Staging monitor wiring/delivery/failure exercise                       |
+
+Existing critical boundaries revalidated by regression
+
+- Source documents remain immutable; completed operations create downloads/versions.
+- Browser/Windows privileged inputs are bounded and typed. The Windows webview has no broad filesystem, shell, process, logging, HTTP, dialog, or updater permission.
+- Supabase exposed tables use RLS and pgTAP negative cases. Trusted service-role work stays server/worker-only.
+- Cloud storage/job/billing remain adapter-bound and disabled/fake locally. Billing redirects do not grant entitlements.
+- OCR/Office/redaction stay behind default-off kill switches and their prior security/licensing gates.
+- Safe structured logs remove unknown and sensitive field names before serialization.
+
+Abuse and failure cases
+
+- Oversized/invalid JSON receives a bounded safe error from the framework/schema boundary; infrastructure body-size and rate policies must be set at deployment.
+- Extra support/analytics fields fail closed instead of being silently collected.
+- A failed fake intake returns a generic availability state; it cannot write to an external system.
+- Analytics fetch errors are intentionally non-blocking and do not affect local tools.
+- A consent choice is local to the browser profile and can be reopened. Cross-device consent is not claimed.
+- Public-policy drafts cannot satisfy the strict release gate; the repository does not contain an approval manifest with invented evidence.
+
+Independent test brief
+
+The public-beta penetration test must cover origin/CSRF behavior, parser/body limits, abuse/rate controls, stored/reflected injection, cache poisoning, session/PKCE handling, two-tenant RLS and object/job inference, presigned upload/download constraints, Stripe webhook replay/order, entitlement issuance, desktop IPC/path/token bounds, updater/signature tamper, and deletion/orphan reconciliation. Use synthetic fixtures and content-free evidence only.
+

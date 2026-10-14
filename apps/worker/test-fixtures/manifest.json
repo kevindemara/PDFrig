@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sensitivity": "none",
+  "origin": "Purpose-created synthetic Office fixtures generated from adjacent text, CSV and flat OpenDocument sources with LibreOffice 26.2.5.2. No production/customer content. Macro-marker fixture contains no executable macro.",
+  "fixtures": [
+    {
+      "filename": "synthetic-letter.docx",
+      "sha256": "2c5efeebb7832ca5e9141e8c4e9c2ae2e8cce90f4431a79afb88614bf760bbcd"
+    },
+    {
+      "filename": "synthetic-table.xlsx",
+      "sha256": "26bd20e0426ce4ad940a71c8ee9cfab2ea7af7215f5483e737e2b51805032dac"
+    },
+    {
+      "filename": "synthetic-slides.pptx",
+      "sha256": "5e92d5ee8bfc37595c88ac306e95760906dbee6fe8fdac73fd3fedd36347e5e7"
+    },
+    {
+      "filename": "source-with-macro-marker.docx",
+      "sha256": "9dff17c3d215351bdf0d0c9d7d82f382e6a1b51647e23fdd2739a07385ceef19"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@pdfmason/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --hostname 127.0.0.1",
+    "start": "next start --hostname 127.0.0.1",
+    "test": "vitest run",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@pdfmason/config": "workspace:*",
+    "@pdfmason/contracts": "workspace:*",
+    "@pdfmason/editor-core": "workspace:*",
+    "@pdfmason/observability": "workspace:*",
+    "@pdfmason/pdf-engine": "workspace:*",
+    "@pdfmason/ui": "workspace:*",
+    "@supabase/ssr": "catalog:",
+    "@supabase/supabase-js": "catalog:",
+    "aws4fetch": "catalog:",
+    "next": "16.3.8",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "stripe": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

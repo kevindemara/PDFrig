@@ -1,0 +1,124 @@
+name: PDFMason Windows signed alpha
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic alpha version, for example 0.1.0-alpha.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Reproducible signed NSIS alpha
+    environment: windows-alpha
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PDFMASON_DESKTOP_IDENTIFIER: com.pdfmason.desktop
+      PDFMASON_RELEASE_CHANNEL: alpha
+      PDFMASON_RELEASE_VERSION: ${{ inputs.version }}
+      PDFMASON_UPDATER_ENDPOINT: ${{ vars.PDFMASON_ALPHA_UPDATER_ENDPOINT }}
+      PDFMASON_UPDATER_PUBLIC_KEY: ${{ secrets.PDFMASON_UPDATER_PUBLIC_KEY }}
+      PDFMASON_WINDOWS_CERTIFICATE_THUMBPRINT: ${{ secrets.PDFMASON_WINDOWS_CERTIFICATE_THUMBPRINT }}
+      PDFMASON_WINDOWS_PUBLISHER: ${{ vars.PDFMASON_WINDOWS_PUBLISHER }}
+      PDFMASON_WINDOWS_TIMESTAMP_URL: ${{ vars.PDFMASON_WINDOWS_TIMESTAMP_URL }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      VITE_PDFMASON_ENTITLEMENT_ENFORCED: true
+      VITE_PDFMASON_ENTITLEMENT_KEY_ID: ${{ vars.PDFMASON_ENTITLEMENT_KEY_ID }}
+      VITE_PDFMASON_ENTITLEMENT_PUBLIC_KEY: ${{ vars.PDFMASON_ENTITLEMENT_PUBLIC_KEY }}
+      VITE_PDFMASON_WEB_URL: ${{ vars.PDFMASON_WEB_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.PDFMASON_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_SUPABASE_URL: ${{ vars.PDFMASON_SUPABASE_URL }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v7.0.1
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          version: 11.22.0
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.98.0
+          components: rustfmt, clippy
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Import the protected Windows code-signing identity
+        shell: pwsh
+        env:
+          PFX_BASE64: ${{ secrets.PDFMASON_WINDOWS_CERTIFICATE_PFX_BASE64 }}
+          PFX_PASSWORD: ${{ secrets.PDFMASON_WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $pfxPath = Join-Path $env:RUNNER_TEMP 'pdfmason-signing.pfx'
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:PFX_BASE64))
+          $password = ConvertTo-SecureString $env:PFX_PASSWORD -AsPlainText -Force
+          Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation 'Cert:\CurrentUser\My' -Password $password | Out-Null
+          Remove-Item -LiteralPath $pfxPath -Force
+      - name: Repeat Windows release gates
+        run: |
+          pnpm build:packages
+          pnpm --filter @pdfmason/desktop typecheck
+          pnpm --filter @pdfmason/desktop test
+          cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml --check
+          cargo test --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+          cargo clippy --locked --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+          pnpm desktop:surface-check
+          pnpm license:check:cargo
+          pnpm secret:scan
+      - name: Generate secret-free release configuration
+        run: pnpm desktop:release-config
+      - name: Build code-signed installer and updater artifact
+        run: pnpm --filter @pdfmason/desktop exec tauri build --config src-tauri/target/pdfmason-release-config.json
+      - name: Verify Authenticode and create checksums
+        shell: pwsh
+        run: |
+          $bundleRoot = Resolve-Path 'apps/desktop/src-tauri/target/release/bundle/nsis'
+          $installers = Get-ChildItem -LiteralPath $bundleRoot -File -Filter '*.exe'
+          if ($installers.Count -eq 0) { throw 'No NSIS installer was produced.' }
+          foreach ($installer in $installers) {
+            $signature = Get-AuthenticodeSignature -LiteralPath $installer.FullName
+            if ($signature.Status -ne 'Valid') { throw "Invalid Authenticode signature: $($installer.Name)" }
+          }
+          $signatures = Get-ChildItem -LiteralPath $bundleRoot -File -Filter '*.sig'
+          if ($signatures.Count -eq 0) { throw 'No signed updater artifact was produced.' }
+          Get-ChildItem -LiteralPath $bundleRoot -File |
+            Get-FileHash -Algorithm SHA256 |
+            Sort-Object Path |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" } |
+            Set-Content -LiteralPath (Join-Path $bundleRoot 'SHA256SUMS.txt') -Encoding utf8NoBOM
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0.24.0
+        with:
+          path: apps/desktop/src-tauri/target/release/bundle/nsis
+          format: spdx-json
+          output-file: apps/desktop/src-tauri/target/release/bundle/nsis/pdfmason-windows.spdx.json
+          upload-artifact: false
+      - name: Upload immutable internal alpha bundle
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: pdfmason-windows-${{ inputs.version }}-${{ github.sha }}
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Remove imported signing identity
+        if: always()
+        shell: pwsh
+        run: |
+          $thumbprint = '${{ secrets.PDFMASON_WINDOWS_CERTIFICATE_THUMBPRINT }}'
+          if ($thumbprint -match '^[A-Fa-f0-9]{40}$') {
+            $certificatePath = "Cert:\CurrentUser\My\$thumbprint"
+            if (Test-Path -LiteralPath $certificatePath) {
+              Remove-Item -LiteralPath $certificatePath -Force
+            }
+          }

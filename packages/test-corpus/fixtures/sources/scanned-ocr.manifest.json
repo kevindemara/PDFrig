@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "featureIds": ["OCR-001"],
+  "license": "CC0-1.0",
+  "sensitivity": "none",
+  "origin": "Purpose-created standard-font PDF rasterized with the existing Poppler QA renderer",
+  "fontProgramBundled": false,
+  "sourceFont": "Helvetica",
+  "sourceFontSize": 32,
+  "expectedText": "OCR FIXTURE 4827",
+  "renderer": "Poppler QA 26.07.0, 200 DPI",
+  "sha256": "6bdd6e8b6c829e111182d0ed240a64f2871506e365ff67974a3e3a36f7e9581e"
+}

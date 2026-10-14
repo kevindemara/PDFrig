@@ -1,0 +1,62 @@
+{
+  "fixtures": [
+    {
+      "encodedHeight": 20,
+      "encodedWidth": 40,
+      "expectedHeight": 40,
+      "expectedOrientation": 6,
+      "expectedWidth": 20,
+      "featureIds": ["ORG-008", "CREATE-002"],
+      "filename": "quadrants-orientation-6.jpg",
+      "license": "CC0-1.0",
+      "mimeType": "image/jpeg",
+      "origin": "Purpose-created by the PDFMason image fixture generator",
+      "sensitivity": "none",
+      "sha256": "2ea94d33ca9859733f1dfab0655dd2f7d0235d7a9ebe11ddebd7e40c561d874a"
+    },
+    {
+      "encodedHeight": 20,
+      "encodedWidth": 40,
+      "expectedHeight": 40,
+      "expectedOrientation": 6,
+      "expectedWidth": 20,
+      "featureIds": ["ORG-008", "CREATE-002"],
+      "filename": "quadrants-orientation-6.png",
+      "license": "CC0-1.0",
+      "mimeType": "image/png",
+      "origin": "Purpose-created by the PDFMason image fixture generator",
+      "sensitivity": "none",
+      "sha256": "b7bcd57932b1567f11797b98c092f2f99f989f01703affebbf57f578afcea604"
+    },
+    {
+      "encodedHeight": 18,
+      "encodedWidth": 30,
+      "expectedHeight": 18,
+      "expectedOrientation": 1,
+      "expectedWidth": 30,
+      "featureIds": ["ORG-008", "CREATE-002"],
+      "filename": "split-colours.webp",
+      "license": "CC0-1.0",
+      "mimeType": "image/webp",
+      "origin": "Purpose-created by the PDFMason image fixture generator",
+      "sensitivity": "none",
+      "sha256": "2db53e2e33ffab4a0b7eb030fd3d8ef6f43864b182021069b0a2402804af00a5"
+    },
+    {
+      "encodedHeight": 12,
+      "encodedWidth": 16,
+      "expectedError": "UTILITY_IMAGE_ANIMATION_UNSUPPORTED",
+      "expectedHeight": 12,
+      "expectedOrientation": 1,
+      "expectedWidth": 16,
+      "featureIds": ["ORG-008", "CREATE-002"],
+      "filename": "animated-two-frame.webp",
+      "license": "CC0-1.0",
+      "mimeType": "image/webp",
+      "origin": "Purpose-created by the PDFMason image fixture generator",
+      "sensitivity": "none",
+      "sha256": "3d51a1301036d72f1c1069b53bad9ab9df24a213bb5eeccffaafaabb535e2ec4"
+    }
+  ],
+  "schemaVersion": 1
+}
