@@ -1,3 +1,4 @@
+import { assertOcrPixels } from './local-ocr-pixels.js';
 /** Pinned Tesseract.js v7 worker protocol. Own the worker before initialization so
  * aborts, initialization failures and deadlines always terminate it immediately. */
 export async function runLocalOcrWorker(
@@ -8,6 +9,8 @@ export async function runLocalOcrWorker(
   progress: (percent: number) => void,
 ): Promise<unknown> {
   if (signal.aborted) throw new Error('OCR_CANCELLED');
+  if (!['eng', 'fra'].includes(language)) throw new Error('OCR_LANGUAGE_UNSUPPORTED');
+  assertOcrPixels(image);
   const worker = new Worker(`${base}worker.min.js`);
   let sequence = 0;
   let stopped = false;
@@ -76,6 +79,9 @@ export async function runLocalOcrWorker(
       options: { langPath: base, gzip: false, cacheMethod: 'none', lstmOnly: true },
     });
     await job('initialize', { langs: language, oem: 1, config: {} });
+    // Initialization yields to the caller. Recheck immediately before the
+    // synchronous structured clone so a changed/detached header cannot reach native code.
+    assertOcrPixels(image);
     return await job('recognize', { image, options: {}, output: { blocks: true, text: true } });
   } finally {
     stop('OCR_CANCELLED');

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { runLocalOcrWorker } from './local-ocr-worker-client.js';
+import { encodeOcrPixels } from './local-ocr-pixels.js';
 class FakeWorker {
   static latest: FakeWorker;
   onmessage: ((event: { data: unknown }) => void) | null = null;
@@ -26,7 +27,7 @@ const start = (controller = new AbortController()) => {
   return {
     controller,
     result: runLocalOcrWorker(
-      new Uint8Array([1]),
+      encodeOcrPixels(1, 1, new Uint8ClampedArray([0, 0, 0, 255]), controller.signal),
       'eng',
       'http://localhost/ocr/',
       controller.signal,
@@ -80,6 +81,46 @@ describe('OCR-001 initialization ownership and cleanup', () => {
   it('does not spawn for already-cancelled work', async () => {
     const controller = new AbortController();
     controller.abort();
-    await expect(start(controller).result).rejects.toThrow('OCR_CANCELLED');
+    await expect(
+      runLocalOcrWorker(new Uint8Array(), 'eng', '', controller.signal, vi.fn()),
+    ).rejects.toThrow('OCR_CANCELLED');
+  });
+  it('rejects compressed/URL/arbitrary raster bytes before creating a worker', async () => {
+    const constructor = vi.fn();
+    vi.stubGlobal('Worker', constructor);
+    for (const input of [
+      new Uint8Array([137, 80, 78, 71]),
+      new TextEncoder().encode('https://example.invalid/image.png'),
+    ])
+      await expect(
+        runLocalOcrWorker(input, 'eng', '', new AbortController().signal, vi.fn()),
+      ).rejects.toThrow('OCR_IMAGE_FAILED');
+    expect(constructor).not.toHaveBeenCalled();
+  });
+  it('refuses unsupported runtime language values before loading native assets', async () => {
+    const constructor = vi.fn();
+    vi.stubGlobal('Worker', constructor);
+    const image = encodeOcrPixels(1, 1, new Uint8ClampedArray(4), new AbortController().signal);
+    await expect(
+      runLocalOcrWorker(image, 'deu' as 'eng', '', new AbortController().signal, vi.fn()),
+    ).rejects.toThrow('OCR_LANGUAGE_UNSUPPORTED');
+    expect(constructor).not.toHaveBeenCalled();
+  });
+  it('rechecks mutable raster headers after initialization and always terminates on refusal', async () => {
+    vi.stubGlobal('Worker', FakeWorker);
+    const image = encodeOcrPixels(1, 1, new Uint8ClampedArray(4), new AbortController().signal);
+    const result = runLocalOcrWorker(image, 'eng', '', new AbortController().signal, vi.fn());
+    const outcome = result.catch((error: unknown) =>
+      error instanceof Error ? error.message : 'unknown',
+    );
+    for (let index = 0; index < 2; index++) {
+      FakeWorker.latest.reply('resolve');
+      await Promise.resolve();
+    }
+    image[0] = 0;
+    FakeWorker.latest.reply('resolve');
+    expect(await outcome).toBe('OCR_IMAGE_FAILED');
+    expect(FakeWorker.latest.sent).toHaveLength(3);
+    expect(FakeWorker.latest.terminate).toHaveBeenCalledOnce();
   });
 });
