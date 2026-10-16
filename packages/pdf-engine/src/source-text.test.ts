@@ -1,5 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { PDFArray, PDFDict, PDFDocument, PDFName, StandardFonts } from '@cantoo/pdf-lib';
+import {
+  PDFArray,
+  PDFDict,
+  PDFDocument,
+  PDFHexString,
+  PDFName,
+  StandardFonts,
+} from '@cantoo/pdf-lib';
 import { describe, expect, it } from 'vitest';
 import { inspectSourceText, replaceSourceText } from './source-text.js';
 import { embedSignatureFont } from './signature-font.js';
@@ -59,6 +66,25 @@ describe('EDIT-002 genuine bounded source text replacement', () => {
     if (!run) throw new Error('Missing synthetic run');
     const output = await replaceSourceText(source, run.id, run.text, 'EDIT');
     expect((await inspectSourceText(output, 0)).some((item) => item.text === 'EDIT')).toBe(true);
+    const fitted = await replaceSourceText(
+      source,
+      run.id,
+      run.text,
+      `${run.text} ${run.text}`,
+      undefined,
+      true,
+    );
+    const reopened = await PDFDocument.load(fitted);
+    const tagged = reopened.catalog
+      .lookup(PDFName.of('StructTreeRoot'), PDFDict)
+      .lookup(PDFName.of('K'), PDFArray)
+      .lookup(0, PDFDict);
+    const actual = tagged.get(PDFName.of('ActualText'));
+    if (!(actual instanceof PDFHexString)) throw new Error('Missing synthetic accessibility text');
+    expect(actual.decodeText()).toBe(`${run.text} ${run.text}`);
+    expect(
+      (await inspectSourceText(fitted, 0)).some((item) => item.text === `${run.text} ${run.text}`),
+    ).toBe(true);
   });
   it('refuses active, encrypted and signed documents and has no editable text on scans', async () => {
     for (const name of ['embedded-javascript.pdf', 'password-aes256.pdf', 'signature-field.pdf'])
@@ -196,6 +222,92 @@ describe('EDIT-002 genuine bounded source text replacement', () => {
           .join('')
           .replace(/\s/gu, ''),
       ).toBe('BEFOREEDITAFTER');
+      for (const replacement of ['WWWWWW', 'WIDERTEXT']) {
+        await expect(
+          replaceSourceText(source, run.id, run.text, replacement, { start: 7, end: 13 }),
+        ).rejects.toThrow('TOO_WIDE');
+        const fitted = await replaceSourceText(
+          source,
+          run.id,
+          run.text,
+          replacement,
+          { start: 7, end: 13 },
+          true,
+        );
+        const fittedRuns = await inspectSourceText(fitted, 0);
+        expect(
+          fittedRuns
+            .map((item) => item.text)
+            .join('')
+            .replace(/\s/gu, ''),
+        ).toBe(`BEFORE${replacement}AFTER`);
+        expect(
+          fittedRuns.every(
+            (item) => item.fontName === run.fontName && item.fontSize === run.fontSize,
+          ),
+        ).toBe(true);
+      }
     },
   );
+  it('fits same-character-count US to CA changes with a proportional font and restores text state', async () => {
+    const document = await PDFDocument.create(),
+      page = document.addPage([612, 792]);
+    const font = await document.embedFont(StandardFonts.TimesRoman);
+    const text = 'The US site has a solid baseline';
+    page.drawText(text, { x: 54, y: 600, size: 18, font });
+    const source = await document.save(),
+      run = (await inspectSourceText(source, 0))[0];
+    if (!run) throw new Error('Missing synthetic run');
+    expect(font.widthOfTextAtSize('CA', 18)).toBeGreaterThan(font.widthOfTextAtSize('US', 18));
+    const output = await replaceSourceText(
+      source,
+      run.id,
+      run.text,
+      'CA',
+      { start: 4, end: 6 },
+      true,
+    );
+    expect(
+      (await inspectSourceText(output, 0))
+        .map((item) => item.text)
+        .join('')
+        .replace(/\s/gu, ''),
+    ).toBe('TheCAsitehasasolidbaseline');
+  });
+  it('restores non-default horizontal/character/word spacing and the next line matrix after fitting', async () => {
+    const document = await PDFDocument.create(),
+      page = document.addPage([612, 792]);
+    const font = await document.embedFont(StandardFonts.Helvetica);
+    page.node.set(PDFName.of('Resources'), document.context.obj({ Font: { H: font.ref } }));
+    page.node.set(
+      PDFName.of('Contents'),
+      document.context.register(
+        document.context.flateStream(
+          'BT /H 18 Tf 2 Tc 3 Tw 80 Tz 25 TL 1 0 0 1 54 600 Tm (BEFORE SOURCE AFTER) Tj T* (NEXT LINE) Tj ET',
+        ),
+      ),
+    );
+    const source = await document.save(),
+      before = await inspectSourceText(source, 0),
+      run = before[0];
+    if (!run) throw new Error('Missing synthetic source');
+    const result = await replaceSourceText(
+      source,
+      run.id,
+      run.text,
+      'WIDERTEXT',
+      { start: 7, end: 13 },
+      true,
+    );
+    const after = await inspectSourceText(result, 0);
+    expect(after.find((item) => item.text === 'NEXT LINE')?.bounds).toEqual(
+      before.find((item) => item.text === 'NEXT LINE')?.bounds,
+    );
+    const following = after.find((item) => item.text.endsWith('AFTER'));
+    expect(following?.bounds?.x).toBeCloseTo(
+      (54 + 0.8 * (font.widthOfTextAtSize('BEFORE SOURCE', 18) + 13 * 2 + 3)) / 612,
+      8,
+    );
+    expect(following?.fontSize).toBe(18);
+  });
 });

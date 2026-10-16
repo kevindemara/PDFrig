@@ -35,6 +35,7 @@ export function SourceTextDialog({
   const [runs, setRuns] = useState<readonly SourceTextRun[]>([]);
   const [selected, setSelected] = useState('');
   const [replacement, setReplacement] = useState('');
+  const [fitToSpace, setFitToSpace] = useState(true);
   const [language, setLanguage] = useState<'eng' | 'fra'>('eng');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(mode === 'edit');
@@ -114,6 +115,7 @@ export function SourceTextDialog({
             id: selected,
             expectedText: run.text,
             replacement,
+            fitToSpace,
             ...(range ? { range } : {}),
           },
           signal,
@@ -149,14 +151,14 @@ export function SourceTextDialog({
         setStatus(
           mode === 'ocr'
             ? 'Scan appearance is unchanged. Review recognized words; OCR can make mistakes.'
-            : 'This is the actual exported-PDF preview, using the original font and size.',
+            : `This is the actual exported-PDF preview, using the original font and size.${fitToSpace ? ' Fit-to-space is enabled: wider replacement text is narrowed horizontally. Review its appearance before applying.' : ''}`,
         );
       }
     } catch (error) {
       if (!controller.current.signal.aborted)
         setStatus(
           error instanceof Error && error.message === 'SOURCE_TEXT_REPLACEMENT_TOO_WIDE'
-            ? 'Replacement is too wide for the selected area. Shorten it or select a larger text range. Nothing was changed; review and apply stay unavailable until a preview succeeds.'
+            ? 'The replacement is wider in this font. Choose Fit to selected space under Replacement width, then build the preview again. Nothing was changed.'
             : error instanceof Error && error.message === 'SOURCE_TEXT_GLYPH_UNSUPPORTED'
               ? 'The original font does not contain these characters. No substitution was made.'
               : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
@@ -201,8 +203,9 @@ export function SourceTextDialog({
         {mode === 'edit' ? (
           <>
             <p>
-              Original font, size and placement are preserved. Printable ASCII text and existing
-              supported glyphs only; replacement must fit. No paragraph reflow or covering overlays.
+              Uses the original font, size and baseline. Fit to selected space allows wider text by
+              narrowing it horizontally, without moving surrounding text. No paragraph reflow or
+              covering overlays. Printable ASCII and supported existing glyphs only.
             </p>
             <label className="field-stack">
               {range ? 'Source line (context)' : 'Original text'}
@@ -247,6 +250,24 @@ export function SourceTextDialog({
                   setReplacement(event.target.value);
                 }}
               />
+            </label>
+            <label className="field-stack">
+              Replacement width
+              <select
+                disabled={busy}
+                value={fitToSpace ? 'fit' : 'strict'}
+                onChange={(event) => {
+                  invalidate();
+                  setFitToSpace(event.target.value === 'fit');
+                }}
+              >
+                <option value="fit">Fit to selected space (allow wider text)</option>
+                <option value="strict">Keep original character proportions (must fit)</option>
+              </select>
+              <small>
+                Fitting keeps the font size and surrounding positions, but long replacements can
+                look compressed. Review the actual PDF before applying.
+              </small>
             </label>
           </>
         ) : (

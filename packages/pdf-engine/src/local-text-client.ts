@@ -9,6 +9,7 @@ export type LocalTextRequest =
       readonly expectedText: string;
       readonly replacement: string;
       readonly range?: SourceTextRange;
+      readonly fitToSpace?: boolean;
     }
   | {
       readonly kind: 'ocr';

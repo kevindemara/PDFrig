@@ -3,7 +3,9 @@ import json, subprocess, sys, xml.etree.ElementTree as ET
 from pathlib import Path
 from pypdf import PdfReader
 from PIL import Image, ImageChops, ImageDraw
-source_path, output_path = sys.argv[1:]
+source_path, output_path = sys.argv[1:3]
+replacement = sys.argv[3] if len(sys.argv) == 4 else 'EDIT'
+assert replacement in ['EDIT', 'WWWWWW', 'WIDERTEXT']
 ns = {'x': 'http://www.w3.org/1999/xhtml'}
 def lines(path):
     result = subprocess.run(['pdftotext', '-bbox-layout', path, '-'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
@@ -13,13 +15,14 @@ def words(line): return line.findall('x:word', ns)
 def text(line): return ' '.join(word.text or '' for word in words(line))
 assert any(text(line) == 'FIRST SOURCE AFTER' for line in output_lines)
 edited_row = sorted([word for line in output_lines for word in words(line) if abs(float(word.attrib['yMin'])-(792-480-18*0.718)) < 4], key=lambda word: float(word.attrib['xMin']))
-assert ' '.join(word.text or '' for word in edited_row) == 'SECOND EDIT AFTER'
+assert ' '.join(word.text or '' for word in edited_row) == f'SECOND {replacement} AFTER'
 assert any(text(line) == 'ARRAY WORDS AFTER' for line in output_lines)
 target = next(word for line in source_lines if text(line) == 'SECOND SOURCE AFTER' for word in words(line) if word.text == 'SOURCE')
 box = tuple(float(target.attrib[key]) for key in ['xMin', 'yMin', 'xMax', 'yMax'])
-edited_word = next(word for word in edited_row if word.text == 'EDIT')
+edited_word = next(word for word in edited_row if word.text == replacement)
 assert abs(float(edited_word.attrib['xMin'])-box[0]) < 0.01
 assert abs(float(edited_word.attrib['yMin'])-box[1]) < 0.01
+assert float(edited_word.attrib['xMax']) <= box[2]+0.01
 readers = [PdfReader(path, strict=True) for path in [source_path, output_path]]
 records = []
 for reader in readers:

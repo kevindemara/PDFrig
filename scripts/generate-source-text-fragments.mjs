@@ -13,9 +13,11 @@ const document = await PDFDocument.create(),
 const font = await document.embedFont(StandardFonts.Helvetica);
 page.node.set(PDFName.of('Resources'), document.context.obj({ Font: { H: font.ref } }));
 let content = '';
+const selectedMode = process.argv[3] ?? 'positioned';
+if (!['Tj', 'TJ', 'positioned'].includes(selectedMode)) throw new Error('SYNTHETIC_MODE_INVALID');
 for (const [mode, text, y] of [
   ['Tj', 'FIRST SOURCE AFTER', 600],
-  ['positioned', 'SECOND SOURCE AFTER', 480],
+  [selectedMode, 'SECOND SOURCE AFTER', 480],
   ['TJ', 'ARRAY WORDS AFTER', 360],
 ]) {
   content += `BT /H 18 Tf 1 0 0 1 54 ${y} Tm `;

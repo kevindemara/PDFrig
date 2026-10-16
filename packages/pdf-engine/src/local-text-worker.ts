@@ -29,6 +29,7 @@ scope.onmessage = (event) => {
           request.expectedText,
           request.replacement,
           request.range,
+          request.fitToSpace,
         );
       else result = await composeLocalOcr(request.bytes, request.pageIndex, request.words);
       scope.postMessage({ ok: true, result });

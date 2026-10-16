@@ -11,13 +11,15 @@
     "version": "2.9.1",
     "licence": "MIT",
     "newNativeBinary": false,
-    "implementation": "Bounded in-place original Tj/TJ string-operator replacement; existing font encodings/metrics retained; compensating TJ advance retains following text placement",
-    "scope": "Printable ASCII runs in non-symbolic Base-14 Type1 fonts or Identity-H CID fonts with one-to-one ToUnicode maps; unknown simple embedded fonts remain read-only; replacement cannot exceed original advance; no substitution, reflow, XObject editing or visible scan reconstruction",
+    "implementation": "Bounded in-place original Tj/TJ string-operator replacement; existing font encodings retained; optional temporary Tz fits wider inserted text, immediately restoring horizontal scale; compensating TJ advance retains following text and line placement",
+    "scope": "Printable ASCII runs in non-symbolic Base-14 Type1 fonts or Identity-H CID fonts with one-to-one ToUnicode maps; unknown simple embedded fonts remain read-only. Editor defaults to fit-to-space for wider replacements: font size and baseline are retained, but glyphs may be horizontally compressed. Strict natural-width mode remains available. No substitution, paragraph reflow, XObject editing or visible scan reconstruction.",
+    "fitToSpaceReviewDate": "2026-10-16",
     "accessibility": "Unique page MCID ownership and exact ActualText are verified and repaired; the reopened expected tag graph and outlines are checked. Ambiguous/shared semantics refuse editing.",
     "verification": [
       "source-text.test.ts",
       "source-text-accessibility.test.ts",
-      "tests/browser/local-text.spec.ts"
+      "tests/browser/local-text.spec.ts",
+      "tests/browser/selected-text.spec.ts with independent qpdf/Poppler/Python font, baseline, bounds and outside-pixel checks"
     ],
     "integration": "Current-page editor dialog with actual exported-PDF preview, explicit review, immutable source revisions and undo/redo",
     "publicReleaseApproved": false,

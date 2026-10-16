@@ -59,11 +59,15 @@ Every operation can refuse a document it cannot safely preserve.
   Enter the replacement and click **Build actual PDF preview**. Review and apply
   stay unavailable until a preview succeeds; after reviewing it, check the review
   box and apply. Changing the replacement invalidates the previous preview/review.
-  A too-wide replacement explains the failure instead of enabling an unsafe apply. The original
+  **Replacement width** defaults to **Fit to selected space**: wider replacements
+  are narrowed horizontally, retaining the font size, baseline and surrounding
+  positions. Long replacements can look compressed; inspect the preview. Choose
+  **Keep original character proportions** to require the natural width to fit.
+  The original
   font must have an unambiguous supported encoding; printable ASCII only, using
   existing glyphs. Current font support is non-symbolic Base-14 Type1 fonts or
   Identity-H CID fonts with one-to-one supported ToUnicode mappings; unknown simple
-  embedded fonts remain read-only. Replacement must fit the original advance. No paragraph reflow,
+  embedded fonts remain read-only. No paragraph reflow,
   font substitution, XObject editing or covering rectangle. Unsupported text stays
   read-only; uniquely owned accessibility text is repaired, not stripped.
 - **Scans:** choose **Text → OCR this page**, select English/French and review

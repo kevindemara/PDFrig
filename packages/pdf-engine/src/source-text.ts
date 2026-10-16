@@ -729,10 +729,12 @@ export async function replaceSourceText(
   expectedText: string,
   replacement: string,
   range?: SourceTextRange,
+  fitToSpace = false,
 ): Promise<Uint8Array> {
   if (
     !validText(expectedText) ||
     !validText(replacement) ||
+    typeof fitToSpace !== 'boolean' ||
     typeof id !== 'string' ||
     !/^\d+:\d+:\d+$/u.test(id)
   )
@@ -777,13 +779,17 @@ export async function replaceSourceText(
     ((endPoint[0] - startPoint[0]) * basis[0] + (endPoint[1] - startPoint[1]) * basis[1]) /
     (axisSquared * first.fragment.horizontalScale);
   const newWidth = advanceText(first.fragment, replacement);
-  if (
-    ![oldWidth, newWidth].every(Number.isFinite) ||
-    oldWidth < 0 ||
-    newWidth < 0 ||
-    newWidth > oldWidth + 0.01
-  )
-    return fail('SOURCE_TEXT_REPLACEMENT_TOO_WIDE');
+  if (![oldWidth, newWidth].every(Number.isFinite) || oldWidth < 0 || newWidth < 0)
+    return fail('SOURCE_TEXT_INVALID_GEOMETRY');
+  const needsFit = newWidth > oldWidth + 0.01;
+  if (needsFit && !fitToSpace) return fail('SOURCE_TEXT_REPLACEMENT_TOO_WIDE');
+  const originalScale = first.fragment.horizontalScale;
+  const fittedPercent = needsFit
+    ? Number(((100 * originalScale * oldWidth) / newWidth).toFixed(10))
+    : originalScale * 100;
+  if (needsFit && (!(oldWidth > 0) || !(fittedPercent > 0)))
+    return fail('SOURCE_TEXT_INVALID_GEOMETRY');
+  const fitRatio = fittedPercent / (100 * originalScale);
   const outlines = snapshotOutlineStructures(document);
   const changedText = run.text.slice(0, startOffset) + replacement + run.text.slice(endOffset);
   const mcid = first.fragment.mcid;
@@ -812,10 +818,20 @@ export async function replaceSourceText(
     const insertion = index === 0 ? replacement : '';
     const removedWidth = advanceText(fragment, fragment.text.slice(from, to));
     const adjustment = -(
-      ((removedWidth - advanceText(fragment, insertion)) * 1000) /
+      ((removedWidth - advanceText(fragment, insertion) * (index === 0 ? fitRatio : 1)) * 1000) /
       fragment.fontSize
     );
-    const encoded = `${fragment.codec.encode(fragment.text.slice(0, from))} ${fragment.codec.encode(insertion)} ${adjustment.toFixed(8)} ${fragment.codec.encode(fragment.text.slice(to))}`;
+    const prefix = fragment.codec.encode(fragment.text.slice(0, from)),
+      suffix = fragment.codec.encode(fragment.text.slice(to)),
+      added = fragment.codec.encode(insertion);
+    // Split the enclosing TJ array around the insertion, temporarily changing
+    // only its horizontal scale. Restore Tz before compensation/suffix so text
+    // and line matrices, following glyphs and later Td/T* operators stay intact.
+    // This is genuine source replacement, not a covering rectangle or overlay.
+    const encoded =
+      index === 0 && needsFit
+        ? `${prefix}] TJ ${fittedPercent.toFixed(10)} Tz [${added}] TJ ${(100 * originalScale).toFixed(10)} Tz [${adjustment.toFixed(8)} ${suffix}`
+        : `${prefix} ${added} ${adjustment.toFixed(8)} ${suffix}`;
     const changes = patches.get(fragment.stream.toString()) ?? [];
     changes.push({
       fragment,
