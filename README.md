@@ -90,6 +90,10 @@ Every operation can refuse a document it cannot safely preserve.
   OCR receives only a bounded, generated P6 RGB raster, not user image headers or
   compressed image streams. Older codecs remain compiled into the pinned runtime;
   this mitigation is not native security clearance for public distribution.
+  The worker boundary independently rejects noncanonical/shared/truncated P6 data
+  before initialization and rechecks it immediately before native recognition.
+  A fixed ASCII header area keeps pixels out of the wrapper's first-500-byte
+  EXIF probe, preventing pixel bytes from being treated as orientation metadata.
 - **Signatures:** visual signatures are not certificate-backed signatures or proof
   of identity. Editing may invalidate existing digital signatures.
 - **Redaction:** the separately gated raster-removal beta is not a black-box overlay;
@@ -266,9 +270,9 @@ It does not download or compile anything. If Cargo is not on PATH, set
 `PDFRIG_CARGO_PATH` to its approved installed executable; do not use another toolchain
 to evade a security-policy block. Reports stay in an ignored, fresh `tmp/desktop-notices-*`
 directory. The strict form exits unsuccessfully while any text gaps remain. As of
-October 16, 2026, 32 of the conservative 575 declared build-input records still lack
+October 16, 2026, 29 of the conservative 575 declared build-input records still lack
 retained notice text (down from 51); this is not a final-artifact SBOM or legal clearance.
-Nineteen exact-version supplements are checked against pinned commits, original
+Twenty-two exact-version supplements are checked against pinned commits, original
 manifests, crate archive hashes and retained-text hashes. Where an upstream crate
 offers alternative licenses, the retained branch is recorded, not applied to other
 components. A licensing explanation or SPDX declaration alone is not a replacement
@@ -276,6 +280,14 @@ for missing full text. The [remaining-gap review](docs/dependencies/desktop-noti
 records the unresolved groups and next evidence needed. Do not mark an optional
 dependency cleared merely because a Windows build may omit it; establish the final
 artifact's contents separately. The internal installer uses this same collector.
+
+The audit also emits `windows-msvc-scope.json`: locked target metadata currently
+narrows the unresolved prospective Windows inputs to five npm packages; the other
+24 Rust gaps are retained in the full audit. This is not evidence that any package
+is absent from the installed artifact. `selectors` retains its explicit MPL-2.0
+notice, full steward terms and exact unmodified-source location; project restrictions
+cannot override that component's source rights. `r-efi` retains its original full
+AUTHORS text with the offered MIT branch recorded. No author notices are invented.
 
 Use only a disposable Windows x64 VM/reference machine. In a clean test checkout,
 `pnpm desktop:internal-build` prepares a current-user NSIS alpha installer,
@@ -336,6 +348,43 @@ Docker is required for
 `pnpm test:ocr-worker` and `pnpm test:office-worker`; these verify isolated workers,
 not approval of the native image for public availability. Editor OCR tests use
 the separate local WASM path and do not require Docker.
+
+### Experimental minimal OCR build (maintainers only)
+
+The existing app still uses the pinned upstream OCR runtime. A separate
+[research candidate](docs/dependencies/ocr-minimal-candidate.json) builds the
+baseline LSTM engine with Leptonica 1.87.0 and without the optional compressed-image
+codec libraries/OpenLibm. It is **not adopted or security-cleared**. Synthetic
+English/French recognition passed and an independent fresh source build matched
+the repaired initial artifact, but old Tesseract code, internal-structure bindings,
+compiler warnings, broader export/accuracy/platform tests and final notice/security
+review remain gates. No candidate binaries are stored in Git.
+
+On an approved Docker host with sufficient disk space, maintainers can explicitly run:
+
+```powershell
+node scripts/prepare-ocr-minimal.mjs
+```
+
+The helper downloads hash-checked source archives into a fresh ignored
+`tmp/ocr-minimal-*` folder, then builds in a digest-pinned, unprivileged Linux
+container with no network, a read-only root and bounded CPU/memory/processes.
+It does not mount the repository, credentials or documents, install application
+assets, compile Windows helpers, change policy or work around Application Control.
+It does not pull the toolchain image automatically; obtain the exact image in the
+candidate record through your normal approved Docker setup first. The build can
+use several GB of local disk and runs with a 30-minute deadline.
+
+After `pnpm build:packages`, use the generated folder printed by the helper:
+
+```powershell
+node scripts/verify-ocr-minimal.mjs tmp/ocr-minimal-REPLACE/tesseract-core-lstm.wasm.cjs
+```
+
+This uses an isolated loopback server/headless Chromium and synthetic canvas text;
+it never changes a user tab or substitutes the candidate into the local app.
+It is a baseline-only smoke, not verification of the SIMD variants or permission
+to ship the candidate. Do not copy a candidate over the pinned application assets.
 
 Use synthetic/licensed fixtures only. Never put PDFs, extracted text, filenames,
 passwords or signature data into logs, issue attachments or analytics. Report

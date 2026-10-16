@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "featureIds": ["OCR-001"],
+  "status": "baseline-built-repeatable-smoke-tested-not-adopted",
+  "publicReleaseApproved": false,
+  "runtimeReplacementApproved": false,
+  "toolchain": {
+    "image": "emscripten/emsdk@sha256:27bc6267cb285223b8aebb7627bfebae7cb3ad2aaa0d5923b8aa5321793033e8",
+    "version": "4.0.15"
+  },
+  "sources": [
+    {
+      "id": "core",
+      "repo": "naptha/tesseract.js-core",
+      "commit": "acffef2b66eb44a31df297e11d905f4b39001068",
+      "url": "https://codeload.github.com/naptha/tesseract.js-core/tar.gz/acffef2b66eb44a31df297e11d905f4b39001068",
+      "bytes": 32031052,
+      "sha256": "35a7e5961bce2435bb6064ad8424de1a3bd9b1d5f5930076aab1bfc7d90f62f5"
+    },
+    {
+      "id": "tesseract",
+      "repo": "Balearica/tesseract",
+      "commit": "2a9c1c49c360462733c386d2a44fcd22c4e21411",
+      "url": "https://codeload.github.com/Balearica/tesseract/tar.gz/2a9c1c49c360462733c386d2a44fcd22c4e21411",
+      "bytes": 1937174,
+      "sha256": "67e83745bd7fc6940c17e2c5142985f709e448e26b452231a362f5dd0f5e071f"
+    },
+    {
+      "id": "leptonica",
+      "repo": "DanBloomberg/leptonica",
+      "commit": "13275a278eb55b5746e33f95fbf5a2c8f604b3ab",
+      "url": "https://codeload.github.com/DanBloomberg/leptonica/tar.gz/13275a278eb55b5746e33f95fbf5a2c8f604b3ab",
+      "bytes": 13725547,
+      "sha256": "e72242133adf678e8584081a506ca3a665c8f6f6de8c3fe7b47d1d5fcf9a4ce4"
+    }
+  ],
+  "scope": "Research-only LSTM WASM build using the existing Tesseract.js bindings and patched Tesseract fork, refreshed Leptonica 1.87.0 and no optional compressed-image codecs or OpenLibm. No source or generated binary is installed into the application.",
+  "remainingGates": [
+    "full candidate source/licence/attribution and exact-native vulnerability review, including old Tesseract and compiler warnings",
+    "updated public-API bindings rather than unreviewed internal-structure coupling",
+    "SIMD/relaxed-SIMD or reviewed baseline-only performance and platform policy",
+    "broader English/French recognition, scan-preserving export and reference browser/WebView2 regressions",
+    "clean reference Windows installer testing on an approved host; no security bypass",
+    "approved reproducible artifact delivery/build-from-source integration; existing application OCR remains unchanged"
+  ],
+  "evidence": {
+    "date": "2026-10-16",
+    "variant": "baseline-lstm",
+    "sha256": "dc64eaea17bdf06a28dbc7f5e6fc7f35c065095a0c401c3bd0bc01c7b8a79759",
+    "bytes": 2468340,
+    "repeatedArtifactMatch": true,
+    "reproductionScope": "Repaired initial tree and independent fresh source build produced identical baseline bytes under the pinned image; broader cross-host reproducibility is not certified.",
+    "englishSyntheticSmoke": true,
+    "frenchSyntheticSmoke": true,
+    "pixelForgedExifIgnored": true,
+    "unexpectedRequests": 0,
+    "browserPageErrors": 0,
+    "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
+    "modifiedWrapperSha256": "092404581164a1be3908c8b4b2a22ae113022e138858ae22f6825637a584b093",
+    "modifiedGlueSha256": "88e9ec9644f90fe031536f13a604ad2212cc007aa5e933c13c18bfc38d6b9a4b",
+    "disabledCodecMacros": [
+      "HAVE_LIBGIF",
+      "HAVE_LIBJP2K",
+      "HAVE_LIBJPEG",
+      "HAVE_LIBPNG",
+      "HAVE_LIBTIFF",
+      "HAVE_LIBWEBP",
+      "HAVE_LIBWEBP_ANIM",
+      "HAVE_LIBZ"
+    ],
+    "linkedApplicationArchives": ["libleptonica.a", "libtesseract.a"],
+    "strictUndefinedSymbols": true,
+    "maximumWasmMemoryBytes": 1073741824,
+    "knownLimits": [
+      "Old Tesseract 5.3.0 fork remains; no complete native vulnerability clearance.",
+      "Existing generated bindings need Leptonica internal structure definitions; ABI/API review is required.",
+      "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
+      "Compiler emitted nontrivial memcpy warnings in RecodeNode; these are not declared benign or fixed.",
+      "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
+      "No candidate bytes replaced application assets or were added to Git."
+    ]
+  }
+}

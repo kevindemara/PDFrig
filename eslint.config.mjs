@@ -18,6 +18,7 @@ export default tseslint.config(
       '**/supabase/.temp/**',
       '**/target/**',
       '**/test-results/**',
+      'tmp/**',
       'apps/desktop/src-tauri/gen/**',
       'apps/web/next-env.d.ts',
       '**/public/ocr/**',

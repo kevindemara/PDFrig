@@ -10,6 +10,46 @@ const wrapper = path.dirname(require.resolve('tesseract.js/package.json'));
 const core = path.dirname(
   createRequire(path.join(wrapper, 'package.json')).resolve('tesseract.js-core/package.json'),
 );
+
+test('OCR-001 minimal research build is pinned, isolated and never substitutes application assets', async () => {
+  const pins = JSON.parse(
+    await readFile(path.join(root, 'docs/dependencies/ocr-minimal-candidate.json'), 'utf8'),
+  );
+  assert.equal(pins.publicReleaseApproved, false);
+  assert.equal(pins.runtimeReplacementApproved, false);
+  assert.match(pins.toolchain.image, /^emscripten\/emsdk@sha256:[a-f0-9]{64}$/u);
+  assert.deepEqual(
+    pins.sources.map((source) => source.id),
+    ['core', 'tesseract', 'leptonica'],
+  );
+  for (const source of pins.sources) {
+    assert.match(source.commit, /^[a-f0-9]{40}$/u);
+    assert.match(source.sha256, /^[a-f0-9]{64}$/u);
+    assert.equal(source.url, `https://codeload.github.com/${source.repo}/tar.gz/${source.commit}`);
+  }
+  const script = await readFile(path.join(root, 'scripts/prepare-ocr-minimal.mjs'), 'utf8');
+  for (const guard of [
+    "'--pull', 'never'",
+    "'--network', 'none'",
+    "'--read-only'",
+    "'--cap-drop', 'ALL'",
+    "'--user', '65532:65532'",
+    "'--memory', '4g'",
+    "'--pids-limit', '256'",
+  ])
+    assert.ok(script.replaceAll(/\s+/gu, ' ').includes(guard));
+  assert.ok(script.includes("'--cidfile'"));
+  assert.ok(script.includes("['rm', '--force', id.trim()]"));
+  assert.doesNotMatch(
+    script,
+    /apps\/(?:web|desktop)\/public|tauri|powershell|WindowsCertificate/iu,
+  );
+  const build = await readFile(path.join(root, 'scripts/ocr-minimal-build.py'), 'utf8');
+  assert.ok(build.includes('ERROR_ON_UNDEFINED_SYMBOLS=1'));
+  assert.ok(build.includes('OCR_CANDIDATE_PATCH_DRIFT'));
+  assert.ok(build.includes("'--parallel', '4'"));
+  assert.ok(build.includes('MAXIMUM_MEMORY=1073741824'));
+});
 test('OCR-001 pins the unchanged worker/core and ships all selected-engine notices', async () => {
   for (const directory of [wrapper, core])
     assert.equal(

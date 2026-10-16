@@ -156,6 +156,7 @@ test('QA TypeScript inherits strict settings and generated caches stay out of so
   assert.match(await load('../.gitignore'), /^apps\/web\/next-env\.d\.ts$/mu);
   assert.match(await load('../.prettierignore'), /^\.next-qa$/mu);
   assert.ok((await load('../eslint.config.mjs')).includes('**/.next-qa/**'));
+  assert.ok((await load('../eslint.config.mjs')).includes("'tmp/**'"));
 });
 
 test('directory-glob workspace filters are quoted for POSIX shells', async () => {

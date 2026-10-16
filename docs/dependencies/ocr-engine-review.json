@@ -37,7 +37,9 @@
         "https://nvd.nist.gov/vuln/detail/CVE-2023-4863",
         "https://github.com/madler/zlib/releases/tag/v1.2.13"
       ],
-      "controlledInput": "local-ocr-pixels.ts emits a fixed P6 header, exact bounded RGB byte count and explicit white alpha composition; no arbitrary raster input is accepted by the editor",
+      "controlledInput": "local-ocr-pixels.ts emits a fixed P6 header, exact bounded RGB byte count and explicit white alpha composition. The worker independently validates canonical P6 and refuses shared/truncated/alternate-format data before spawning and after asynchronous initialization, immediately before cloning into recognition.",
+      "researchCandidate": "ocr-minimal-candidate.json records a separate baseline source build with Leptonica 1.87.0 and no optional compressed-image codec archives. Two source-tree builds matched and English/French synthetic browser smoke passed. Existing app assets are unchanged; candidate adoption, full licensing/security, ABI/API, variant and reference-platform reviews remain blocked. This research does not set completeNativeVulnerabilityClearance.",
+      "pixelMetadataIsolation": "A fixed 512-space ASCII prefix keeps all RGB pixels outside the unchanged tesseract.js 7.0.0 setImage helper's first-500-byte EXIF-pattern scan. Raster pixels remain unchanged. Canonical prefix, depth, dimensions, exact body size and non-shared ownership are checked before worker creation and again after initialization. Header mutation cases and a forged-EXIF pixel pattern are tested; this is bounded parser exposure reduction, not whole-native fuzz clearance.",
       "remainingReview": [
         "patched/minimal reproducible native build and source-to-binary binding",
         "PNM and trained-model parser/fuzzer review",
