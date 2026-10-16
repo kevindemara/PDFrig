@@ -15,6 +15,7 @@
     "scope": "Printable ASCII runs in non-symbolic Base-14 Type1 fonts or Identity-H CID fonts with one-to-one ToUnicode maps; unknown simple embedded fonts remain read-only. Same-page, left-aligned uniform paragraphs support longer replacements, cross-line selections and explicit line breaks within bounded width/height. Overflow refuses instead of shrinking, squeezing, overlapping neighbors or paginating. Graphics/annotations prevent growth outside the original area; intersecting links and unindexed text prevent reflow. No mixed-style paragraph reflow, font substitution, XObject editing or visible scan reconstruction.",
     "fitToSpaceReviewDate": "2026-10-16",
     "paragraphReflowReviewDate": "2026-10-16",
+    "graphicsStateCorrection": "Clipping/unsupported graphics state is scoped to active q/Q contexts and selected fragments, not a page-wide prohibition. A validated allowlist handles common opacity/normal-blend/stroke settings and compares bounded effective fill state. Clipped text, font overrides, masks, unknown keys and unsupported blending remain refused with content-free reason codes. Synthetic restored-logo tests cover body text without retaining customer PDFs.",
     "accessibility": "Unique page MCID ownership and exact ActualText are verified and repaired; the reopened expected tag graph and outlines are checked. Ambiguous/shared semantics refuse editing.",
     "verification": [
       "source-text.test.ts",

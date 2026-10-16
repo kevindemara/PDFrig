@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 const replacement = 'a substantially longer introductory passage with natural wrapping';
-for (const variant of ['normal', 'crop-rotated'])
+for (const variant of ['normal', 'crop-rotated', 'graphics-state'])
   test(`EDIT-002 natural paragraph reflow ${variant} previews and exports identical rendered pages`, async ({
     page,
   }, info) => {
@@ -31,8 +31,11 @@ for (const variant of ['normal', 'crop-rotated'])
     const dialog = page.getByRole('dialog', { name: 'Edit existing text' });
     await expect(dialog.getByLabel('Text layout', { exact: true })).toHaveValue('paragraph');
     await expect(dialog.getByLabel('Replacement text')).toHaveValue('first');
-    await dialog.getByLabel('Replacement text').fill(replacement);
-    await dialog.getByLabel('Paragraph width (pt)', { exact: true }).fill('220');
+    await dialog
+      .getByLabel('Replacement text')
+      .fill(variant === 'graphics-state' ? 'final' : replacement);
+    if (variant !== 'graphics-state')
+      await dialog.getByLabel('Paragraph width (pt)', { exact: true }).fill('220');
     await dialog.getByRole('button', { name: 'Build actual PDF preview' }).click();
     await expect(dialog.getByRole('status')).toContainText('no shrinking or squeezing');
     const actualPreview = dialog.getByLabel('Actual exported PDF preview', { exact: true });
@@ -45,12 +48,13 @@ for (const variant of ['normal', 'crop-rotated'])
     await dialog.getByRole('checkbox').check();
     await dialog.getByRole('button', { name: 'Apply reviewed copy' }).click();
     await page.getByRole('button', { name: 'Select text', exact: true }).click();
-    const zoomButton = variant === 'normal' ? 'Actual size (100%)' : 'Fit full page';
+    const zoomButton = variant === 'crop-rotated' ? 'Fit full page' : 'Actual size (100%)';
     await page.getByRole('button', { name: zoomButton, exact: true }).click();
-    await expect(page.locator('.pdf-text-layer')).toContainText(/substantially\s*longer/u);
+    const expectedText = variant === 'graphics-state' ? /final line/u : /substantially\s*longer/u;
+    await expect(page.locator('.pdf-text-layer')).toContainText(expectedText);
     const rendered = page.getByLabel('Rendered page 1', { exact: true });
     await expect(rendered).toBeVisible();
-    if (variant === 'normal')
+    if (variant !== 'crop-rotated')
       await expect
         .poll(() => rendered.evaluate((element) => (element as HTMLCanvasElement).toDataURL()))
         .toBe(previewPixels);
@@ -66,13 +70,13 @@ for (const variant of ['normal', 'crop-rotated'])
     const report = JSON.parse(
       execFileSync(
         process.env.PDFMASON_PYTHON_PATH ?? 'python',
-        ['scripts/verify-paragraph-reflow.py', source, output],
+        ['scripts/verify-paragraph-reflow.py', source, output, variant],
         { encoding: 'utf8', stdio: 'pipe' },
       ),
     ) as Record<string, boolean>;
     expect(Object.values(report).every(Boolean)).toBe(true);
     await page.getByLabel('Open PDF').setInputFiles(output);
-    await expect(page.locator('.pdf-text-layer')).toContainText(/substantially\s*longer/u);
+    await expect(page.locator('.pdf-text-layer')).toContainText(expectedText);
     await page.getByRole('button', { name: zoomButton, exact: true }).click();
     await expect
       .poll(() => rendered.evaluate((element) => (element as HTMLCanvasElement).toDataURL()))

@@ -19,6 +19,77 @@ async function fixture(graphics = false) {
   return doc.save();
 }
 describe('EDIT-002 real source paragraph reflow', () => {
+  it('keeps restored logo clipping and benign repeated gs out of body-paragraph eligibility', async () => {
+    const doc = await PDFDocument.load(await fixture()),
+      page = doc.getPage(0);
+    const resources = page.node.Resources();
+    if (!resources) throw new Error('Missing resources');
+    resources.set(
+      PDFName.of('ExtGState'),
+      doc.context.obj({
+        Opaque: { ca: 1, CA: 1, BM: 'Normal', LW: 1, LC: 0, LJ: 0, ML: 10, SA: true },
+        Unsupported: { SMask: 'None' },
+      }),
+    );
+    page.node.set(
+      PDFName.of('Contents'),
+      doc.context.register(
+        doc.context.flateStream(
+          'q 0 0 30 30 re W* n /Unsupported gs 0.5 g 0 0 30 30 re f Q /Opaque gs BT /H 18 Tf 22 TL 1 0 0 1 54 650 Tm (This is the first line of a short paragraph.) Tj /Opaque gs T* (The second line keeps the same natural font.) Tj 1 0 0 1 54 350 Tm (UNCHANGED FOOTER) Tj ET q 0 740 30 30 re W n 0.5 g 0 740 30 30 re f Q',
+        ),
+      ),
+    );
+    const source = await doc.save(),
+      runs = await inspectSourceText(source, 0),
+      run = runs[0];
+    if (!run?.paragraph) throw new Error('Restored logo state still blocked body');
+    expect(run.paragraph.lineCount).toBe(2);
+    expect(run.paragraphIssue).toBeUndefined();
+    const result = await reflowSourceText(source, run.id, run.text, 'final', {
+      start: 12,
+      end: 17,
+    });
+    const after = await inspectSourceText(result, 0);
+    expect(after[0]?.text).toContain('final');
+    expect(after.at(-1)?.bounds).toEqual(runs.at(-1)?.bounds);
+  });
+  it.each([{ Font: [0, 18] }, { ca: 0 }, { BM: 'Multiply' }])(
+    'still refuses a selected paragraph under unmodeled graphics state %j',
+    async (state) => {
+      const doc = await PDFDocument.load(await fixture()),
+        page = doc.getPage(0),
+        resources = page.node.Resources();
+      if (!resources) throw new Error('Missing resources');
+      resources.set(PDFName.of('ExtGState'), doc.context.obj({ State: state }));
+      page.node.set(
+        PDFName.of('Contents'),
+        doc.context.register(
+          doc.context.flateStream('/State gs BT /H 18 Tf 1 0 0 1 54 650 Tm (Visible words) Tj ET'),
+        ),
+      );
+      const source = await doc.save(),
+        run = (await inspectSourceText(source, 0))[0];
+      if (!run) throw new Error('Missing line');
+      expect(run.paragraphIssue).toBe('SOURCE_TEXT_REFLOW_GRAPHICS_STATE');
+      await expect(reflowSourceText(source, run.id, run.text, 'EDIT')).rejects.toThrow(
+        'REFLOW_GRAPHICS_STATE',
+      );
+    },
+  );
+  it('does not use stale inline font metrics after an external font override', async () => {
+    const doc = await PDFDocument.load(await fixture()),
+      page = doc.getPage(0),
+      resources = page.node.Resources();
+    if (!resources) throw new Error('Missing resources');
+    resources.set(PDFName.of('ExtGState'), doc.context.obj({ Override: { Font: [0, 18] } }));
+    page.node.set(
+      PDFName.of('Contents'),
+      doc.context.register(
+        doc.context.flateStream('BT /H 18 Tf 1 0 0 1 54 650 Tm /Override gs (Unknown font) Tj ET'),
+      ),
+    );
+    expect(await inspectSourceText(await doc.save(), 0)).toEqual([]);
+  });
   it('restores text and line state with original character/word spacing and horizontal scale', async () => {
     const doc = await PDFDocument.create(),
       page = doc.addPage([612, 792]);
@@ -63,7 +134,7 @@ describe('EDIT-002 real source paragraph reflow', () => {
     if (!run) throw new Error('Missing visible line');
     expect(run.paragraph).toBeUndefined();
     await expect(reflowSourceText(hidden, run.id, run.text, 'EDIT')).rejects.toThrow(
-      'REFLOW_UNSUPPORTED',
+      'REFLOW_UNINDEXED_TEXT',
     );
     page.node.set(
       PDFName.of('Contents'),
@@ -95,7 +166,7 @@ describe('EDIT-002 real source paragraph reflow', () => {
       if (!run) throw new Error('Missing line');
       expect(run.paragraph).toBeUndefined();
       await expect(reflowSourceText(bytes, run.id, run.text, 'EDIT')).rejects.toThrow(
-        'REFLOW_UNSUPPORTED',
+        'REFLOW_GRAPHICS_STATE',
       );
     },
   );
@@ -141,7 +212,7 @@ describe('EDIT-002 real source paragraph reflow', () => {
     if (!run) throw new Error('Missing line');
     expect(run.paragraph).toBeUndefined();
     await expect(reflowSourceText(linked, run.id, run.text, 'EDIT')).rejects.toThrow(
-      'REFLOW_UNSUPPORTED',
+      'REFLOW_LINKED_AREA',
     );
     const shared = await PDFDocument.load(source);
     const sharedContents = shared.getPage(0).node.get(PDFName.of('Contents'));

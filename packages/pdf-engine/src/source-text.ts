@@ -35,6 +35,8 @@ export interface SourceTextRun {
   readonly text: string;
   readonly fontName: string;
   readonly fontSize: number;
+  /** Content-free reason when this line cannot use paragraph layout. */
+  readonly paragraphIssue?: string;
   readonly paragraph?: {
     readonly id: string;
     readonly text: string;
@@ -82,6 +84,8 @@ interface Fragment extends SourceTextRun {
   horizontalScale: number;
   boundary: number;
   paint: string;
+  graphicsStyle: string;
+  reflowStateKnown: boolean;
 }
 interface Run extends SourceTextRun {
   fragments: { fragment: Fragment; start: number; end: number }[];
@@ -504,6 +508,14 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
   let characterSpace = 0;
   let wordSpace = 0;
   let paint = '0 g';
+  // Only these parameters affect filled glyphs (the indexed Tr=0 mode).
+  // Stroke-only settings are validated but do not split identical text styles.
+  let graphicsParameters = new Map([
+    ['BM', '/Normal'],
+    ['ca', '1'],
+  ]);
+  let graphicsStyle = JSON.stringify([...graphicsParameters]);
+  let reflowStateKnown = true;
   let growthSafe = true;
   let reflowSafe = true;
   const marked: { mcid: number | null; semanticOverride: boolean }[] = [];
@@ -518,6 +530,9 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
     rise: number;
     leading: number;
     paint: string;
+    graphicsStyle: string;
+    graphicsParameters: Map<string, string>;
+    reflowStateKnown: boolean;
   }[] = [];
   for (const [streamIndex, ref] of refs.entries()) {
     if (!(ref instanceof PDFRef)) continue;
@@ -539,14 +554,65 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
       const op = operator.raw;
       if (['g', 'rg', 'k'].includes(op))
         paint = `${op} ${operands.map((item) => item.raw).join(' ')}`;
-      if (['cs', 'sc', 'scn', 'gs'].includes(op)) paint = `${boundary}:${op}`;
+      if (['cs', 'sc', 'scn'].includes(op)) paint = `${boundary}:${op}`;
       if (
         ['Do', 'sh', 'S', 's', 'f', 'F', 'f*', 'B', 'B*', 'b', 'b*', 'gs', 'W', 'W*'].includes(op)
       )
         growthSafe = false;
-      // External graphics state may change the font/text metrics, and clipping
-      // can hide newly wrapped words. Neither is inferred from string operators.
-      if (['gs', 'W', 'W*'].includes(op)) reflowSafe = false;
+      // Scope clipping/state uncertainty to the active q/Q context, not the
+      // entire page. Logo clipping must not lock unrelated body text.
+      if (['W', 'W*'].includes(op)) reflowStateKnown = false;
+      if (op === 'gs') {
+        const name = operands[0]?.raw.slice(1) ?? '';
+        const state = page.node
+          .Resources()
+          ?.lookupMaybe(PDFName.of('ExtGState'), PDFDict)
+          ?.lookupMaybe(PDFName.of(name), PDFDict);
+        if (state?.has(PDFName.of('Font'))) {
+          // Do not let the inline path use stale metrics either. An explicit Tf
+          // or restored q/Q state is required to know the selected font again.
+          codec = null;
+          size = 0;
+        }
+        const allowed =
+          state?.entries().every(([key, value]) => {
+            const property = key.decodeText(),
+              resolved = document.context.lookup(value);
+            if (property === 'Type')
+              return resolved instanceof PDFName && resolved.decodeText() === 'ExtGState';
+            if (property === 'BM')
+              return (
+                resolved instanceof PDFName &&
+                ['Normal', 'Compatible'].includes(resolved.decodeText())
+              );
+            if (property === 'SA') return ['true', 'false'].includes(resolved?.toString() ?? '');
+            return (
+              ['CA', 'ca', 'LC', 'LJ', 'LW', 'ML'].includes(property) &&
+              resolved instanceof PDFNumber &&
+              Number.isFinite(resolved.asNumber()) &&
+              (['CA', 'ca'].includes(property)
+                ? resolved.asNumber() > 0 && resolved.asNumber() <= 1
+                : resolved.asNumber() >= 0)
+            );
+          }) ?? false;
+        if (!allowed) reflowStateKnown = false;
+        else if (state) {
+          // gs sets only the supplied parameters. Canonicalize effective state
+          // so redundant applications do not split one paragraph or grow an
+          // unbounded signature string. q/Q keep immutable snapshots.
+          graphicsParameters = new Map(graphicsParameters);
+          for (const [key, value] of state.entries()) {
+            if (['ca', 'BM'].includes(key.decodeText()))
+              graphicsParameters.set(
+                key.decodeText(),
+                document.context.lookup(value)?.toString() ?? '',
+              );
+          }
+          graphicsStyle = JSON.stringify(
+            [...graphicsParameters].sort(([a], [b]) => a.localeCompare(b)),
+          );
+        }
+      }
       if (op === 'q') {
         if (graphics.length >= 32) return [];
         graphics.push({
@@ -560,6 +626,9 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
           rise,
           leading,
           paint,
+          graphicsStyle,
+          graphicsParameters,
+          reflowStateKnown,
         });
       }
       if (op === 'Q') {
@@ -576,6 +645,9 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
           rise,
           leading,
           paint,
+          graphicsStyle,
+          graphicsParameters,
+          reflowStateKnown,
         } = saved);
       }
       if (op === 'BT') {
@@ -724,6 +796,8 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
                 horizontalScale,
                 boundary,
                 paint,
+                graphicsStyle,
+                reflowStateKnown,
               });
             const advance = advanceText({ codec, fontSize: size, characterSpace, wordSpace }, text);
             matrix = moveTextMatrix(matrix, advance * horizontalScale);
@@ -754,16 +828,30 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
     : groupFragments(runs, page.getCropBox()).map((run) => ({ ...run, growthSafe, reflowSafe }));
 }
 
-function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run) {
-  if (runs.length > 500) return null;
+function paragraphFor(
+  document: PDFDocument,
+  runs: readonly Run[],
+  selected: Run,
+  onReject?: (code: string) => void,
+) {
+  const reject = (code: string): null => {
+    onReject?.(`SOURCE_TEXT_REFLOW_${code}`);
+    return null;
+  };
+  if (runs.length > 500) return reject('PAGE_LIMIT');
   const base = selected.fragments[0]?.fragment;
-  if (!base || selected.reflowSafe === false || !selected.bounds) return null;
+  if (!base || !selected.bounds) return reject('GEOMETRY');
+  if (selected.reflowSafe === false) return reject('UNINDEXED_TEXT');
+  if (selected.fragments.some(({ fragment }) => !fragment.reflowStateKnown))
+    return reject('GRAPHICS_STATE');
   const eligible = (run: Run): boolean =>
     run.fragments.every(
       ({ fragment: f }) =>
         f.codec === base.codec &&
         f.fontSize === base.fontSize &&
         f.paint === base.paint &&
+        f.reflowStateKnown &&
+        f.graphicsStyle === base.graphicsStyle &&
         f.mcid === base.mcid &&
         f.characterSpace === base.characterSpace &&
         f.wordSpace === base.wordSpace &&
@@ -776,7 +864,7 @@ function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run
           .slice(0, 4)
           .every((value, index) => Math.abs(value - (base.matrix[index] ?? NaN)) < 1e-8),
     );
-  if (!eligible(selected)) return null;
+  if (!eligible(selected)) return reject('STYLE_OR_TRANSFORM');
   const em = base.fontSize * base.matrix[3];
   const compatible = (upper: Run, lower: Run): boolean => {
     const a = upper.fragments[0]?.fragment,
@@ -792,7 +880,7 @@ function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run
   while (to + 1 < runs.length && compatible(runs[to] ?? selected, runs[to + 1] ?? selected)) to++;
   const members = runs.slice(from, to + 1),
     first = members[0]?.fragments[0]?.fragment;
-  if (!first) return null;
+  if (!first) return reject('GEOMETRY');
   const page = document.getPage(selected.pageIndex),
     crop = page.getCropBox();
   const left = first.matrix[4],
@@ -842,7 +930,7 @@ function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run
         ?.asArray()
         .map((value) => document.context.lookup(value))
         .map((value) => (value instanceof PDFNumber ? value.asNumber() : NaN));
-      if (values?.length !== 4 || !values.every(Number.isFinite)) return null;
+      if (values?.length !== 4 || !values.every(Number.isFinite)) return reject('ANNOTATION');
       const [x0 = 0, y0 = 0, x1 = 0, y1 = 0] = values;
       if (
         Math.max(x0, x1) > left &&
@@ -850,7 +938,7 @@ function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run
         Math.max(y0, y1) > bottom &&
         Math.min(y0, y1) < top
       )
-        return null;
+        return reject('LINKED_AREA');
     }
   }
   // Without a full graphics/annotation obstacle map, never grow outside the
@@ -865,9 +953,9 @@ function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run
     left < crop.x ||
     top > crop.y + crop.height
   )
-    return null;
+    return reject('FRAME');
   const text = members.map((run) => run.text.trim()).join(' ');
-  if (text.length > 4096) return null;
+  if (text.length > 4096) return reject('PARAGRAPH_LIMIT');
   return {
     members,
     first,
@@ -887,12 +975,16 @@ export async function inspectSourceText(
     runs = indexPage(document, pageIndex),
     crop = document.getPage(pageIndex).getCropBox();
   return runs.map((run) => {
-    const paragraph = paragraphFor(document, runs, run);
+    let paragraphIssue: string | undefined;
+    const paragraph = paragraphFor(document, runs, run, (code) => {
+      paragraphIssue = code;
+    });
     return {
       id: run.id,
       text: run.text,
       fontName: run.fontName,
       fontSize: run.fontSize,
+      ...(paragraphIssue ? { paragraphIssue } : {}),
       ...(paragraph
         ? {
             paragraph: {
@@ -949,8 +1041,11 @@ export async function reflowSourceText(
   const runs = indexPage(document, pageIndex),
     run = runs.find((item) => item.id === id);
   if (run?.text !== expectedText) return fail('SOURCE_TEXT_STALE_CHANGE');
-  const paragraph = paragraphFor(document, runs, run);
-  if (!paragraph) return fail('SOURCE_TEXT_REFLOW_UNSUPPORTED');
+  let paragraphIssue = 'SOURCE_TEXT_REFLOW_UNSUPPORTED';
+  const paragraph = paragraphFor(document, runs, run, (code) => {
+    paragraphIssue = code;
+  });
+  if (!paragraph) return fail(paragraphIssue);
   const width = options.width ?? paragraph.frame.width,
     height = options.height ?? paragraph.frame.height;
   if (

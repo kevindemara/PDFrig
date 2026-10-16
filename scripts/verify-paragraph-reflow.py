@@ -3,12 +3,14 @@ import json, subprocess, sys, xml.etree.ElementTree as ET
 from pathlib import Path
 from pypdf import PdfReader
 from PIL import Image, ImageDraw, ImageChops
-source_path, output_path = sys.argv[1:]
+source_path, output_path = sys.argv[1:3]
+short = len(sys.argv) > 3 and sys.argv[3] == 'graphics-state'
 source, output = [PdfReader(path, strict=True) for path in [source_path, output_path]]
 assert len(source.pages) == len(output.pages) == 1
 assert source.pages[0].rotation == output.pages[0].rotation
 assert list(source.pages[0].cropbox) == list(output.pages[0].cropbox)
 expected = 'This is the a substantially longer introductory passage with natural wrapping line of a short paragraph. The second line keeps the same natural font.'
+if short: expected = 'This is the final line of a short paragraph. The second line keeps the same natural font.'
 text = output.pages[0].extract_text()
 assert ''.join(text.split()) == ''.join((expected+' UNCHANGED FOOTER').split())
 ns = {'x':'http://www.w3.org/1999/xhtml'}
@@ -31,9 +33,10 @@ for reader in [source,output]:
     reader.pages[0].extract_text(visitor_text=capture)
     font_records.append(current)
 assert font_records[1] and all(record==('/Helvetica',18.0) for record in font_records[1])
-assert len(font_records[1]) > len(font_records[0])
+assert len(font_records[1]) >= len(font_records[0]) if short else len(font_records[1]) > len(font_records[0])
 ops=output.pages[0].get_contents().operations
-assert not any(op in [b'Tz',b'Do',b're',b'f',b'f*'] for _,op in ops)
+for operator in [b'Tz',b'Do',b're',b'f',b'f*',b'gs',b'W',b'W*']:
+    assert sum(op==operator for _,op in ops) == sum(op==operator for _,op in source.pages[0].get_contents().operations)
 # Poppler renders MediaBox by default. In rotated output the same fixed source
 # paragraph region transforms to the right-hand side of the landscape render.
 images=[]

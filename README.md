@@ -69,6 +69,8 @@ Every operation can refuse a document it cannot safely preserve.
   paragraph area; linked text is not reflowed. Mixed-style paragraphs, complex
   transforms and automatic cross-page flow are not supported. Choose **Keep selection
   on one line (must fit)** for strict natural-width, single-line replacement instead.
+  Clipping around a logo does not lock unrelated text: clipping and unsupported
+  graphics states are scoped to the affected text, with a specific explanation when refused.
   The original
   font must have an unambiguous supported encoding; printable ASCII only, using
   existing glyphs. Current font support is non-symbolic Base-14 Type1 fonts or

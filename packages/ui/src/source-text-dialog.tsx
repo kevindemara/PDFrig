@@ -21,6 +21,26 @@ interface Props {
   onClose: () => void;
   onApply: (bytes: Uint8Array, signal: AbortSignal) => Promise<void>;
 }
+const paragraphErrors: Readonly<Record<string, string>> = {
+  SOURCE_TEXT_REFLOW_UNINDEXED_TEXT:
+    'Some text on this page uses an unsupported encoding or position, so its boundaries cannot be checked for paragraph wrapping. Nothing was changed. A supported single-line selection may still work with Keep selection on one line (must fit); it never squeezes text.',
+  SOURCE_TEXT_REFLOW_GRAPHICS_STATE:
+    'This selected text is inside a clipping area or uses a graphics state whose text effects are not yet supported. Other unclipped paragraphs may still be editable. Nothing was changed.',
+  SOURCE_TEXT_REFLOW_STYLE_OR_TRANSFORM:
+    'The selected line mixes text styles or uses a text transform that paragraph wrapping does not yet support. Nothing was changed.',
+  SOURCE_TEXT_REFLOW_LINKED_AREA:
+    'This paragraph intersects a link or annotation. Reflow would move words without moving that interactive area, so it has not been applied. A supported single-line selection may still work with Keep selection on one line (must fit).',
+  SOURCE_TEXT_REFLOW_ANNOTATION:
+    'An annotation on this page has unsupported geometry. Paragraph boundaries cannot be checked, so nothing was changed.',
+  SOURCE_TEXT_REFLOW_FRAME:
+    'The existing paragraph overlaps another text block or extends outside the supported page area. It cannot be rewrapped safely; nothing was changed.',
+  SOURCE_TEXT_REFLOW_GEOMETRY:
+    'The selected text does not have a supported paragraph position. Nothing was changed.',
+  SOURCE_TEXT_REFLOW_PAGE_LIMIT:
+    'This page exceeds the paragraph-layout complexity limit. Nothing was changed.',
+  SOURCE_TEXT_REFLOW_PARAGRAPH_LIMIT:
+    'This paragraph exceeds the 4,096-character editing limit. Nothing was changed.',
+};
 export function SourceTextDialog({
   bytes,
   document,
@@ -187,28 +207,32 @@ export function SourceTextDialog({
         );
       }
     } catch (error) {
-      if (!controller.current.signal.aborted)
+      if (!controller.current.signal.aborted) {
+        const paragraphMessage =
+          error instanceof Error ? paragraphErrors[error.message] : undefined;
         setStatus(
-          error instanceof Error && error.message === 'SOURCE_TEXT_REPLACEMENT_TOO_WIDE'
-            ? 'The replacement is wider in this font. Choose Wrap paragraph naturally under Text layout, then build the preview again. Nothing was changed.'
-            : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_OVERFLOW'
-              ? 'The paragraph needs more vertical space than is available. Increase the paragraph width, shorten the replacement or choose another area. Nothing was shrunk, squeezed, overlapped or applied.'
-              : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_INVALID_FRAME'
-                ? 'This paragraph area is too narrow or extends beyond the safe available space. Adjust its width/height within the displayed limits.'
-                : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_UNSUPPORTED'
-                  ? 'A safely editable uniform paragraph could not be identified. Mixed fonts, linked text, complex graphics or unsupported text structures may prevent paragraph wrapping. No copy was applied.'
-                  : error instanceof Error && error.message === 'SOURCE_TEXT_GLYPH_UNSUPPORTED'
-                    ? 'The original font does not contain these characters. No substitution was made.'
-                    : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
-                      ? 'This page already contains searchable text. OCR was not added a second time; use Select text or Edit existing text.'
-                      : error instanceof Error &&
-                          error.message === 'SOURCE_TEXT_SELECTION_UNSUPPORTED'
-                        ? 'This selection crosses an unsupported text boundary. Select a complete supported word or choose a line below. Nothing was changed.'
+          paragraphMessage ??
+            (error instanceof Error && error.message === 'SOURCE_TEXT_REPLACEMENT_TOO_WIDE'
+              ? 'The replacement is wider in this font. Choose Wrap paragraph naturally under Text layout, then build the preview again. Nothing was changed.'
+              : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_OVERFLOW'
+                ? 'The paragraph needs more vertical space than is available. Increase the paragraph width, shorten the replacement or choose another area. Nothing was shrunk, squeezed, overlapped or applied.'
+                : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_INVALID_FRAME'
+                  ? 'This paragraph area is too narrow or extends beyond the safe available space. Adjust its width/height within the displayed limits.'
+                  : error instanceof Error && error.message === 'SOURCE_TEXT_REFLOW_UNSUPPORTED'
+                    ? 'A safely editable uniform paragraph could not be identified. Mixed fonts, linked text, complex graphics or unsupported text structures may prevent paragraph wrapping. No copy was applied.'
+                    : error instanceof Error && error.message === 'SOURCE_TEXT_GLYPH_UNSUPPORTED'
+                      ? 'The original font does not contain these characters. No substitution was made.'
+                      : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
+                        ? 'This page already contains searchable text. OCR was not added a second time; use Select text or Edit existing text.'
                         : error instanceof Error &&
-                            error.message === 'SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED'
-                          ? 'This selection cannot yet be edited while preserving its accessibility text. Nothing was changed.'
-                          : 'Could not safely build this copy. The source is unchanged. Review and apply stay unavailable until a preview succeeds. Try a supported page or shorter text.',
+                            error.message === 'SOURCE_TEXT_SELECTION_UNSUPPORTED'
+                          ? 'This selection crosses an unsupported text boundary. Select a complete supported word or choose a line below. Nothing was changed.'
+                          : error instanceof Error &&
+                              error.message === 'SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED'
+                            ? 'This selection cannot yet be edited while preserving its accessibility text. Nothing was changed.'
+                            : 'Could not safely build this copy. The source is unchanged. Review and apply stay unavailable until a preview succeeds. Try a supported page or shorter text.'),
         );
+      }
     } finally {
       if (!controller.current.signal.aborted) setBusy(false);
     }
