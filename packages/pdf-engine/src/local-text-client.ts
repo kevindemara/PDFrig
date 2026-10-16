@@ -10,6 +10,7 @@ export type LocalTextRequest =
       readonly replacement: string;
       readonly range?: SourceTextRange;
       readonly fitToSpace?: boolean;
+      readonly reflow?: { readonly width?: number; readonly height?: number };
     }
   | {
       readonly kind: 'ocr';

@@ -21,6 +21,7 @@ import {
 } from './outline-preservation.js';
 import { snapshotTagStructures } from './tag-preservation.js';
 import { updateSourceTextAccessibility } from './source-text-accessibility.js';
+import { wrapParagraph } from './paragraph-layout.js';
 import {
   IDENTITY_TEXT_MATRIX,
   moveTextMatrix,
@@ -34,6 +35,16 @@ export interface SourceTextRun {
   readonly text: string;
   readonly fontName: string;
   readonly fontSize: number;
+  readonly paragraph?: {
+    readonly id: string;
+    readonly text: string;
+    readonly bounds: NonNullable<SourceTextRun['bounds']>;
+    readonly width: number;
+    readonly maxWidth: number;
+    readonly height: number;
+    readonly lineHeight: number;
+    readonly lineCount: number;
+  };
   /** Unrotated CropBox-relative, top-left coordinates for selection matching. */
   readonly bounds?: {
     readonly x: number;
@@ -66,15 +77,21 @@ interface Fragment extends SourceTextRun {
   wordSpace: number;
   mcid: number | null;
   matrix: TextMatrix;
+  textMatrix: TextMatrix;
+  lineMatrix: TextMatrix;
   horizontalScale: number;
   boundary: number;
+  paint: string;
 }
 interface Run extends SourceTextRun {
   fragments: { fragment: Fragment; start: number; end: number }[];
+  growthSafe?: boolean;
+  reflowSafe?: boolean;
 }
 export interface SourceTextRange {
   readonly start: number;
   readonly end: number;
+  readonly scope?: 'paragraph';
 }
 const fail = (code = 'SOURCE_TEXT_UNSUPPORTED'): never => {
   throw new Error(code);
@@ -486,6 +503,9 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
   let rendering = 0;
   let characterSpace = 0;
   let wordSpace = 0;
+  let paint = '0 g';
+  let growthSafe = true;
+  let reflowSafe = true;
   const marked: { mcid: number | null; semanticOverride: boolean }[] = [];
   const graphics: {
     codec: Codec | null;
@@ -497,6 +517,7 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
     horizontalScale: number;
     rise: number;
     leading: number;
+    paint: string;
   }[] = [];
   for (const [streamIndex, ref] of refs.entries()) {
     if (!(ref instanceof PDFRef)) continue;
@@ -516,6 +537,16 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
         continue;
       }
       const op = operator.raw;
+      if (['g', 'rg', 'k'].includes(op))
+        paint = `${op} ${operands.map((item) => item.raw).join(' ')}`;
+      if (['cs', 'sc', 'scn', 'gs'].includes(op)) paint = `${boundary}:${op}`;
+      if (
+        ['Do', 'sh', 'S', 's', 'f', 'F', 'f*', 'B', 'B*', 'b', 'b*', 'gs', 'W', 'W*'].includes(op)
+      )
+        growthSafe = false;
+      // External graphics state may change the font/text metrics, and clipping
+      // can hide newly wrapped words. Neither is inferred from string operators.
+      if (['gs', 'W', 'W*'].includes(op)) reflowSafe = false;
       if (op === 'q') {
         if (graphics.length >= 32) return [];
         graphics.push({
@@ -528,6 +559,7 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
           horizontalScale,
           rise,
           leading,
+          paint,
         });
       }
       if (op === 'Q') {
@@ -543,6 +575,7 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
           horizontalScale,
           rise,
           leading,
+          paint,
         } = saved);
       }
       if (op === 'BT') {
@@ -661,15 +694,16 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
           }
           try {
             const text = codec.decode(bytesOf(token));
-            if (
+            const editable =
               validText(text) &&
               rendering === 0 &&
               positionKnown &&
               horizontalScale > 0 &&
               Math.abs(transform[0] * transform[3] - transform[1] * transform[2]) > 0.000001 &&
               Math.abs(matrix[0] * matrix[3] - matrix[1] * matrix[2]) > 0.000001 &&
-              !marked.some((item) => item.semanticOverride)
-            )
+              !marked.some((item) => item.semanticOverride);
+            if (text.trim() && !editable) reflowSafe = false;
+            if (editable)
               runs.push({
                 id: `${pageIndex}:${streamIndex}:${token.start}`,
                 pageIndex,
@@ -685,44 +719,385 @@ function indexPage(document: PDFDocument, pageIndex: number): Run[] {
                 wordSpace,
                 mcid: marked.at(-1)?.mcid ?? null,
                 matrix: multiplyTextMatrices(transform, moveTextMatrix(matrix, 0, rise)),
+                textMatrix: matrix,
+                lineMatrix: line,
                 horizontalScale,
                 boundary,
+                paint,
               });
             const advance = advanceText({ codec, fontSize: size, characterSpace, wordSpace }, text);
             matrix = moveTextMatrix(matrix, advance * horizontalScale);
           } catch {
             /* Unsupported glyphs are not editable. */
             positionKnown = false;
+            growthSafe = false;
+            reflowSafe = false;
             boundary++;
           }
         }
       }
       operands = [];
-      if (['Tj', 'TJ', "'", '"'].includes(op) && (!inside || !codec)) {
+      if (
+        ['Tj', 'TJ', "'", '"'].includes(op) &&
+        (!inside || !codec || !(size > 0 && size <= 1000) || op === "'" || op === '"')
+      ) {
+        growthSafe = false;
+        reflowSafe = false;
         positionKnown = false;
         boundary++;
       }
       if (runs.length > 20_000) return fail('SOURCE_TEXT_LIMIT');
     }
   }
-  return graphics.length || inside || marked.length ? [] : groupFragments(runs, page.getCropBox());
+  return graphics.length || inside || marked.length
+    ? []
+    : groupFragments(runs, page.getCropBox()).map((run) => ({ ...run, growthSafe, reflowSafe }));
+}
+
+function paragraphFor(document: PDFDocument, runs: readonly Run[], selected: Run) {
+  if (runs.length > 500) return null;
+  const base = selected.fragments[0]?.fragment;
+  if (!base || selected.reflowSafe === false || !selected.bounds) return null;
+  const eligible = (run: Run): boolean =>
+    run.fragments.every(
+      ({ fragment: f }) =>
+        f.codec === base.codec &&
+        f.fontSize === base.fontSize &&
+        f.paint === base.paint &&
+        f.mcid === base.mcid &&
+        f.characterSpace === base.characterSpace &&
+        f.wordSpace === base.wordSpace &&
+        f.horizontalScale === base.horizontalScale &&
+        Math.abs(f.matrix[1]) < 1e-8 &&
+        Math.abs(f.matrix[2]) < 1e-8 &&
+        f.matrix[0] > 0 &&
+        f.matrix[3] > 0 &&
+        f.matrix
+          .slice(0, 4)
+          .every((value, index) => Math.abs(value - (base.matrix[index] ?? NaN)) < 1e-8),
+    );
+  if (!eligible(selected)) return null;
+  const em = base.fontSize * base.matrix[3];
+  const compatible = (upper: Run, lower: Run): boolean => {
+    const a = upper.fragments[0]?.fragment,
+      b = lower.fragments[0]?.fragment;
+    if (!a || !b || !eligible(lower) || !eligible(upper)) return false;
+    const gap = a.matrix[5] - b.matrix[5];
+    return Math.abs(a.matrix[4] - b.matrix[4]) < em * 0.3 && gap >= em * 0.9 && gap <= em * 1.7;
+  };
+  const index = runs.indexOf(selected);
+  let from = index,
+    to = index;
+  while (from > 0 && compatible(runs[from - 1] ?? selected, runs[from] ?? selected)) from--;
+  while (to + 1 < runs.length && compatible(runs[to] ?? selected, runs[to + 1] ?? selected)) to++;
+  const members = runs.slice(from, to + 1),
+    first = members[0]?.fragments[0]?.fragment;
+  if (!first) return null;
+  const page = document.getPage(selected.pageIndex),
+    crop = page.getCropBox();
+  const left = first.matrix[4],
+    top = first.matrix[5] + em * 0.85;
+  const right = Math.max(
+    ...members.map(
+      (run) => crop.x + (run.bounds?.x ?? 0) * crop.width + (run.bounds?.width ?? 0) * crop.width,
+    ),
+  );
+  const bottom = Math.min(
+    ...members.map(
+      (run) =>
+        crop.y +
+        crop.height -
+        (run.bounds?.y ?? 0) * crop.height -
+        (run.bounds?.height ?? 0) * crop.height,
+    ),
+  );
+  const lineHeight =
+    members.length > 1
+      ? (first.matrix[5] - (members.at(-1)?.fragments[0]?.fragment.matrix[5] ?? first.matrix[5])) /
+        (members.length - 1)
+      : em * 1.2;
+  let maxWidth = crop.x + crop.width - left - 6,
+    height = top - crop.y - 6;
+  for (const other of runs) {
+    if (members.includes(other) || !other.bounds) continue;
+    const x = crop.x + other.bounds.x * crop.width,
+      y = crop.y + crop.height - other.bounds.y * crop.height;
+    const otherBottom = y - other.bounds.height * crop.height;
+    if (x >= right - 0.01 && y > bottom && otherBottom < top)
+      maxWidth = Math.min(maxWidth, x - left - em * 0.2);
+    if (y <= bottom + 0.01 && x + other.bounds.width * crop.width > left)
+      // Retain the existing clearance on closely spaced blocks. Requiring a
+      // larger new margin would incorrectly reject an unchanged two-line area.
+      height = Math.min(height, top - y - Math.min(em * 0.2, Math.max(0, bottom - y)));
+  }
+  const annotations = page.node.Annots();
+  if (annotations?.size()) {
+    for (const ref of annotations.asArray()) {
+      const annotation = document.context.lookup(ref);
+      const rect =
+        annotation instanceof PDFDict
+          ? annotation.lookupMaybe(PDFName.of('Rect'), PDFArray)
+          : undefined;
+      const values = rect
+        ?.asArray()
+        .map((value) => document.context.lookup(value))
+        .map((value) => (value instanceof PDFNumber ? value.asNumber() : NaN));
+      if (values?.length !== 4 || !values.every(Number.isFinite)) return null;
+      const [x0 = 0, y0 = 0, x1 = 0, y1 = 0] = values;
+      if (
+        Math.max(x0, x1) > left &&
+        Math.min(x0, x1) < right &&
+        Math.max(y0, y1) > bottom &&
+        Math.min(y0, y1) < top
+      )
+        return null;
+    }
+  }
+  // Without a full graphics/annotation obstacle map, never grow outside the
+  // original paragraph rectangle on complex pages.
+  if (!selected.growthSafe || (annotations?.size() ?? 0) > 0) {
+    maxWidth = right - left;
+    height = top - bottom;
+  }
+  if (
+    !(height >= top - bottom - 0.01) ||
+    !(maxWidth >= right - left - 0.01) ||
+    left < crop.x ||
+    top > crop.y + crop.height
+  )
+    return null;
+  const text = members.map((run) => run.text.trim()).join(' ');
+  if (text.length > 4096) return null;
+  return {
+    members,
+    first,
+    left,
+    top,
+    bottom,
+    text,
+    frame: { width: right - left, maxWidth, height, lineHeight, lineCount: members.length },
+  };
 }
 
 export async function inspectSourceText(
   bytes: Uint8Array,
   pageIndex: number,
 ): Promise<readonly SourceTextRun[]> {
-  return indexPage(await loadLocalTextDocument(bytes), pageIndex).map(
-    ({ id, text, fontName, fontSize, bounds }) => ({
-      id,
-      text,
-      fontName,
-      fontSize,
+  const document = await loadLocalTextDocument(bytes),
+    runs = indexPage(document, pageIndex),
+    crop = document.getPage(pageIndex).getCropBox();
+  return runs.map((run) => {
+    const paragraph = paragraphFor(document, runs, run);
+    return {
+      id: run.id,
+      text: run.text,
+      fontName: run.fontName,
+      fontSize: run.fontSize,
+      ...(paragraph
+        ? {
+            paragraph: {
+              ...paragraph.frame,
+              id: paragraph.members[0]?.id ?? run.id,
+              text: paragraph.text,
+              bounds: {
+                x: (paragraph.left - crop.x) / crop.width,
+                y: (crop.y + crop.height - paragraph.top) / crop.height,
+                width: paragraph.frame.width / crop.width,
+                height: (paragraph.top - paragraph.bottom) / crop.height,
+              },
+            },
+          }
+        : {}),
       pageIndex,
-      ...(bounds ? { bounds } : {}),
-    }),
-  );
+      ...(run.bounds ? { bounds: run.bounds } : {}),
+    };
+  });
 }
+
+export interface ParagraphReflowOptions {
+  readonly width?: number;
+  readonly height?: number;
+}
+const isReflowOptions = (value: unknown): value is ParagraphReflowOptions =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/** Replace source strings and typeset the containing uniform paragraph. No
+ * covering paint, new font, shrinking, horizontal squeeze or rasterization. */
+export async function reflowSourceText(
+  bytes: Uint8Array,
+  id: string,
+  expectedText: string,
+  replacement: string,
+  range?: SourceTextRange,
+  options: ParagraphReflowOptions = {},
+): Promise<Uint8Array> {
+  const rangeScope: unknown = range?.scope;
+  if (
+    !validText(expectedText) ||
+    typeof replacement !== 'string' ||
+    !replacement.length ||
+    replacement.length > 4096 ||
+    !/^[\x20-\x7e\n]+$/u.test(replacement) ||
+    typeof id !== 'string' ||
+    !isReflowOptions(options) ||
+    (rangeScope !== undefined && rangeScope !== 'paragraph') ||
+    !/^\d+:\d+:\d+$/u.test(id)
+  )
+    return fail('SOURCE_TEXT_INVALID_CHANGE');
+  const document = await loadLocalTextDocument(bytes),
+    pageIndex = Number(id.split(':')[0]);
+  const runs = indexPage(document, pageIndex),
+    run = runs.find((item) => item.id === id);
+  if (run?.text !== expectedText) return fail('SOURCE_TEXT_STALE_CHANGE');
+  const paragraph = paragraphFor(document, runs, run);
+  if (!paragraph) return fail('SOURCE_TEXT_REFLOW_UNSUPPORTED');
+  const width = options.width ?? paragraph.frame.width,
+    height = options.height ?? paragraph.frame.height;
+  if (
+    ![width, height].every(Number.isFinite) ||
+    width <= 0 ||
+    height <= 0 ||
+    width > paragraph.frame.maxWidth + 0.01 ||
+    height > paragraph.frame.height + 0.01
+  )
+    return fail('SOURCE_TEXT_REFLOW_INVALID_FRAME');
+  const selectionText = range?.scope === 'paragraph' ? paragraph.text : run.text;
+  if (range?.scope === 'paragraph' && paragraph.members[0] !== run)
+    return fail('SOURCE_TEXT_INVALID_CHANGE');
+  const start = range?.start ?? 0,
+    end = range?.end ?? selectionText.length;
+  if (
+    ![start, end].every(Number.isSafeInteger) ||
+    start < 0 ||
+    end > selectionText.length ||
+    start >= end
+  )
+    return fail('SOURCE_TEXT_INVALID_CHANGE');
+  // Preserve the selected characters exactly; paragraph joins only infer the
+  // whitespace between existing visual lines.
+  const text =
+    range?.scope === 'paragraph'
+      ? paragraph.text.slice(0, start) + replacement + paragraph.text.slice(end)
+      : paragraph.members
+          .map((item) =>
+            item === run
+              ? (item.text.slice(0, start) + replacement + item.text.slice(end)).trim()
+              : item.text.trim(),
+          )
+          .join(' ');
+  if (text.length > 4096) return fail('SOURCE_TEXT_LIMIT');
+  const first = paragraph.first,
+    crop = document.getPage(pageIndex).getCropBox();
+  const measure = (value: string) =>
+    advanceText(first, value) * first.horizontalScale * first.matrix[0];
+  const lines = wrapParagraph(text, width, measure);
+  const em = first.fontSize * first.matrix[3];
+  const usedHeight = (lines.length - 1) * paragraph.frame.lineHeight + em * 1.1;
+  if (usedHeight > height + 0.01) return fail('SOURCE_TEXT_REFLOW_OVERFLOW');
+  const members = new Set(paragraph.members),
+    fragments = paragraph.members.flatMap((item) => item.fragments.map((part) => part.fragment));
+  for (const [index, page] of document.getPages().entries()) {
+    if (index === pageIndex) continue;
+    const raw = page.node.get(PDFName.of('Contents')),
+      value = document.context.lookup(raw);
+    if (
+      (value instanceof PDFArray ? value.asArray() : [raw]).some((ref) =>
+        fragments.some((f) => ref?.toString() === f.stream.toString()),
+      )
+    )
+      return fail('SOURCE_TEXT_SHARED_STREAM');
+  }
+  const outlines = snapshotOutlineStructures(document),
+    mcid = first.mcid;
+  if (document.catalog.has(PDFName.of('StructTreeRoot'))) {
+    if (
+      mcid === null ||
+      runs.some(
+        (item) => !members.has(item) && item.fragments.some((part) => part.fragment.mcid === mcid),
+      )
+    )
+      return fail('SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED');
+    updateSourceTextAccessibility(document, {
+      pageIndex,
+      markedContentId: mcid,
+      expectedText: paragraph.text,
+      replacementText: text,
+    });
+  }
+  const expectedTags = (await snapshotTagStructures(document))?.graph;
+  const decimal = (value: number): string => {
+    if (!Number.isFinite(value) || Math.abs(value) > 1e12)
+      return fail('SOURCE_TEXT_REFLOW_INVALID_FRAME');
+    return value.toFixed(10);
+  };
+  const matrixText = (matrix: TextMatrix) => matrix.map(decimal).join(' ');
+  let inserted = lines
+    .map(
+      (value, index) =>
+        `${matrixText(moveTextMatrix(first.textMatrix, 0, (-index * paragraph.frame.lineHeight) / first.matrix[3]))} Tm [${first.codec.encode(value)}] TJ`,
+    )
+    .join('\n');
+  const local = first.textMatrix,
+    line = first.lineMatrix;
+  const axis = line[0] * line[0] + line[1] * line[1];
+  const before =
+    ((local[4] - line[4]) * line[0] + (local[5] - line[5]) * line[1]) /
+    axis /
+    first.horizontalScale;
+  const restore = -(((before + advanceText(first, first.text)) * 1000) / first.fontSize);
+  inserted += `\n${matrixText(line)} Tm [${decimal(restore)}] TJ`;
+  const patches = new Map<
+    string,
+    { fragment: Fragment; start: number; end: number; value: string }[]
+  >();
+  for (const fragment of fragments) {
+    const encoded =
+      fragment === first
+        ? `<>] TJ ${inserted} [<>`
+        : `<> ${decimal((-advanceText(fragment, fragment.text) * 1000) / fragment.fontSize)}`;
+    const changes = patches.get(fragment.stream.toString()) ?? [];
+    changes.push({
+      fragment,
+      start: fragment.token.start,
+      end: fragment.operator.raw === 'Tj' ? fragment.operator.end : fragment.token.end,
+      value: fragment.operator.raw === 'Tj' ? `[${encoded}] TJ` : encoded,
+    });
+    patches.set(fragment.stream.toString(), changes);
+  }
+  for (const changes of patches.values()) {
+    const original = changes[0]?.fragment;
+    if (!original) return fail();
+    let changed = original.content;
+    for (const patch of changes.sort((a, b) => b.start - a.start))
+      changed = changed.slice(0, patch.start) + patch.value + changed.slice(patch.end);
+    document.context.assign(original.stream, document.context.flateStream(changed));
+  }
+  const saved = await document.save({ updateFieldAppearances: false }),
+    reopened = await PDFDocument.load(saved, { updateMetadata: false });
+  assertOutlineStructuresPreserved(outlines, reopened);
+  if (expectedTags !== (await snapshotTagStructures(reopened))?.graph)
+    return fail('SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED');
+  const verified = indexPage(reopened, pageIndex).filter(
+    (item) =>
+      item.bounds &&
+      item.fontName === first.fontName &&
+      item.fontSize === first.fontSize &&
+      item.bounds.x * crop.width + crop.x >= paragraph.left - 0.001 &&
+      (item.bounds.x + item.bounds.width) * crop.width + crop.x <= paragraph.left + width + 0.001 &&
+      crop.y + crop.height - item.bounds.y * crop.height <= paragraph.top + 0.001 &&
+      crop.y + crop.height - (item.bounds.y + item.bounds.height) * crop.height >=
+        paragraph.top - usedHeight - 0.001,
+  );
+  if (
+    verified
+      .map((item) => item.text)
+      .join('')
+      .replace(/\s/gu, '') !== text.replace(/\s/gu, '')
+  )
+    return fail('SOURCE_TEXT_VERIFICATION_FAILED');
+  return saved;
+}
+
 export async function replaceSourceText(
   bytes: Uint8Array,
   id: string,
@@ -735,6 +1110,7 @@ export async function replaceSourceText(
     !validText(expectedText) ||
     !validText(replacement) ||
     typeof fitToSpace !== 'boolean' ||
+    range?.scope !== undefined ||
     typeof id !== 'string' ||
     !/^\d+:\d+:\d+$/u.test(id)
   )

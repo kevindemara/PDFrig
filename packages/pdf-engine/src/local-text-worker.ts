@@ -1,4 +1,4 @@
-import { inspectSourceText, replaceSourceText } from './source-text.js';
+import { inspectSourceText, replaceSourceText, reflowSourceText } from './source-text.js';
 import { composeLocalOcr } from './local-ocr-compose.js';
 import type { LocalTextRequest } from './local-text-client.js';
 const scope = globalThis as unknown as {
@@ -23,14 +23,23 @@ scope.onmessage = (event) => {
       if (request.kind === 'inspect')
         result = await inspectSourceText(request.bytes, request.pageIndex);
       else if (request.kind === 'replace')
-        result = await replaceSourceText(
-          request.bytes,
-          request.id,
-          request.expectedText,
-          request.replacement,
-          request.range,
-          request.fitToSpace,
-        );
+        result = request.reflow
+          ? await reflowSourceText(
+              request.bytes,
+              request.id,
+              request.expectedText,
+              request.replacement,
+              request.range,
+              request.reflow,
+            )
+          : await replaceSourceText(
+              request.bytes,
+              request.id,
+              request.expectedText,
+              request.replacement,
+              request.range,
+              request.fitToSpace,
+            );
       else result = await composeLocalOcr(request.bytes, request.pageIndex, request.words);
       scope.postMessage({ ok: true, result });
     } catch (error) {

@@ -43,7 +43,11 @@ export const updateSourceTextAccessibility = (
         text.length > 4_096 ||
         Array.from(text).some((character) => {
           const point = character.codePointAt(0) ?? 0;
-          return point < 0x20 || point === 0x7f || (point >= 0xd800 && point <= 0xdfff);
+          return (
+            (point < 0x20 && point !== 0x0a) ||
+            point === 0x7f ||
+            (point >= 0xd800 && point <= 0xdfff)
+          );
         }),
     )
   )
