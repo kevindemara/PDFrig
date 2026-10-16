@@ -195,20 +195,34 @@ apply; hosting, domains and optional providers are not guaranteed free.
 ## Windows
 
 The shared editor runs in a Tauri 2 Windows shell. Building it requires the
-separate free Rust/C++/Windows SDK toolchain. An internal unsigned NSIS installer
-exists for controlled testing, but clean-machine installation, upgrade/uninstall,
-notices and release review remain open.
+separate free Rust/C++/Windows SDK toolchain. Internal unsigned NSIS build
+orchestration exists for controlled testing, but the current native build is
+blocked by Windows Application Control. **No current-source installer has been
+produced or install-tested. Windows compliance is not certified.** Old internal
+artifacts do not verify today's source. Clean-machine installation, upgrade/uninstall,
+notices and release review remain open; see the [Windows QA record](docs/operations/windows-installer-qa.json).
 
 ### Run from source
 
 Install Rust **1.98.0**, the free Microsoft C++ Build Tools workload and Windows
 SDK, plus WebView2. See the [official Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
-Then, from the repository root:
+First complete the Git/Node.js/pnpm setup in [Quick start](#quick-start), clone the
+repository and open PowerShell in its root. Confirm `node --version`,
+`pnpm --version`, `rustc --version` and `cargo --version` match the pinned tools.
+Use the `x86_64-pc-windows-msvc` Rust host, not the GNU host. In the Microsoft
+installer, select **Desktop development with C++**, including MSVC and a Windows
+SDK; install only tools whose terms you are eligible to use. Then run:
 
 ```powershell
 pnpm install --frozen-lockfile
 pnpm desktop:dev
 ```
+
+This opens the native development window; it does not install PDFrig. Keep the
+terminal open, save/export work before closing, and press Ctrl+C to stop it.
+If Windows blocks a build helper, stop: do not disable Application Control,
+rename/move executables, change policies or substitute toolchains to evade it.
+Use the browser preview until an approved developer/reference host is available.
 
 Native save creates a new file and refuses overwriting an existing file. The
 shell shares the same feature limits and local OCR assets. Native installed-app
@@ -252,10 +266,16 @@ It does not download or compile anything. If Cargo is not on PATH, set
 `PDFRIG_CARGO_PATH` to its approved installed executable; do not use another toolchain
 to evade a security-policy block. Reports stay in an ignored, fresh `tmp/desktop-notices-*`
 directory. The strict form exits unsuccessfully while any text gaps remain. As of
-October 16, 2026, 48 of the conservative 575 declared build-input records still lack
+October 16, 2026, 32 of the conservative 575 declared build-input records still lack
 retained notice text (down from 51); this is not a final-artifact SBOM or legal clearance.
-The three WebView2 supplements are checked against exact commits, original manifests,
-crate archive hashes and retained-text hashes. The internal installer uses this same collector.
+Nineteen exact-version supplements are checked against pinned commits, original
+manifests, crate archive hashes and retained-text hashes. Where an upstream crate
+offers alternative licenses, the retained branch is recorded, not applied to other
+components. A licensing explanation or SPDX declaration alone is not a replacement
+for missing full text. The [remaining-gap review](docs/dependencies/desktop-notice-review.json)
+records the unresolved groups and next evidence needed. Do not mark an optional
+dependency cleared merely because a Windows build may omit it; establish the final
+artifact's contents separately. The internal installer uses this same collector.
 
 Use only a disposable Windows x64 VM/reference machine. In a clean test checkout,
 `pnpm desktop:internal-build` prepares a current-user NSIS alpha installer,
