@@ -7,6 +7,11 @@ const fail = (code) => {
   throw new Error(`DESKTOP_NOTICES_${code}`);
 };
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const selectedBranchMatches = (entry) =>
+  entry.selectedLicense === undefined ||
+  (typeof entry.license === 'string' &&
+    typeof entry.selectedLicense === 'string' &&
+    entry.license.replaceAll('/', ' OR ').split(' OR ').includes(entry.selectedLicense));
 const within = (root, file) => {
   const relative = path.relative(path.resolve(root), path.resolve(file));
   return (
@@ -39,6 +44,7 @@ export async function loadDesktopLicenseSupplements(root) {
     return fail('INVALID_SUPPLEMENTS');
   const ids = new Set();
   for (const entry of manifest.packages) {
+    if (!selectedBranchMatches(entry)) return fail('SUPPLEMENT_LICENSE_CHOICE');
     const id = `${entry.name}@${entry.version}`;
     if (ids.has(id)) return fail('DUPLICATE_SUPPLEMENT');
     ids.add(id);
@@ -94,6 +100,7 @@ export async function retainPackageLicenseTexts(pkg, { root, supplements }) {
   if (!matches.length) return [];
   if (matches.length !== 1) return fail('DUPLICATE_SUPPLEMENT');
   const reviewed = matches[0];
+  if (!selectedBranchMatches(reviewed)) return fail('SUPPLEMENT_LICENSE_CHOICE');
   const registry = path.dirname(pkg.directory);
   if (
     path.basename(pkg.directory) !== `${pkg.name}-${pkg.version}` ||

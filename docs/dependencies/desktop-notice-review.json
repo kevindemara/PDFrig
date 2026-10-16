@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-16",
+  "publicReleaseApproved": false,
+  "scope": "Conservative declared Windows desktop build inputs, including optional and other-platform dependencies; not a final installed-artifact inventory or legal/security clearance.",
+  "declaredInputCount": 575,
+  "remainingTextGaps": 32,
+  "resolvedSupplementCount": 19,
+  "resolvedThisReview": 16,
+  "evidence": "desktop-license-supplements.json binds every retained source supplement to exact crate archive/original manifest hashes and source commits. Source Cargo.toml comparisons were byte-identical except the two dlopen2 manifests, which differed only by CRLF/LF. Missing path_in_vcs in older rust-unic archives is not invented: explicit sourceManifestPath plus byte-identical source manifests bind those paths.",
+  "branchPolicy": "The recorded selectedLicense identifies an offered alternative, not a rewrite of upstream licensing or clearance of vendored/native/data dependencies. All original declarations, copyrights and third-party rights remain applicable. No generic text is generated or borrowed from an unrelated version.",
+  "remainingGroups": [
+    {
+      "id": "objc2-family",
+      "packages": [
+        "block2@0.6.2",
+        "dispatch2@0.3.1",
+        "objc2-app-kit@0.3.2",
+        "objc2-cloud-kit@0.3.2",
+        "objc2-core-data@0.3.2",
+        "objc2-core-foundation@0.3.2",
+        "objc2-core-graphics@0.3.2",
+        "objc2-core-image@0.3.2",
+        "objc2-core-location@0.3.2",
+        "objc2-core-text@0.3.2",
+        "objc2-encode@4.1.0",
+        "objc2-exception-helper@0.1.1",
+        "objc2-foundation@0.3.2",
+        "objc2-io-surface@0.3.2",
+        "objc2-osa-kit@0.3.2",
+        "objc2-quartz-core@0.3.2",
+        "objc2-ui-kit@0.3.2",
+        "objc2-user-notifications@0.3.2",
+        "objc2-web-kit@0.3.2",
+        "objc2@0.6.4"
+      ],
+      "status": "upstream-declaration-without-full-text",
+      "evidence": [
+        "https://github.com/madsmtm/objc2/blob/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "https://github.com/madsmtm/objc2/blob/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md"
+      ],
+      "finding": "Inspected pinned upstream licence overview links to standard licence sites and discusses Apple SDK implications, but does not include full licence texts. Do not count that overview as retained full terms.",
+      "nextAction": "Obtain attributable version-bound terms/copyright evidence and resolve any applicable SDK obligations, or prove absence from the final Windows artifact. Do not auto-clear these other-platform declared inputs."
+    },
+    {
+      "id": "upstream-missing-or-incomplete-cargo-text",
+      "packages": ["cesu8@1.1.0", "r-efi@5.3.0", "r-efi@6.0.0", "selectors@0.36.1"],
+      "status": "full-version-bound-terms-and-obligations-needed",
+      "finding": "The inspected r-efi roots offer a choice in README/AUTHORS but no full root licence files. selectors has MPL source headers rather than a full packaged licence. cesu8 ships COPYRIGHT-RUST.txt referring to missing MIT/Apache texts; unrelated third-party excerpts do not supply the missing project terms.",
+      "nextAction": "Bind full upstream terms to exact packaged source; retain applicable attribution and review any source-availability obligations. A permissive SPDX declaration or licence URL is not enough."
+    },
+    {
+      "id": "older-cargo-provenance",
+      "packages": [
+        "rustls-platform-verifier-android@0.1.1",
+        "winapi-i686-pc-windows-gnu@0.4.0",
+        "winapi-x86_64-pc-windows-gnu@0.4.0"
+      ],
+      "status": "archive-to-upstream-source-binding-needed",
+      "finding": "These cached packages lack cargo VCS metadata. No current-branch generic licence is substituted.",
+      "nextAction": "Establish reproducible exact-version source/archive binding before retaining upstream texts, or establish final-artifact absence."
+    },
+    {
+      "id": "npm-and-optional-native",
+      "packages": [
+        "@napi-rs/canvas-win32-x64-msvc@1.0.7",
+        "brotli@1.3.3",
+        "dfa@1.2.0",
+        "fontkit@2.0.4",
+        "tr46@0.0.3"
+      ],
+      "status": "npm-source-and-vendored-obligations-needed",
+      "finding": "Installed packages lack root notice text. Native Canvas includes a Skia binary and ICU data; an npm MIT declaration does not clear those components. The optional Node canvas is not imported by the browser/WebView frontend, but this inventory does not prove final-artifact absence.",
+      "nextAction": "Bind npm integrity/gitHead and installed contents to exact-source notices. Inspect vendored Brotli/Skia/ICU obligations separately; prove artifact scope rather than suppressing gaps."
+    }
+  ],
+  "additionalDistributionGates": [
+    "Final installed-artifact SBOM, bundled asset/native/data notices, licence compatibility and legal review.",
+    "Project own-source licence approval remains UNLICENSED; this record grants no application redistribution permission.",
+    "Exact native OCR WASM dependency security clearance or refreshed minimal reproducible runtime.",
+    "Windows build and clean-machine installation/upgrade/uninstall/shortcuts/icons/offline OCR verification on an approved host; no App Control workaround.",
+    "Standalone production/self-hosting mode remains unfinished; development fake-provider mode must never be exposed publicly."
+  ]
+}

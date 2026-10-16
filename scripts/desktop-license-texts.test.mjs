@@ -125,6 +125,34 @@ test('desktop text paths cannot escape the package or repository root', async ()
   f.supplements.texts[0].path = '../private.txt';
   await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /UNSAFE_TEXT_PATH/u);
 });
+
+test('a retained licence choice must be one of the exact upstream alternatives, not a new grant', async () => {
+  const f = await fixture();
+  f.supplements.packages[0].selectedLicense = 'BSD-3-Clause';
+  await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /SUPPLEMENT_LICENSE_CHOICE/u);
+  f.supplements.packages[0].selectedLicense = 'MIT';
+  assert.equal((await retainPackageLicenseTexts(f.pkg, f)).length, 1);
+  for (const license of ['MIT OR Apache-2.0', 'MIT/Apache-2.0']) {
+    f.pkg.license = license;
+    f.supplements.packages[0].license = license;
+    assert.equal((await retainPackageLicenseTexts(f.pkg, f)).length, 1);
+  }
+  f.supplements.packages[0].license = 'MIT AND BSD-3-Clause';
+  await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /SUPPLEMENT_LICENSE_CHOICE/u);
+});
+
+test('old archives without a VCS path still require exact manifest/archive/commit bindings', async () => {
+  const f = await fixture();
+  delete f.supplements.packages[0].pathInVcs;
+  f.supplements.packages[0].sourceManifestPath = 'crates/sample/Cargo.toml';
+  await writeFile(
+    path.join(f.directory, '.cargo_vcs_info.json'),
+    JSON.stringify({ git: { sha1: 'a'.repeat(40) } }),
+  );
+  assert.equal((await retainPackageLicenseTexts(f.pkg, f)).length, 1);
+  await writeFile(path.join(f.directory, 'Cargo.toml.orig'), 'changed');
+  await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /SUPPLEMENT_BINDING_MISMATCH/u);
+});
 test('unreadable/empty/oversized notice inputs fail, not silently become complete', async () => {
   const f = await fixture();
   await writeFile(path.join(f.directory, 'LICENSE'), '');
@@ -132,18 +160,29 @@ test('unreadable/empty/oversized notice inputs fail, not silently become complet
   await writeFile(path.join(f.directory, 'LICENSE'), Buffer.alloc(1024 * 1024 + 1, 65));
   await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /INVALID_TEXT_FILE/u);
 });
-test('reviewed real WebView2 text and source metadata stay integrity bound, without granting release approval', async () => {
+test('reviewed real source texts and metadata stay integrity bound, without granting release approval', async () => {
   const manifest = await loadDesktopLicenseSupplements(repository);
   assert.equal(manifest.publicReleaseApproved, false);
-  assert.equal(manifest.packages.length, 3);
-  assert.ok(
-    manifest.packages.every(
-      (pkg) => pkg.license === 'MIT' && /^[a-f0-9]{64}$/u.test(pkg.archiveSha256),
-    ),
-  );
+  assert.equal(manifest.packages.length, 19);
+  assert.ok(manifest.packages.every((pkg) => /^[a-f0-9]{64}$/u.test(pkg.archiveSha256)));
   const text = await readFile(path.join(repository, manifest.texts[0].path), 'utf8');
   assert.match(text, /Copyright \(c\) 2021 Bill Avery/u);
   assert.match(text, /THE SOFTWARE IS PROVIDED "AS IS"/u);
+  for (const pkg of manifest.packages) {
+    const retained = manifest.texts.find((entry) => entry.id === pkg.textId);
+    assert.ok(retained, `Missing retained text for ${pkg.name}`);
+    assert.ok(retained.sources.some((source) => source.includes(`/${pkg.commit}/`)));
+    assert.match(pkg.manifestSha256, /^[a-f0-9]{64}$/u);
+    if (pkg.selectedLicense) {
+      assert.ok(pkg.license.replaceAll('/', ' OR ').split(' OR ').includes(pkg.selectedLicense));
+      assert.match(pkg.sourceManifestSha256, /^[a-f0-9]{64}$/u);
+      assert.ok(['byte-identical', 'line-endings-only'].includes(pkg.sourceManifestComparison));
+      assert.equal(
+        pkg.sourceManifestSha256 === pkg.manifestSha256,
+        pkg.sourceManifestComparison === 'byte-identical',
+      );
+    }
+  }
   const build = await readFile(path.join(repository, 'scripts/build-internal-windows.mjs'), 'utf8');
   assert.match(build, /await prepareDesktopNotices\(/u);
   const audit = await readFile(

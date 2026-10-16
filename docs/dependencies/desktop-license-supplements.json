@@ -13,6 +13,89 @@
         "https://raw.githubusercontent.com/wravery/webview2-rs/b74dc5e2b394044bea5191052868ce7a106c202c/LICENSE",
         "https://raw.githubusercontent.com/wravery/webview2-rs/dffa41a8a46d3f5565eefbff2de57d38d399f158/LICENSE"
       ]
+    },
+    {
+      "id": "rust-alloc-BSD",
+      "path": "docs/dependencies/upstream/rust-alloc-BSD.txt",
+      "sha256": "c0c56f26d9c051cac4d200c34c84e7ae9aaa853e01a982a1df08b09931e518ae",
+      "gitBlob": "cd496ba72eb37e83a44958358d1f89a8a28cbc15",
+      "sources": [
+        "https://raw.githubusercontent.com/dropbox/rust-alloc-no-stdlib/ae42d22078b98549e987d2f03d12df7b984fde47/LICENSE"
+      ]
+    },
+    {
+      "id": "dlopen2-MIT",
+      "path": "docs/dependencies/upstream/dlopen2-MIT.txt",
+      "sha256": "39fa265207450e77c62e90c5594a06c085b655d8374c7ced4bf7894b6bd95dd2",
+      "gitBlob": "d38093a7a564c64ad15e459f2e0a1f86a443c8b3",
+      "sources": [
+        "https://raw.githubusercontent.com/OpenByteDev/dlopen2/cc80e4a0a90d499b677fdf7743699b4b3a43a989/LICENSE"
+      ]
+    },
+    {
+      "id": "jni-rs-MIT",
+      "path": "docs/dependencies/upstream/jni-rs-MIT.txt",
+      "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960",
+      "gitBlob": "74323882c4eeb6ce9f75f1f3269d212038f394d2",
+      "sources": [
+        "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT",
+        "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT"
+      ]
+    },
+    {
+      "id": "jni-sys-MIT",
+      "path": "docs/dependencies/upstream/jni-sys-MIT.txt",
+      "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1",
+      "gitBlob": "2008402b8a1299cf118ea38e02116bfcc72e53c3",
+      "sources": [
+        "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT"
+      ]
+    },
+    {
+      "id": "ndk-MIT",
+      "path": "docs/dependencies/upstream/ndk-MIT.txt",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "gitBlob": "9cf106272ac3b56b0c4c80218e8fc10a664ca5f4",
+      "sources": [
+        "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT"
+      ]
+    },
+    {
+      "id": "tauri-MIT",
+      "path": "docs/dependencies/upstream/tauri-MIT.txt",
+      "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d",
+      "gitBlob": "b08530d59433b3060f4fad8751ac2610c0b0aff3",
+      "sources": [
+        "https://raw.githubusercontent.com/tauri-apps/tauri/6f6ab1207bb3923c2721fbc67d2fdb1c8deb0c7a/LICENSE_MIT"
+      ]
+    },
+    {
+      "id": "defmt-Apache-2.0",
+      "path": "docs/dependencies/upstream/defmt-Apache-2.0.txt",
+      "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90",
+      "gitBlob": "11069edd79019f7dafbe3138841cf289209270dd",
+      "sources": [
+        "https://raw.githubusercontent.com/knurling-rs/defmt/4a8cdb44891ed57b8ff5a023b6bec7137c48708f/LICENSE-APACHE"
+      ]
+    },
+    {
+      "id": "libappindicator-rs-MIT",
+      "path": "docs/dependencies/upstream/libappindicator-rs-MIT.txt",
+      "sha256": "eb227437252b2a7a9c1fc342c93ade1f3d7ce38cc6dd754f613db07d53ceff0b",
+      "gitBlob": "50e79e21ccd1454f00695108ae01eaff9569689a",
+      "sources": [
+        "https://raw.githubusercontent.com/tauri-apps/libappindicator-rs/eafd1e3682a1247f595410266091e9684021cb6f/LICENSE-MIT"
+      ]
+    },
+    {
+      "id": "rust-unic-MIT",
+      "path": "docs/dependencies/upstream/rust-unic-MIT.txt",
+      "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+      "gitBlob": "31aa79387f27e730e33d871925e152e35e428031",
+      "sources": [
+        "https://raw.githubusercontent.com/open-i18n/rust-unic/5878605364af97a3358368a6eaef02104af2e016/LICENSE-MIT",
+        "https://raw.githubusercontent.com/open-i18n/rust-unic/8a6ce83063d90b91ae2ce59eddb803edd393fca9/LICENSE-MIT"
+      ]
     }
   ],
   "packages": [
@@ -45,6 +128,215 @@
       "manifestSha256": "00229c125c597e4f0ddb9e598738ee5b38a9086fd59eea6d2577cdda5f8e5875",
       "archiveSha256": "381336cfffd772377d291702245447a5251a2ffa5bad679c99e61bc48bacbf9c",
       "textId": "webview2-rs-mit"
+    },
+    {
+      "name": "alloc-stdlib",
+      "version": "0.2.4",
+      "license": "BSD-3-Clause",
+      "commit": "ae42d22078b98549e987d2f03d12df7b984fde47",
+      "pathInVcs": "alloc-stdlib",
+      "manifestSha256": "77cff698112ee833c7c2e2b42c2b51677502ee04ca4a0c213155e3494a80fec3",
+      "sourceManifestSha256": "77cff698112ee833c7c2e2b42c2b51677502ee04ca4a0c213155e3494a80fec3",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "0e76a019e91224d279006ff972f1e984179a6e9feb050adba6ce8274aef23195",
+      "selectedLicense": "BSD-3-Clause",
+      "textId": "rust-alloc-BSD"
+    },
+    {
+      "name": "defmt-parser",
+      "version": "1.0.0",
+      "license": "MIT OR Apache-2.0",
+      "commit": "4a8cdb44891ed57b8ff5a023b6bec7137c48708f",
+      "pathInVcs": "parser",
+      "manifestSha256": "5d5c0e139cf4076aad5d1f8b992a7b8c9095f5443dab0f9d1da020101adea245",
+      "sourceManifestSha256": "5d5c0e139cf4076aad5d1f8b992a7b8c9095f5443dab0f9d1da020101adea245",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "10d60334b3b2e7c9d91ef8150abfb6fa4c1c39ebbcf4a81c2e346aad939fee3e",
+      "selectedLicense": "Apache-2.0",
+      "textId": "defmt-Apache-2.0"
+    },
+    {
+      "name": "dlopen2",
+      "version": "0.8.2",
+      "license": "MIT",
+      "commit": "cc80e4a0a90d499b677fdf7743699b4b3a43a989",
+      "pathInVcs": "dlopen2",
+      "manifestSha256": "4db2cb7eef7db93aac79ebab07af14ef27e00cc322ebb9f3744fcc971a1a6b6a",
+      "sourceManifestSha256": "0153c3c729490e105d65aa883c3891323ae801aedbf24eac4edbe21de6d2efa7",
+      "sourceManifestComparison": "line-endings-only",
+      "archiveSha256": "5e2c5bd4158e66d1e215c49b837e11d62f3267b30c92f1d171c4d3105e3dc4d4",
+      "selectedLicense": "MIT",
+      "textId": "dlopen2-MIT"
+    },
+    {
+      "name": "dlopen2_derive",
+      "version": "0.4.3",
+      "license": "MIT",
+      "commit": "cc80e4a0a90d499b677fdf7743699b4b3a43a989",
+      "pathInVcs": "dlopen2-derive",
+      "manifestSha256": "5e3d2d7fe64c4b47b01d4c2e88dbf669bf0950d937b43757b48f965bea4e254a",
+      "sourceManifestSha256": "8a2558abfe3b44960eaca355b1f3262b86d27760978f8a34d317d1b3daa92965",
+      "sourceManifestComparison": "line-endings-only",
+      "archiveSha256": "0fbbb781877580993a8707ec48672673ec7b81eeba04cfd2310bd28c08e47c8f",
+      "selectedLicense": "MIT",
+      "textId": "dlopen2-MIT"
+    },
+    {
+      "name": "jni",
+      "version": "0.22.4",
+      "license": "MIT OR Apache-2.0",
+      "commit": "5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7",
+      "pathInVcs": "crates/jni",
+      "manifestSha256": "420d0c6c04c3579946386ceea541bf5dd5f564b6b190e76568cce83bad0b9db3",
+      "sourceManifestSha256": "420d0c6c04c3579946386ceea541bf5dd5f564b6b190e76568cce83bad0b9db3",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "5efd9a482cf3a427f00d6b35f14332adc7902ce91efb778580e180ff90fa3498",
+      "selectedLicense": "MIT",
+      "textId": "jni-rs-MIT"
+    },
+    {
+      "name": "jni-macros",
+      "version": "0.22.4",
+      "license": "MIT OR Apache-2.0",
+      "commit": "33045a124105c939d1e2cbdcb5a39e5d868ffa03",
+      "pathInVcs": "crates/jni-macros",
+      "manifestSha256": "cfa3ca54bc23baa582a42df863f397debe8c4312a80ead221e8e049b834f93b5",
+      "sourceManifestSha256": "cfa3ca54bc23baa582a42df863f397debe8c4312a80ead221e8e049b834f93b5",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "a00109accc170f0bdb141fed3e393c565b6f5e072365c3bd58f5b062591560a3",
+      "selectedLicense": "MIT",
+      "textId": "jni-rs-MIT"
+    },
+    {
+      "name": "jni-sys-macros",
+      "version": "0.4.1",
+      "license": "MIT OR Apache-2.0",
+      "commit": "64d77b7a5f119d7b55b4e2c169a4668067ff59e6",
+      "pathInVcs": "jni-sys-macros",
+      "manifestSha256": "6501ef93eff9b37ab65ec846bd06992d79cc28d8ef1f02f13b0488ff441ed90a",
+      "sourceManifestSha256": "6501ef93eff9b37ab65ec846bd06992d79cc28d8ef1f02f13b0488ff441ed90a",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "38c0b942f458fe50cdac086d2f946512305e5631e720728f2a61aabcd47a6264",
+      "selectedLicense": "MIT",
+      "textId": "jni-sys-MIT"
+    },
+    {
+      "name": "ndk",
+      "version": "0.9.0",
+      "license": "MIT OR Apache-2.0",
+      "commit": "49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25",
+      "pathInVcs": "ndk",
+      "manifestSha256": "2fef16f26085f508a2404e52d4ed9dc54dbc915cf89c2868f25fb49a2e940e2a",
+      "sourceManifestSha256": "2fef16f26085f508a2404e52d4ed9dc54dbc915cf89c2868f25fb49a2e940e2a",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "c3f42e7bbe13d351b6bead8286a43aac9534b82bd3cc43e47037f012ebfd62d4",
+      "selectedLicense": "MIT",
+      "textId": "ndk-MIT"
+    },
+    {
+      "name": "ndk-sys",
+      "version": "0.6.0+11769913",
+      "license": "MIT OR Apache-2.0",
+      "commit": "49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25",
+      "pathInVcs": "ndk-sys",
+      "manifestSha256": "c860c6b92e9c7fb701d0ab8ba09b2ec6f35c78a3c609fcc32e73581b3e230eb1",
+      "sourceManifestSha256": "c860c6b92e9c7fb701d0ab8ba09b2ec6f35c78a3c609fcc32e73581b3e230eb1",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873",
+      "selectedLicense": "MIT",
+      "textId": "ndk-MIT"
+    },
+    {
+      "name": "tauri-plugin",
+      "version": "2.6.3",
+      "license": "Apache-2.0 OR MIT",
+      "commit": "6f6ab1207bb3923c2721fbc67d2fdb1c8deb0c7a",
+      "pathInVcs": "crates/tauri-plugin",
+      "manifestSha256": "cb733ae0ff8eae3102f43bbd4f2d7b0dba57de0e9df941685878f6c8f4173d34",
+      "sourceManifestSha256": "cb733ae0ff8eae3102f43bbd4f2d7b0dba57de0e9df941685878f6c8f4173d34",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "74be5dd4bed9afbd145e5716b5fa2ec28cbc29c34ffa61c258c9273d896c8020",
+      "selectedLicense": "MIT",
+      "textId": "tauri-MIT"
+    },
+    {
+      "name": "libappindicator-sys",
+      "version": "0.9.0",
+      "license": "Apache-2.0 OR MIT",
+      "commit": "eafd1e3682a1247f595410266091e9684021cb6f",
+      "pathInVcs": "sys",
+      "sourceManifestPath": "sys/Cargo.toml",
+      "manifestSha256": "ffa544131659aeeff24cdf56faf7f89e0dcd4e1eb0f6e03b1616436eab4bc815",
+      "sourceManifestSha256": "ffa544131659aeeff24cdf56faf7f89e0dcd4e1eb0f6e03b1616436eab4bc815",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "6e9ec52138abedcc58dc17a7c6c0c00a2bdb4f3427c7f63fa97fd0d859155caf",
+      "selectedLicense": "MIT",
+      "textId": "libappindicator-rs-MIT"
+    },
+    {
+      "name": "unic-char-property",
+      "version": "0.9.0",
+      "license": "MIT/Apache-2.0",
+      "commit": "5878605364af97a3358368a6eaef02104af2e016",
+      "sourceManifestPath": "unic/char/property/Cargo.toml",
+      "manifestSha256": "132a2ace33bbc5f54a2c4a4b522f96b7260c9e0fdb7756a753b4017e101e86d0",
+      "sourceManifestSha256": "132a2ace33bbc5f54a2c4a4b522f96b7260c9e0fdb7756a753b4017e101e86d0",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "a8c57a407d9b6fa02b4795eb81c5b6652060a15a7903ea981f3d723e6c0be221",
+      "selectedLicense": "MIT",
+      "textId": "rust-unic-MIT"
+    },
+    {
+      "name": "unic-char-range",
+      "version": "0.9.0",
+      "license": "MIT/Apache-2.0",
+      "commit": "5878605364af97a3358368a6eaef02104af2e016",
+      "sourceManifestPath": "unic/char/range/Cargo.toml",
+      "manifestSha256": "d176bfd5d70a75b4b8b27ee24e9a8bdd3138aaa3bf0903a7f58497b4e4490f59",
+      "sourceManifestSha256": "d176bfd5d70a75b4b8b27ee24e9a8bdd3138aaa3bf0903a7f58497b4e4490f59",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "0398022d5f700414f6b899e10b8348231abf9173fa93144cbc1a43b9793c1fbc",
+      "selectedLicense": "MIT",
+      "textId": "rust-unic-MIT"
+    },
+    {
+      "name": "unic-common",
+      "version": "0.9.0",
+      "license": "MIT/Apache-2.0",
+      "commit": "5878605364af97a3358368a6eaef02104af2e016",
+      "sourceManifestPath": "unic/common/Cargo.toml",
+      "manifestSha256": "5c74ebf8b8eede95170fbef14b6050735ce8993ce265978f41562386cb0c2bb9",
+      "sourceManifestSha256": "5c74ebf8b8eede95170fbef14b6050735ce8993ce265978f41562386cb0c2bb9",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "80d7ff825a6a654ee85a63e80f92f054f904f21e7d12da4e22f9834a4aaa35bc",
+      "selectedLicense": "MIT",
+      "textId": "rust-unic-MIT"
+    },
+    {
+      "name": "unic-ucd-ident",
+      "version": "0.9.0",
+      "license": "MIT/Apache-2.0",
+      "commit": "8a6ce83063d90b91ae2ce59eddb803edd393fca9",
+      "sourceManifestPath": "unic/ucd/ident/Cargo.toml",
+      "manifestSha256": "9c1c7cfc028e70f52a6a5bdc126c9348837783e5e3e059429c05fadb9af8ec8d",
+      "sourceManifestSha256": "9c1c7cfc028e70f52a6a5bdc126c9348837783e5e3e059429c05fadb9af8ec8d",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "e230a37c0381caa9219d67cf063aa3a375ffed5bf541a452db16e744bdab6987",
+      "selectedLicense": "MIT",
+      "textId": "rust-unic-MIT"
+    },
+    {
+      "name": "unic-ucd-version",
+      "version": "0.9.0",
+      "license": "MIT/Apache-2.0",
+      "commit": "5878605364af97a3358368a6eaef02104af2e016",
+      "sourceManifestPath": "unic/ucd/version/Cargo.toml",
+      "manifestSha256": "6411d1d10e5bf720a19366db6ab5f4c84cf1156c7033fafbd941f64729bd027c",
+      "sourceManifestSha256": "6411d1d10e5bf720a19366db6ab5f4c84cf1156c7033fafbd941f64729bd027c",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "96bd2f2237fe450fcd0a1d2f5f4e91711124f7857ba2e964247776ebeeb7b0c4",
+      "selectedLicense": "MIT",
+      "textId": "rust-unic-MIT"
     }
   ]
 }
