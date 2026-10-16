@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reviewDate": "2026-10-16",
   "publicReleaseApproved": false,
-  "scope": "Exact-source supplemental notice text for crates that omit upstream root licences. Not a complete final-artifact SBOM or legal approval. Crate archive, original manifest, VCS binding and retained text hashes must match; no generic licence templates or latest-branch fallback.",
+  "scope": "Exact-source supplemental notice text for crates that omit upstream root licences. Not a complete final-artifact SBOM or legal approval. Crate archive, original manifest, VCS binding and retained text hashes must match; no generic licence templates or latest-branch fallback. An explicitly adopted, versioned standard licence may be retained from its steward only with an exact-source notice/header binding and source-availability information; this is not an inferred grant.",
   "texts": [
     {
       "id": "webview2-rs-mit",
@@ -95,6 +95,34 @@
       "sources": [
         "https://raw.githubusercontent.com/open-i18n/rust-unic/5878605364af97a3358368a6eaef02104af2e016/LICENSE-MIT",
         "https://raw.githubusercontent.com/open-i18n/rust-unic/8a6ce83063d90b91ae2ce59eddb803edd393fca9/LICENSE-MIT"
+      ]
+    },
+    {
+      "id": "mozilla-MPL-2.0",
+      "path": "docs/dependencies/upstream/Mozilla-MPL-2.0.txt",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
+      "gitBlob": "d0a1fa1482eea82e19510e7920cbe3a03e41f691",
+      "sources": [
+        "https://raw.githubusercontent.com/mozilla/bedrock/44ed96d8f4c73e7597cc6bd55a3e2fe4ba66a4b6/media/MPL/2.0/index.txt"
+      ],
+      "canonicalUrl": "https://www.mozilla.org/MPL/2.0/index.txt"
+    },
+    {
+      "id": "r-efi-5.3.0-AUTHORS",
+      "path": "docs/dependencies/upstream/r-efi-5.3.0-AUTHORS.txt",
+      "sha256": "ff92bed461f50338dd703a9ba9aee496a425957873df1d91192776e4bdf5dda7",
+      "gitBlob": "7397b2bd6a8580d51fe7b23783f8f1a05fa70291",
+      "sources": [
+        "https://raw.githubusercontent.com/r-efi/r-efi/97b55bed1c2c91dcbf787674849f05337ff80b33/AUTHORS"
+      ]
+    },
+    {
+      "id": "r-efi-6.0.0-AUTHORS",
+      "path": "docs/dependencies/upstream/r-efi-6.0.0-AUTHORS.txt",
+      "sha256": "d027e91dbc9cdbb2f1190068e498bd6b61cff022b6a032b191021ba658d96111",
+      "gitBlob": "79c8b7c4a1dabcfbc718b7fe6d43b1892f9850cd",
+      "sources": [
+        "https://raw.githubusercontent.com/r-efi/r-efi/7e1b0322d31d625f81a5656096330934f9cd835d/AUTHORS"
       ]
     }
   ],
@@ -337,6 +365,54 @@
       "archiveSha256": "96bd2f2237fe450fcd0a1d2f5f4e91711124f7857ba2e964247776ebeeb7b0c4",
       "selectedLicense": "MIT",
       "textId": "rust-unic-MIT"
+    },
+    {
+      "name": "selectors",
+      "version": "0.36.1",
+      "license": "MPL-2.0",
+      "selectedLicense": "MPL-2.0",
+      "commit": "635e1a19d02960588a00e189bd4bd5bdb150ec3d",
+      "pathInVcs": "selectors",
+      "manifestSha256": "be6ed6441d04b710178c3b50052672755e15e5cf3780060ca9fdd2c8aba1d392",
+      "sourceManifestSha256": "be6ed6441d04b710178c3b50052672755e15e5cf3780060ca9fdd2c8aba1d392",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "c5d9c0c92a92d33f08817311cf3f2c29a3538a8240e94a6a3c622ce652d7e00c",
+      "textId": "mozilla-MPL-2.0",
+      "licenseReference": {
+        "file": "lib.rs",
+        "sha256": "d54c6e13e9e952dac17d209171df8657e3cae93beaddace4906150cdec8d02e9",
+        "notice": "/* This Source Code Form is subject to the terms of the Mozilla Public\n * License, v. 2.0. If a copy of the MPL was not distributed with this\n * file, You can obtain one at https://mozilla.org/MPL/2.0/. */",
+        "url": "https://mozilla.org/MPL/2.0/",
+        "source": "https://raw.githubusercontent.com/servo/stylo/635e1a19d02960588a00e189bd4bd5bdb150ec3d/selectors/lib.rs",
+        "sourceArchive": "https://static.crates.io/crates/selectors/selectors-0.36.1.crate",
+        "unmodified": true
+      }
+    },
+    {
+      "name": "r-efi",
+      "version": "5.3.0",
+      "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "selectedLicense": "MIT",
+      "commit": "97b55bed1c2c91dcbf787674849f05337ff80b33",
+      "pathInVcs": "",
+      "manifestSha256": "57b6d9b9a1b6524f6b4dcc1dd24970ac03e6959786a6cfedaec9ba52878b4d3e",
+      "sourceManifestSha256": "57b6d9b9a1b6524f6b4dcc1dd24970ac03e6959786a6cfedaec9ba52878b4d3e",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f",
+      "textId": "r-efi-5.3.0-AUTHORS"
+    },
+    {
+      "name": "r-efi",
+      "version": "6.0.0",
+      "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "selectedLicense": "MIT",
+      "commit": "7e1b0322d31d625f81a5656096330934f9cd835d",
+      "pathInVcs": "",
+      "manifestSha256": "b8e89c393831c2161b6d390bd40422910ac34f02903ad39edd85ec38d4513fef",
+      "sourceManifestSha256": "b8e89c393831c2161b6d390bd40422910ac34f02903ad39edd85ec38d4513fef",
+      "sourceManifestComparison": "byte-identical",
+      "archiveSha256": "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf",
+      "textId": "r-efi-6.0.0-AUTHORS"
     }
   ]
 }

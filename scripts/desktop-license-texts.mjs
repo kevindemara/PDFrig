@@ -126,14 +126,53 @@ export async function retainPackageLicenseTexts(pkg, { root, supplements }) {
   if (!textEntry) return fail('SUPPLEMENT_TEXT_MISSING');
   const bytes = await boundedFile(root, textEntry.path);
   if (hash(bytes) !== textEntry.sha256) return fail('SUPPLEMENT_TEXT_MISMATCH');
+  const reference = reviewed.licenseReference;
+  let sourceNotice;
+  if (reference) {
+    if (
+      pkg.name !== 'selectors' ||
+      pkg.version !== '0.36.1' ||
+      reviewed.license !== 'MPL-2.0' ||
+      reference.unmodified !== true ||
+      reference.file !== 'lib.rs' ||
+      typeof reference.notice !== 'string' ||
+      reference.notice.length < 100 ||
+      reference.notice.length > 2048 ||
+      reference.source !==
+        `https://raw.githubusercontent.com/servo/stylo/${reviewed.commit}/selectors/lib.rs` ||
+      reference.url !== 'https://mozilla.org/MPL/2.0/' ||
+      reference.sourceArchive !==
+        `https://static.crates.io/crates/${pkg.name}/${pkg.name}-${pkg.version}.crate` ||
+      textEntry.canonicalUrl !== 'https://www.mozilla.org/MPL/2.0/index.txt'
+    )
+      return fail('STANDARD_REFERENCE_INVALID');
+    const source = await boundedFile(pkg.directory, reference.file);
+    if (
+      hash(source) !== reference.sha256 ||
+      !source.toString('utf8').startsWith(reference.notice) ||
+      !reference.notice.includes(reference.url)
+    )
+      return fail('STANDARD_REFERENCE_MISMATCH');
+    const noticeText = `${reference.notice}\n\nUnmodified ${pkg.name} ${pkg.version} source is available at:\n${reference.sourceArchive}\nSHA-256 ${reviewed.archiveSha256}\nThird-party source retains its MPL-2.0 rights; PDFrig terms do not restrict those rights.\n`;
+    sourceNotice = {
+      file: reference.file,
+      sha256: hash(Buffer.from(noticeText)),
+      sourceSha256: hash(source),
+      origin: 'reviewed-standard-license-reference',
+      commit: reviewed.commit,
+      text: noticeText,
+    };
+  }
   return [
     {
       file: textEntry.path,
       sha256: hash(bytes),
       origin: 'reviewed-source-supplement',
       commit: reviewed.commit,
+      ...(reviewed.selectedLicense ? { selectedLicense: reviewed.selectedLicense } : {}),
       text: bytes.toString('utf8'),
     },
+    ...(sourceNotice ? [sourceNotice] : []),
   ];
 }
 

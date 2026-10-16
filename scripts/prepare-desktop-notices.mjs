@@ -7,6 +7,7 @@ import {
   collectDesktopLicenseNotices,
   loadDesktopLicenseSupplements,
 } from './desktop-license-texts.mjs';
+import { desktopNoticeScope } from './desktop-notice-scope.mjs';
 
 export async function prepareDesktopNotices({
   root,
@@ -16,27 +17,31 @@ export async function prepareDesktopNotices({
   version = '0.0.0',
 }) {
   if (!pnpmCli) throw new Error('DESKTOP_NOTICES_USE_PNPM');
-  const cargo = JSON.parse(
-    execFileSync(
-      process.env.PDFRIG_CARGO_PATH ?? 'cargo',
-      [
-        'metadata',
-        '--locked',
-        '--offline',
-        '--format-version',
-        '1',
-        '--manifest-path',
-        'apps/desktop/src-tauri/Cargo.toml',
-      ],
-      {
-        cwd: root,
-        encoding: 'utf8',
-        maxBuffer: 32 * 1024 * 1024,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        windowsHide: true,
-      },
-    ),
-  );
+  const readCargo = (extra = []) =>
+    JSON.parse(
+      execFileSync(
+        process.env.PDFRIG_CARGO_PATH ?? 'cargo',
+        [
+          'metadata',
+          '--locked',
+          '--offline',
+          ...extra,
+          '--format-version',
+          '1',
+          '--manifest-path',
+          'apps/desktop/src-tauri/Cargo.toml',
+        ],
+        {
+          cwd: root,
+          encoding: 'utf8',
+          maxBuffer: 32 * 1024 * 1024,
+          stdio: ['ignore', 'pipe', 'pipe'],
+          windowsHide: true,
+        },
+      ),
+    );
+  const cargo = readCargo();
+  const targetCargo = readCargo(['--filter-platform', 'x86_64-pc-windows-msvc']);
   const licenses = JSON.parse(
     execFileSync(
       process.execPath,
@@ -76,6 +81,12 @@ export async function prepareDesktopNotices({
     root,
     supplements: await loadDesktopLicenseSupplements(root),
   });
+  const targetScope = desktopNoticeScope(
+    cargo,
+    targetCargo,
+    packages.filter((pkg) => pkg.ecosystem === 'npm'),
+    result.gaps,
+  );
   await mkdir(output, { recursive: true });
   for (const [filename, value] of [
     [
@@ -89,6 +100,7 @@ export async function prepareDesktopNotices({
       },
     ],
     ['license-text-gaps.json', result.gaps],
+    ['windows-msvc-scope.json', targetScope],
     [
       'license-text-provenance.json',
       {

@@ -9,13 +9,14 @@ import {
   loadDesktopLicenseSupplements,
   retainPackageLicenseTexts,
 } from './desktop-license-texts.mjs';
+import { desktopNoticeScope } from './desktop-notice-scope.mjs';
 
 const repository = fileURLToPath(new URL('../', import.meta.url));
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
-async function fixture() {
+async function fixture(name = 'sample', version = '1.0.0') {
   await mkdir(path.join(repository, 'tmp'), { recursive: true });
   const root = await mkdtemp(path.join(repository, 'tmp/notice-test-'));
-  const directory = path.join(root, 'registry/src/index.test/sample-1.0.0');
+  const directory = path.join(root, `registry/src/index.test/${name}-${version}`);
   const cache = path.join(root, 'registry/cache/index.test');
   await mkdir(directory, { recursive: true });
   await mkdir(cache, { recursive: true });
@@ -28,7 +29,7 @@ async function fixture() {
     path.join(directory, '.cargo_vcs_info.json'),
     JSON.stringify({ git: { sha1: 'a'.repeat(40) }, path_in_vcs: 'crates/sample' }),
   );
-  await writeFile(path.join(cache, 'sample-1.0.0.crate'), archive);
+  await writeFile(path.join(cache, `${name}-${version}.crate`), archive);
   const supplements = {
     schemaVersion: 1,
     publicReleaseApproved: false,
@@ -45,8 +46,8 @@ async function fixture() {
     ],
     packages: [
       {
-        name: 'sample',
-        version: '1.0.0',
+        name,
+        version,
         license: 'MIT',
         commit: 'a'.repeat(40),
         pathInVcs: 'crates/sample',
@@ -61,7 +62,7 @@ async function fixture() {
     directory,
     cache,
     supplements,
-    pkg: { ecosystem: 'cargo', name: 'sample', version: '1.0.0', license: 'MIT', directory },
+    pkg: { ecosystem: 'cargo', name, version, license: 'MIT', directory },
   };
 }
 test('desktop notice retention preserves all packaged texts and explicit nested license_file', async () => {
@@ -160,10 +161,84 @@ test('unreadable/empty/oversized notice inputs fail, not silently become complet
   await writeFile(path.join(f.directory, 'LICENSE'), Buffer.alloc(1024 * 1024 + 1, 65));
   await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /INVALID_TEXT_FILE/u);
 });
+
+test('MPL reference retains full steward terms, bound source notice and exact unmodified source location', async () => {
+  const f = await fixture('selectors', '0.36.1');
+  const notice =
+    '/* Synthetic source notice for collector QA: Mozilla Public License v. 2.0. Obtain the referenced full licence at https://mozilla.org/MPL/2.0/. */';
+  const source = notice + '\nSynthetic source body\n';
+  await writeFile(path.join(f.directory, 'lib.rs'), source);
+  f.pkg.license = 'MPL-2.0';
+  const reviewed = f.supplements.packages[0];
+  reviewed.license = 'MPL-2.0';
+  reviewed.licenseReference = {
+    file: 'lib.rs',
+    sha256: hash(source),
+    notice,
+    url: 'https://mozilla.org/MPL/2.0/',
+    source: `https://raw.githubusercontent.com/servo/stylo/${reviewed.commit}/selectors/lib.rs`,
+    sourceArchive: 'https://static.crates.io/crates/selectors/selectors-0.36.1.crate',
+    unmodified: true,
+  };
+  f.supplements.texts[0].canonicalUrl = 'https://www.mozilla.org/MPL/2.0/index.txt';
+  const result = await collectDesktopLicenseNotices([f.pkg], f);
+  assert.deepEqual(result.gaps, []);
+  assert.equal(result.provenance.length, 2);
+  assert.ok(result.text.includes(notice));
+  assert.ok(result.text.includes(reviewed.archiveSha256));
+  assert.ok(result.text.includes(reviewed.licenseReference.sourceArchive));
+  assert.ok(result.text.includes('Third-party source retains its MPL-2.0 rights'));
+  const retained = await retainPackageLicenseTexts(f.pkg, f);
+  assert.equal(retained[1].sha256, hash(retained[1].text));
+  assert.equal(retained[1].sourceSha256, hash(source));
+  const reference = reviewed.licenseReference;
+  for (const [key, value] of [
+    ['sha256', '0'.repeat(64)],
+    ['notice', 'unbound'],
+    ['sourceArchive', 'https://example.invalid/source'],
+    ['unmodified', false],
+    ['source', 'https://example.invalid/source'],
+  ]) {
+    const original = reference[key];
+    reference[key] = value;
+    await assert.rejects(
+      retainPackageLicenseTexts(f.pkg, f),
+      /STANDARD_REFERENCE_(?:INVALID|MISMATCH)/u,
+    );
+    reference[key] = original;
+  }
+  await writeFile(path.join(f.directory, 'lib.rs'), 'changed');
+  await assert.rejects(retainPackageLicenseTexts(f.pkg, f), /STANDARD_REFERENCE_MISMATCH/u);
+});
+
+test('MSVC metadata narrows prospective scope but never removes full-audit gaps or certifies artifacts', () => {
+  const cargo = {
+    workspace_members: ['root'],
+    packages: [
+      { id: 'root', name: 'app', version: '1.0' },
+      { id: 'win', name: 'win', version: '1.0' },
+      { id: 'mac', name: 'mac', version: '1.0' },
+    ],
+  };
+  const target = { resolve: { root: 'root', nodes: [{ id: 'root' }, { id: 'win' }] } };
+  const gaps = ['win@1.0', 'mac@1.0', 'npm@2.0'];
+  const report = desktopNoticeScope(cargo, target, [{ name: 'npm', version: '2.0' }], gaps);
+  assert.deepEqual(report.candidateGaps, ['win@1.0', 'npm@2.0']);
+  assert.deepEqual(report.outsideTargetCargoGaps, ['mac@1.0']);
+  assert.deepEqual(gaps, ['win@1.0', 'mac@1.0', 'npm@2.0']);
+  assert.equal(report.excludedCargoCount, 1);
+  assert.equal(report.finalArtifactContentsVerified, false);
+  for (const resolve of [
+    {},
+    { root: 'root', nodes: [] },
+    { root: 'root', nodes: [{ id: 'root' }, { id: 'unknown' }] },
+  ])
+    assert.throws(() => desktopNoticeScope(cargo, { resolve }, [], []), /TARGET_GRAPH_INVALID/u);
+});
 test('reviewed real source texts and metadata stay integrity bound, without granting release approval', async () => {
   const manifest = await loadDesktopLicenseSupplements(repository);
   assert.equal(manifest.publicReleaseApproved, false);
-  assert.equal(manifest.packages.length, 19);
+  assert.equal(manifest.packages.length, 22);
   assert.ok(manifest.packages.every((pkg) => /^[a-f0-9]{64}$/u.test(pkg.archiveSha256)));
   const text = await readFile(path.join(repository, manifest.texts[0].path), 'utf8');
   assert.match(text, /Copyright \(c\) 2021 Bill Avery/u);
@@ -171,7 +246,11 @@ test('reviewed real source texts and metadata stay integrity bound, without gran
   for (const pkg of manifest.packages) {
     const retained = manifest.texts.find((entry) => entry.id === pkg.textId);
     assert.ok(retained, `Missing retained text for ${pkg.name}`);
-    assert.ok(retained.sources.some((source) => source.includes(`/${pkg.commit}/`)));
+    assert.ok(
+      pkg.licenseReference
+        ? pkg.licenseReference.source.includes(`/${pkg.commit}/`)
+        : retained.sources.some((source) => source.includes(`/${pkg.commit}/`)),
+    );
     assert.match(pkg.manifestSha256, /^[a-f0-9]{64}$/u);
     if (pkg.selectedLicense) {
       assert.ok(pkg.license.replaceAll('/', ' OR ').split(' OR ').includes(pkg.selectedLicense));

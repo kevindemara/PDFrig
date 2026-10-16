@@ -71,7 +71,7 @@ test('notice review accounts for every remaining group without treating texts as
   const supplements = await load('dependencies/desktop-license-supplements.json');
   const qa = await load('operations/windows-installer-qa.json');
   assert.equal(review.publicReleaseApproved, false);
-  assert.equal(review.remainingTextGaps, 32);
+  assert.equal(review.remainingTextGaps, 29);
   assert.equal(review.declaredInputCount, qa.noticeAudit.declaredInputCount);
   assert.equal(review.remainingTextGaps, qa.noticeAudit.remainingTextGaps);
   assert.equal(review.resolvedSupplementCount, supplements.packages.length);
