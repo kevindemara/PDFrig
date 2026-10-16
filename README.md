@@ -240,6 +240,23 @@ installer, and none has been purchased.
 
 ### Internal installer testing
 
+Audit notice texts without starting a native build, signer or installer:
+
+```powershell
+pnpm desktop:notices
+pnpm desktop:notices --require-complete
+```
+
+This needs the pinned Rust toolchain and already-cached locked Cargo/npm dependencies.
+It does not download or compile anything. If Cargo is not on PATH, set
+`PDFRIG_CARGO_PATH` to its approved installed executable; do not use another toolchain
+to evade a security-policy block. Reports stay in an ignored, fresh `tmp/desktop-notices-*`
+directory. The strict form exits unsuccessfully while any text gaps remain. As of
+October 16, 2026, 48 of the conservative 575 declared build-input records still lack
+retained notice text (down from 51); this is not a final-artifact SBOM or legal clearance.
+The three WebView2 supplements are checked against exact commits, original manifests,
+crate archive hashes and retained-text hashes. The internal installer uses this same collector.
+
 Use only a disposable Windows x64 VM/reference machine. In a clean test checkout,
 `pnpm desktop:internal-build` prepares a current-user NSIS alpha installer,
 ephemeral updater test key, checksum and signature evidence in an ignored build

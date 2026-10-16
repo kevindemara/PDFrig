@@ -1,10 +1,11 @@
 // Internal artifact orchestration only; public release configuration is unchanged.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { access, copyFile, mkdir, readFile, readdir, unlink, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { prepareDesktopNotices } from './prepare-desktop-notices.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const pnpmCli = process.env.npm_execpath;
@@ -108,98 +109,14 @@ try {
   );
 
   // Conservative build-input inventory; not an independently reviewed release SBOM.
-  const cargo = JSON.parse(
-    execFileSync(
-      'cargo',
-      [
-        'metadata',
-        '--locked',
-        '--offline',
-        '--format-version',
-        '1',
-        '--manifest-path',
-        'apps/desktop/src-tauri/Cargo.toml',
-      ],
-      { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'inherit'] },
-    ),
-  );
-  const licenses = JSON.parse(
-    execFileSync(
-      process.execPath,
-      [pnpmCli, '--filter', '@pdfmason/desktop...', 'licenses', 'list', '--prod', '--json'],
-      {
-        cwd: root,
-        encoding: 'utf8',
-        maxBuffer: 16 * 1024 * 1024,
-        stdio: ['ignore', 'pipe', 'inherit'],
-        windowsHide: true,
-      },
-    ),
-  );
-  const components = [];
-  const texts = [
-    '# Upstream licence texts for the internal test build\n\nThis conservative build-input inventory includes optional and build/test dependencies. It does not certify the final public distribution.\n',
-  ];
-  const missing = [];
-  async function retain(name, version, directory) {
-    const candidates = (await readdir(directory, { withFileTypes: true })).filter(
-      (entry) => entry.isFile() && /^(?:licen[cs]e|copying|notice)(?:[-._]|$)/iu.test(entry.name),
-    );
-    if (candidates.length === 0) missing.push(`${name}@${version}`);
-    for (const entry of candidates)
-      texts.push(
-        `\n## ${name} ${version} ${entry.name}\n\n${await readFile(path.join(directory, entry.name), 'utf8')}\n`,
-      );
-  }
-  for (const entry of cargo.packages) {
-    if (cargo.workspace_members.includes(entry.id)) continue;
-    components.push({
-      type: 'library',
-      name: entry.name,
-      version: entry.version,
-      purl: `pkg:cargo/${entry.name}@${entry.version}`,
-      licenses: entry.license ? [{ expression: entry.license }] : [],
-    });
-    await retain(entry.name, entry.version, path.dirname(entry.manifest_path));
-  }
-  for (const entries of Object.values(licenses)) {
-    for (const entry of entries) {
-      for (const directory of entry.paths) {
-        const manifest = JSON.parse(await readFile(path.join(directory, 'package.json'), 'utf8'));
-        components.push({
-          type: 'library',
-          name: manifest.name,
-          version: manifest.version,
-          purl: `pkg:npm/${manifest.name.replace('@', '%40')}@${manifest.version}`,
-          licenses: [{ expression: entry.license }],
-        });
-        await retain(manifest.name, manifest.version, directory);
-      }
-    }
-  }
-  await writeFile(
-    path.join(output, 'build-inputs.cdx.json'),
-    JSON.stringify(
-      {
-        bomFormat: 'CycloneDX',
-        specVersion: '1.5',
-        version: 1,
-        metadata: { component: { type: 'application', name: productName, version } },
-        components,
-      },
-      null,
-      2,
-    ),
-  );
-  await writeFile(path.join(output, 'UPSTREAM-LICENSE-TEXTS.txt'), texts.join('\n'));
-  await writeFile(path.join(output, 'license-text-gaps.json'), JSON.stringify(missing, null, 2));
+  const notices = await prepareDesktopNotices({ root, pnpmCli, output, productName, version });
   config.bundle.resources = {
     [path.join(output, 'THIRD_PARTY_NOTICES.txt')]: 'licenses/THIRD_PARTY_NOTICES.txt',
     [path.join(output, 'UPSTREAM-LICENSE-TEXTS.txt')]: 'licenses/UPSTREAM-LICENSE-TEXTS.txt',
   };
   await writeFile(environment.PDFMASON_RELEASE_CONFIG_OUTPUT, JSON.stringify(config, null, 2));
   console.log(
-    `Prepared internal-only build inputs (${components.length} declared dependency records; ${missing.length} upstream text gaps).`,
+    `Prepared internal-only build inputs (${notices.declaredInputCount} declared dependency records; ${notices.gaps.length} upstream text gaps).`,
   );
   execFileSync(
     process.execPath,

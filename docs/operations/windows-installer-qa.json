@@ -15,6 +15,21 @@
   "installerProduced": false,
   "installedAppTested": false,
   "unresolvedLicenseTextGaps": 51,
+  "noticeAudit": {
+    "date": "2026-10-16",
+    "command": "pnpm desktop:notices",
+    "declaredInputCount": 575,
+    "uniqueComponentCount": 575,
+    "remainingTextGaps": 48,
+    "resolvedExactSourceTexts": [
+      "webview2-com@0.38.2",
+      "webview2-com-macros@0.8.1",
+      "webview2-com-sys@0.38.2"
+    ],
+    "evidence": "desktop-license-supplements.json binds retained MIT text to exact upstream commits, manifests and cached crate archive hashes; ignored generated provenance report hashes each retained file",
+    "nativeBuildAttempted": false,
+    "publicReleaseApproved": false
+  },
   "notAttempted": [
     "install/upgrade/uninstall",
     "installed shortcuts/taskbar icon",
