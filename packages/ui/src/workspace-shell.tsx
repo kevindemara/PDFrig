@@ -3427,9 +3427,9 @@ export const WorkspaceShell = ({
                   <div className="tool-options">
                     <p>
                       Choose original-text editing, OCR search/copy for a scan, or drag to add an
-                      overlay. Original-text replacements use the existing font; wider text can fit
-                      by narrowing it horizontally without moving surrounding text; OCR leaves
-                      scanned artwork unchanged.
+                      overlay. Original-text replacements wrap their paragraph at the existing font
+                      size without squeezing. Available space limits overflow; OCR leaves scanned
+                      artwork unchanged.
                     </p>
                     <button
                       type="button"
@@ -5093,6 +5093,7 @@ export const WorkspaceShell = ({
           document={selectedSource.document}
           pageIndex={selectedPage.sourcePageIndex}
           mode={sourceTextMode}
+          rotation={selectedPage.rotation}
           initialSelection={sourceTextInitialSelection}
           onClose={() => setSourceTextMode(null)}
           onApply={async (bytes, signal) => {

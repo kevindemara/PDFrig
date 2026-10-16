@@ -9,6 +9,22 @@ export interface PdfTextSelection {
 export function matchSourceTextSelection(
   runs: readonly SourceTextRun[],
   selection: PdfTextSelection,
+): { id: string; start: number; end: number; scope?: 'paragraph' } | null {
+  const line = matchRuns(runs, selection);
+  if (line) return line;
+  // Cross-line selections use a uniquely identified, uniform source paragraph.
+  // Do not fabricate a range spanning unrelated blocks or mixed-style text.
+  const paragraphs = runs.flatMap((run) =>
+    run.paragraph?.id === run.id
+      ? [{ ...run, text: run.paragraph.text, bounds: run.paragraph.bounds }]
+      : [],
+  );
+  const paragraph = matchRuns(paragraphs, selection);
+  return paragraph ? { ...paragraph, scope: 'paragraph' } : null;
+}
+function matchRuns(
+  runs: readonly SourceTextRun[],
+  selection: PdfTextSelection,
 ): { id: string; start: number; end: number } | null {
   const needle = selection.text.replace(/\s/gu, '');
   if (!needle || needle.length > 4096) return null;
@@ -47,6 +63,7 @@ export function matchSourceTextSelection(
         (!bounds ||
           (Number.isFinite(y) &&
             Number.isFinite(x) &&
+            selection.rect.height <= bounds.height * 1.6 &&
             y >= bounds.y - bounds.height * 0.3 &&
             y <= bounds.y + bounds.height * 1.3 &&
             x >= bounds.x - 0.005 &&

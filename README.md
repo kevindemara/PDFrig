@@ -34,7 +34,7 @@ These are bounded, fixture-tested capabilities—not a claim that every PDF is s
 | Job                | Current support                                                                                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | Read               | Render, search, select/copy searchable text, measured full-page fit, outline navigation and virtualized thumbnails |
-| Edit original text | Supported original text runs, retaining original fonts, size and position; actual-PDF review and undo/redo         |
+| Edit original text | Supported uniform paragraphs wrap at the original font size; actual-PDF review and undo/redo                       |
 | OCR a scan         | Local English/French recognition of the current unrotated page; invisible search/copy text, unchanged visible scan |
 | Organize           | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages, with undo/redo              |
 | Add marks          | Text boxes/callouts, markup, comments, live freehand drawing, shapes and stamps; drag/resize added items           |
@@ -58,16 +58,22 @@ Every operation can refuse a document it cannot safely preserve.
   The dialog separates the exact selected text from its full source-line context.
   Enter the replacement and click **Build actual PDF preview**. Review and apply
   stay unavailable until a preview succeeds; after reviewing it, check the review
-  box and apply. Changing the replacement invalidates the previous preview/review.
-  **Replacement width** defaults to **Fit to selected space**: wider replacements
-  are narrowed horizontally, retaining the font size, baseline and surrounding
-  positions. Long replacements can look compressed; inspect the preview. Choose
-  **Keep original character proportions** to require the natural width to fit.
+  box and apply. Changing the replacement or layout invalidates the previous preview/review.
+  **Text layout** defaults to **Wrap paragraph naturally**. Longer edits rewrap the
+  containing uniform paragraph at its original font size and character proportions;
+  no squeezing or shrinking. Selections can span lines within that paragraph.
+  Adjust **Paragraph width/height (pt)** within the displayed safe limits. Explicit
+  line breaks are supported. Neighboring blocks stay in place: insufficient vertical
+  space produces an overflow message, not overlapping text or automatic new pages.
+  On pages with graphics or annotations, expansion is restricted to the original
+  paragraph area; linked text is not reflowed. Mixed-style paragraphs, complex
+  transforms and automatic cross-page flow are not supported. Choose **Keep selection
+  on one line (must fit)** for strict natural-width, single-line replacement instead.
   The original
   font must have an unambiguous supported encoding; printable ASCII only, using
   existing glyphs. Current font support is non-symbolic Base-14 Type1 fonts or
   Identity-H CID fonts with one-to-one supported ToUnicode mappings; unknown simple
-  embedded fonts remain read-only. No paragraph reflow,
+  embedded fonts remain read-only. No
   font substitution, XObject editing or covering rectangle. Unsupported text stays
   read-only; uniquely owned accessibility text is repaired, not stripped.
 - **Scans:** choose **Text → OCR this page**, select English/French and review

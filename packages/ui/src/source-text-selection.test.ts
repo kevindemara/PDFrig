@@ -19,6 +19,40 @@ const runs = [
   },
 ];
 describe('EDIT-002 viewer selection ownership', () => {
+  it('matches selections across uniform paragraph lines, not unrelated blocks', () => {
+    const first = runs[0];
+    if (!first) throw new Error('Missing synthetic line');
+    const paragraph = {
+      id: first.id,
+      text: 'FIRST SOURCE AFTER SECOND LINE',
+      bounds: { x: 0.1, y: 0.2, width: 0.7, height: 0.07 },
+      width: 400,
+      maxWidth: 500,
+      height: 100,
+      lineHeight: 22,
+      lineCount: 2,
+    };
+    const items = [{ ...first, paragraph }];
+    expect(
+      matchSourceTextSelection(items, {
+        text: 'AFTER\nSECOND',
+        rect: { x: 0.2, y: 0.2, width: 0.4, height: 0.07 },
+      }),
+    ).toEqual({ id: first.id, start: 13, end: 25, scope: 'paragraph' });
+    expect(
+      matchSourceTextSelection(items, {
+        text: 'AFTER\nSECOND',
+        rect: { x: 0.2, y: 0.5, width: 0.4, height: 0.07 },
+      }),
+    ).toBeNull();
+    // A tall selection must not be mistaken for similar text within one line.
+    expect(
+      matchSourceTextSelection([first], {
+        text: 'FIRST SOURCE',
+        rect: { x: 0.2, y: 0.2, width: 0.4, height: 0.06 },
+      }),
+    ).toBeNull();
+  });
   it('retains literal selected spaces, punctuation and the final character', () => {
     const first = runs[0];
     if (!first) throw new Error('Missing synthetic line');

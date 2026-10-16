@@ -1,12 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
-for (const [mode, replacement] of [
-  ['positioned', 'EDIT'],
-  ['positioned', 'WIDERTEXT'],
-  ['Tj', 'WIDERTEXT'],
-  ['TJ', 'WWWWWW'],
-] as const) {
+for (const [mode, replacement] of [['positioned', 'EDIT']] as const) {
   test(`EDIT-002 ${mode} selected word becomes ${replacement} with preserved surroundings`, async ({
     page,
   }, info) => {
@@ -58,7 +53,7 @@ for (const [mode, replacement] of [
         .locator('option')
         .count(),
     ).toBe(4);
-    await expect(dialog.getByLabel('Replacement width')).toHaveValue('fit');
+    await dialog.getByLabel('Text layout', { exact: true }).selectOption('inline');
     await dialog.getByLabel('Replacement text').fill(replacement);
     await dialog.getByRole('button', { name: 'Build actual PDF preview' }).click();
     await expect(dialog.getByRole('status')).toContainText('actual exported-PDF preview');
@@ -124,7 +119,7 @@ test('EDIT-002 snapshots the final live selection and explains preview/review ga
     (button as HTMLButtonElement).click();
   });
   const dialog = page.getByRole('dialog', { name: 'Edit existing text' });
-  await expect(dialog.getByLabel('Selected text (only this will change)')).toHaveValue('SOURCE');
+  await expect(dialog.getByLabel('Selected text (words to replace)')).toHaveValue('SOURCE');
   await expect(dialog.getByLabel('Replacement text')).toHaveValue('SOURCE');
   await expect(dialog.getByRole('status')).toContainText('Build the PDF preview');
   await expect(dialog.getByRole('checkbox')).toBeDisabled();
@@ -132,7 +127,7 @@ test('EDIT-002 snapshots the final live selection and explains preview/review ga
     0,
   );
   await dialog.getByLabel('Replacement text').fill('MUCH LONGER REPLACEMENT');
-  await dialog.getByLabel('Replacement width').selectOption('strict');
+  await dialog.getByLabel('Text layout', { exact: true }).selectOption('inline');
   await dialog.getByRole('button', { name: 'Build actual PDF preview' }).click();
   await expect(dialog.getByRole('status')).toContainText('The replacement is wider in this font');
   await expect(dialog.getByRole('checkbox')).toBeDisabled();

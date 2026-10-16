@@ -56,6 +56,7 @@ for (const [mode, filename] of [
     let original = '';
     if (mode === 'edit') {
       await expect(dialog.getByLabel('Replacement text')).toBeEnabled();
+      await dialog.getByLabel('Text layout', { exact: true }).selectOption('inline');
       if (filename === 'tagged-bookmarks.pdf')
         await dialog
           .getByRole('combobox', { name: 'Original text', exact: true })

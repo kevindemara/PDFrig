@@ -20,7 +20,7 @@
   "notes": [
     "Planning targets are not release dates or public availability promises.",
     "Every behavior change keeps stable feature IDs and adds executable verification. State promotion requires security, fidelity, licensing, accessibility and platform evidence.",
-    "EDIT-002 has a bounded original-operator editor using the existing MIT PDF library with actual-PDF preview and undo. Unbound PDFium remains rejected; broad Unicode/font/reflow coverage is incomplete.",
+    "EDIT-002 has a bounded original-operator editor using the existing MIT PDF library with actual-PDF preview and undo. Uniform paragraphs rewrap at original font size, without squeezing; overflow refuses. Unbound PDFium remains rejected; broad Unicode/font/mixed-style and cross-page reflow coverage is incomplete.",
     "OCR-001 has local current-page English/French WASM integration with reviewed notices, immediate cancellation and immutable scan export tests. Scans retain visible appearance; OCR-002 visible reconstruction is not approved. Windows installed/offline smoke and complete native security clearance remain release work.",
     "Existing unchanged-page annotation exports compare original tags/bookmarks/content streams; added content is untagged and tagged form flattening remains unsupported.",
     "Historical design/checkpoint Markdown has been removed from the publication tree; executable tests remain the verification source, not a release certification."
