@@ -36,6 +36,22 @@ assert.deepEqual(receipt.recodeNodeOwnershipTests.results, [
   { source: 'original-control', exitCode: 17 },
   { source: 'patched', exitCode: 0 },
 ]);
+assert.equal(
+  receipt.nativeP6PreflightSha256,
+  createHash('sha256')
+    .update(await readFile(path.join(root, 'scripts/ocr-candidate-p6.h')))
+    .digest('hex'),
+);
+assert.equal(
+  receipt.modifiedBaseapiSha256,
+  'dbe5d76fb88a318fdf2ea329727c3e65b200ff19919252df929e2f630bd03d84',
+);
+assert.deepEqual(receipt.nativeP6PreflightTests.sanitizers, ['address', 'undefined']);
+assert.equal(receipt.nativeP6PreflightTests.prefixMutations, 131325);
+assert.equal(receipt.nativeP6PreflightTests.deterministicMutations, 10000);
+assert.equal(receipt.nativeP6PreflightTests.allTruncations, true);
+assert.equal(receipt.nativeP6PreflightTests.exactPixelLimit, 20_000_000);
+assert.equal(receipt.nativeP6PreflightTests.warningsAsErrors, true);
 assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'));
 assert.equal(receipt.leptonicaPrivateLayouts, false);
 assert.equal(receipt.publicApiSelftestCycles, 100);
@@ -44,6 +60,48 @@ assert.equal(new Set(receipt.deniedRawOwnershipBindings).size, 25);
 const factory = createRequire(import.meta.url)(candidate);
 const native = await factory({ printErr: () => undefined });
 assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
+// Exercise the real WASM worker entry point, not only the standalone preflight.
+// Layout-only init avoids model parsing in these format-boundary tests.
+const api = new native.TessBaseAPI();
+let rejectedImages = 0;
+try {
+  api.InitForAnalysePage();
+  const valid = Buffer.concat([
+    Buffer.from(`P6\n${' '.repeat(512)}3 2\n255\n`),
+    Buffer.from([0, 10, 32, 255, 128, 0, 1, 18, 0, 3, 0, 0, 0, 1, 0, 6, 0, 0]),
+  ]);
+  const setImage = (bytes, exif = 1, angle = 0) => {
+    native.FS.writeFile('/input', bytes);
+    return api.SetImageFile(exif, angle);
+  };
+  assert.equal(setImage(valid), 0);
+  assert.equal(api.GetInputImage().get_w(), 3);
+  assert.equal(api.GetInputImage().get_h(), 2);
+  const reject = (bytes, exif = 1, angle = 0) => {
+    assert.equal(setImage(bytes, exif, angle), 1);
+    rejectedImages++;
+  };
+  for (let length = 0; length < valid.length; length++) reject(valid.subarray(0, length));
+  for (let offset = 0; offset < 515; offset++) {
+    const changed = Buffer.from(valid);
+    changed[offset] ^= 1;
+    reject(changed);
+  }
+  for (const dimensions of ['0 2', '3 0', '03 2', '3\t2', '20000001 1', '99999999 99999999'])
+    reject(Buffer.from(`P6\n${' '.repeat(512)}${dimensions}\n255\n${'x'.repeat(18)}`));
+  for (const header of ['P3\n3 2\n255\n', 'P6\n3 2\n255\n', 'P7\n', '\x89PNG\r\n', 'BM'])
+    reject(Buffer.concat([Buffer.from(header), Buffer.alloc(600)]));
+  reject(Buffer.concat([valid, Buffer.from([0])]));
+  reject(Buffer.concat([valid, valid]));
+  reject(valid, 6);
+  reject(valid, 1, 0.25);
+  reject(valid, 1, NaN);
+  assert.equal(setImage(valid), 0); // refusals do not poison the module instance
+} finally {
+  api.End();
+  native.destroy(api);
+  native.FS.unlink('/input');
+}
 for (const name of receipt.deniedRawOwnershipBindings) {
   assert.match(
     name,
@@ -197,6 +255,8 @@ try {
     deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
     legacyApiTrapsTested: legacyBindings.length,
     recodeNodeOwnershipTests: receipt.recodeNodeOwnershipTests,
+    nativeP6PreflightTests: receipt.nativeP6PreflightTests,
+    rejectedImagesThroughActualWasmEntry: rejectedImages,
     results,
     unexpectedRequests: outbound.length,
     pageErrors: errors.length,

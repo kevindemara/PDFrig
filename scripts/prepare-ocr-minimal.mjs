@@ -62,6 +62,12 @@ await copyFile(
   path.join(root, 'scripts/ocr-recode-node-test.cpp'),
   path.join(output, 'recode-test.cpp'),
 );
+for (const [source, destination] of [
+  ['ocr-candidate-p6.py', 'ocr_candidate_p6.py'],
+  ['ocr-candidate-p6.h', 'pdfrig-candidate-p6.h'],
+  ['ocr-p6-preflight-test.cpp', 'p6-test.cpp'],
+])
+  await copyFile(path.join(root, 'scripts', source), path.join(output, destination));
 const reference = pins.recodeNodeBackport;
 if (
   reference.url !==

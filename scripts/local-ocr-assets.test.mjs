@@ -68,12 +68,50 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('MAXIMUM_MEMORY=1073741824'));
   assert.doesNotMatch(build, /#include.*pix_internal/u);
   assert.ok(build.includes('patch_bindings(glue)'));
+  assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
+  assert.ok(build.includes('p6_tests = test_preflight(work)'));
   assert.ok(build.includes("run('python3', str(work / 'bindings_test.py'))"));
   const bindings = await readFile(path.join(root, 'scripts/ocr-candidate-bindings.py'), 'utf8');
   assert.ok(bindings.includes('boxGetGeometry'));
   assert.ok(bindings.includes('pixGetWidth'));
   assert.ok(bindings.includes('unsupported raw/ownership API'));
   assert.ok(bindings.includes('OCR_CANDIDATE_BINDING_DRIFT'));
+});
+
+test('OCR-001 research native image preflight is exact, bounded and hash-bound', async () => {
+  const read = (name) => readFile(path.join(root, 'scripts', name), 'utf8');
+  const patch = await read('ocr-candidate-p6.py');
+  for (const guard of [
+    '13e4b10e89549b70fe9c89c24a4590241d9c880fdcd116ef33de963da91856f1',
+    'OCR_CANDIDATE_P6_SOURCE_DRIFT',
+    'pixReadStreamPnm(input)',
+    'exif != 1 || angle != 0.0f',
+    '-fsanitize=address,undefined',
+    '-Werror',
+  ])
+    assert.ok(patch.includes(guard));
+  const preflight = await read('ocr-candidate-p6.h');
+  const candidate = JSON.parse(
+    await readFile(path.join(root, 'docs/dependencies/ocr-minimal-candidate.json'), 'utf8'),
+  );
+  assert.equal(
+    candidate.evidence.nativeP6PreflightSha256,
+    createHash('sha256').update(preflight).digest('hex'),
+  );
+  assert.equal(candidate.evidence.nativeP6PreflightVerification.exactPixelLimit, 20_000_000);
+  assert.equal(
+    candidate.evidence.nativeP6PreflightVerification.rejectedImagesThroughActualWasmEntry,
+    1072,
+  );
+  assert.ok(preflight.includes('pixels > 20000000'));
+  assert.ok(preflight.includes('digits > 8'));
+  assert.ok(preflight.includes('prefix[515]'));
+  assert.ok(preflight.includes('std::uint64_t(header) + pixels * 3'));
+  assert.doesNotMatch(preflight, /malloc|new |pixRead|sscanf|atoi/u);
+  const verify = await read('verify-ocr-minimal.mjs');
+  assert.ok(verify.includes('api.SetImageFile(exif, angle)'));
+  assert.ok(verify.includes('reject(valid, 1, NaN)'));
+  assert.ok(verify.includes('rejectedImagesThroughActualWasmEntry'));
 });
 test('OCR-001 pins the unchanged worker/core and ships all selected-engine notices', async () => {
   for (const directory of [wrapper, core])

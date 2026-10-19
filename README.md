@@ -382,6 +382,12 @@ patch-drift and forbidden-call tests also pass. The candidate backports the upst
 RecodeNode assignment fix; a failing original-source control and 1,000 targeted
 ownership cycles pass AddressSanitizer/UndefinedBehaviorSanitizer checks in the
 pinned Linux container. These use the actual extracted struct, not the whole engine.
+The research worker entry point also checks the exact canonical P6 header, dimensions,
+depth and RGB body length natively, before image allocation/decoding. It refuses alternate
+formats, metadata, non-default orientation/rotation and inputs over 20 million pixels.
+The same validated open stream goes directly to the PNM reader, not general image
+format dispatch. Targeted preflight sanitizer mutation tests and malformed-input
+checks through the actual WASM API are separate from full parser/model fuzz clearance.
 Old Tesseract code, the remaining API/parser surface, broader export/accuracy/platform
 tests and final notice/security review remain gates. The candidate record distinguishes
 each artifact's reproducibility evidence. No candidate binaries are stored in Git.
@@ -407,7 +413,7 @@ After `pnpm build:packages`, use the generated folder printed by the helper:
 node scripts/verify-ocr-minimal.mjs tmp/ocr-minimal-REPLACE/tesseract-core-lstm.wasm.cjs
 ```
 
-This checks the research artifact's public API and forbidden-call traps, then uses
+This checks the research artifact's public API, native image refusals and forbidden-call traps, then uses
 an isolated loopback server/headless Chromium and synthetic canvas text;
 it never changes a user tab or substitutes the candidate into the local app.
 It is a baseline-only smoke, not verification of the SIMD variants or permission

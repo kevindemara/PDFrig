@@ -8,6 +8,7 @@ import subprocess
 import tarfile
 from ocr_candidate_bindings import patch_bindings, selftest_source
 from ocr_candidate_recode import patch_recodebeam, test_backport
+from ocr_candidate_p6 import patch_baseapi, test_preflight
 
 work = Path('/work')
 pins = json.loads((work / 'source-pins.json').read_text())
@@ -16,6 +17,7 @@ def run(*args):
     subprocess.run(args, check=True)
 
 run('python3', str(work / 'bindings_test.py'))
+p6_tests = test_preflight(work)
 
 def unpack(source, destination):
     archive = work / (source['id'] + '.tar.gz')
@@ -54,6 +56,9 @@ for source in pins['sources']:
 # Copy the pinned toolchain cache into the only writable mount, never alter the image.
 shutil.copytree('/emsdk/upstream/emscripten/cache', work / 'em-cache')
 tess = locations['tesseract']
+baseapi_path = tess / 'src/api/baseapi.cpp'
+baseapi_path.write_bytes(patch_baseapi(baseapi_path.read_bytes()))
+shutil.copyfile(work / 'pdfrig-candidate-p6.h', tess / 'src/api/pdfrig-candidate-p6.h')
 recode_path = tess / 'src/lstm/recodebeam.h'
 original_recode = recode_path.read_bytes()
 patched_recode = patch_recodebeam(original_recode, (work / 'upstream-recodebeam.h').read_bytes())
@@ -129,6 +134,9 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'modifiedWrapperSha256': hashlib.sha256(wrapper_path.read_bytes()).hexdigest(),
           'modifiedGlueSha256': hashlib.sha256(glue_path.read_bytes()).hexdigest(),
           'modifiedRecodebeamSha256': hashlib.sha256(patched_recode).hexdigest(),
+          'modifiedBaseapiSha256': hashlib.sha256(baseapi_path.read_bytes()).hexdigest(),
+          'nativeP6PreflightSha256': hashlib.sha256((work / 'pdfrig-candidate-p6.h').read_bytes()).hexdigest(),
+          'nativeP6PreflightTests': p6_tests,
           'recodeNodeOwnershipTests': recode_tests,
           'leptonicaPrivateLayouts': False,
           'deniedRawOwnershipBindings': denied_bindings,

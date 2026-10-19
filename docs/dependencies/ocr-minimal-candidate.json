@@ -45,7 +45,7 @@
   "scope": "Research-only LSTM WASM build using the existing Tesseract.js bindings and patched Tesseract fork, refreshed Leptonica 1.87.0 and no optional compressed-image codecs or OpenLibm. No source or generated binary is installed into the application.",
   "remainingGates": [
     "full candidate source/licence/attribution and exact-native vulnerability review beyond the narrowly tested RecodeNode ownership backport",
-    "complete review of remaining TessBaseAPI/raw pointer and model/PNM parser surface beyond the narrowed Leptonica getters",
+    "complete review of remaining TessBaseAPI/raw pointer and model/PNM parser surface beyond the narrowed getters and canonical worker-entry preflight",
     "SIMD/relaxed-SIMD or reviewed baseline-only performance and platform policy",
     "broader English/French recognition, scan-preserving export and reference browser/WebView2 regressions",
     "clean reference Windows installer testing on an approved host; no security bypass",
@@ -54,10 +54,10 @@
   "evidence": {
     "date": "2026-10-19",
     "variant": "baseline-lstm",
-    "sha256": "76e81295013e8cc04f59ed810d7f21d1d00d8faab89d161d3127a1fbef72fc71",
-    "bytes": 2471411,
+    "sha256": "3fc600eb540bb6077f0af0c93d71ccc2303f7a3f68d5842945391362a1bfb003",
+    "bytes": 2472483,
     "repeatedArtifactMatch": true,
-    "reproductionScope": "Two independent fresh source-tree builds of this RecodeNode-backported revision produced identical artifacts and build receipts under the pinned image. Both passed the original-source negative control, patched ownership sanitizer cycles, public API traps and English/French browser smoke. Cross-host reproducibility is not certified.",
+    "reproductionScope": "Two independent fresh source-tree builds of this native-preflight revision produced identical artifacts and build receipts under the pinned image. Both passed native preflight sanitizers, the original RecodeNode control and patched ownership sanitizer cycles, public API traps, 1072 actual WASM image refusals and English/French browser smoke. Cross-host reproducibility is not certified.",
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
@@ -67,6 +67,18 @@
     "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
     "modifiedGlueSha256": "27b4ebcdaf686b5b9d8b1fd3087de9d5e293dc4df01fa3f6133d02b840e51e2e",
     "modifiedRecodebeamSha256": "785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43",
+    "modifiedBaseapiSha256": "dbe5d76fb88a318fdf2ea329727c3e65b200ff19919252df929e2f630bd03d84",
+    "nativeP6PreflightSha256": "9915881dbe155a95006f24554fe3835cd66edcba70e1a696967a1fc88ca4560a",
+    "nativeP6PreflightVerification": {
+      "sanitizers": ["address", "undefined"],
+      "warningsAsErrors": true,
+      "prefixMutations": 131325,
+      "deterministicMutations": 10000,
+      "allSmallFixtureTruncations": true,
+      "exactPixelLimit": 20000000,
+      "rejectedImagesThroughActualWasmEntry": 1072,
+      "scope": "Actual native preflight header under sanitizers, plus format/size/orientation refusals through the real WASM SetImageFile entry point. Not whole Leptonica/model fuzz or arbitrary pointer clearance."
+    },
     "leptonicaPrivateLayouts": false,
     "publicApiSelftestCycles": 100,
     "deniedRawOwnershipBindingsTested": 25,
@@ -89,6 +101,7 @@
       "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
       "The RecodeNode nontrivial memcpy was replaced by a hash-bound upstream member-wise assignment with a self-assignment guard. Targeted ownership sanitizer tests pass; other old-engine code and legacy move-like copy semantics are not cleared.",
+      "The worker's SetImageFile path now admits only the exact bounded canonical P6 RGB raster and directly uses the PNM stream reader on that same validated handle. Other exported image/processing APIs and the model parser are not cleared by this check.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
     ]
@@ -99,6 +112,7 @@
     "scope": "Research artifact only; application runtime is unchanged. Public getter and owned-object self-tests do not establish arbitrary pointer safety or general binding compatibility.",
     "leptonica": "Removed pix_internal.h coupling. Seventeen scalar getters use public APIs and reject null pointers; 25 raw-array, reference-count/internal-capacity and ownership-ambiguous destroy accessors abort. The current worker uses TessBaseAPI JSON text results, not those Leptonica wrappers. The synthetic self-test owns all six object types locally and releases them through their matching public destroy functions for 100 cycles.",
     "patchContractTests": "Four Python unittest cases, including changed/missing/duplicate/new binding and second-application rejection, execute before the isolated build. Native verifier checks valid public getters and all 25 denied calls; English/French worker smoke uses the same candidate.",
+    "nativeImageEntry": "Hash-bound baseapi.cpp modification restricts SetImageFile to the exact local-ocr-pixels.ts canonical header, depth 255, positive dimensions of at most eight digits, exact RGB body size and at most 20 million pixels. No input-sized allocation is made by the preflight. Non-default EXIF orientation and rotation are refused. It decodes the same open stream directly with pixReadStreamPnm, avoiding general image format dispatch for this worker path. Standalone ASan/UBSan mutation tests and 1072 actual WASM refusals pass; a later valid input and both language worker smokes pass. Not full PNM/model/native security clearance.",
     "compilerWarning": {
       "file": "src/lstm/recodebeam.h",
       "finding": "The original fork lost its owned dawgs pointer on self-assignment and memcpy-copied a non-trivially-copyable object. The candidate now backports the exact upstream assignment method with explicit fields and a self-assignment guard, preserving original copyright plus an explicit modification notice. No casts suppress the warning. No CVE or exploitability is asserted.",
@@ -115,7 +129,7 @@
       "nextAction": "Review remaining old-fork deltas, legacy move-like copy assumptions and parser/model surface. Broader engine tests and exact final artifact clearance remain required."
     },
     "remaining": [
-      "Old Tesseract fork advisories and source delta review; model and PNM parsing fuzz/limit coverage.",
+      "Old Tesseract fork advisories and source delta review; model and PNM decoding coverage beyond the targeted canonical-input preflight mutations.",
       "Other TessBaseAPI pointer ownership, optional renderers and exported functionality outside the current worker path.",
       "Final candidate notices, binary/source delivery, SIMD/baseline performance policy and WebView2/export regressions."
     ]
