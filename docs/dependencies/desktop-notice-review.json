@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewDate": "2026-10-16",
+  "reviewDate": "2026-10-19",
   "publicReleaseApproved": false,
   "scope": "Conservative declared Windows desktop build inputs, including optional and other-platform dependencies; not a final installed-artifact inventory or legal/security clearance.",
   "declaredInputCount": 575,
@@ -70,6 +70,7 @@
         "tr46@0.0.3"
       ],
       "status": "npm-source-and-vendored-obligations-needed",
+      "payloadEvidence": "windows-npm-notice-review.json: all five installed payload trees match their exact integrity-checked published npm archives. This does not supply missing terms or establish native binary build provenance. verify-windows-npm-notices.mjs rechecks offline installed trees; --registry also verifies published bytes without extracting or executing package code.",
       "finding": "Installed packages lack root notice text. Native Canvas includes a Skia binary and ICU data; an npm MIT declaration does not clear those components. The optional Node canvas is not imported by the browser/WebView frontend, but this inventory does not prove final-artifact absence. Direct inspection of brotli 1.3.3 dec/decode.js found Google Apache-2.0 copyright/header text despite the npm-level MIT declaration; a root MIT label alone cannot clear the vendored decoder.",
       "nextAction": "Bind npm integrity/gitHead and installed contents to exact-source notices. Inspect vendored Brotli/Skia/ICU obligations separately; prove artifact scope rather than suppressing gaps."
     }

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-19",
+  "publicReleaseApproved": false,
+  "allNoticesComplete": false,
+  "scope": "Five prospective Windows npm inputs. Exact archive-to-installed payload binding, not final installer scope, licence certification or native binary source attestation. No package code or native addon is executed by this review.",
+  "treeDigest": "Sort relative regular-file paths by code point. SHA-256 of UTF-8 path + NUL + decimal byte length + NUL + lowercase content SHA-256 + LF for every file. Symlinks and special files are rejected.",
+  "packages": [
+    {
+      "name": "@napi-rs/canvas-win32-x64-msvc",
+      "version": "1.0.7",
+      "gitHead": null,
+      "integrity": "sha512-SKTNdBV/ljfhkPsLhXjm4x2PQ0ILpc0PhkBzRHuroJXidZUaF5yh0j3s3dIzB8PrRmW+nEASzyMTaWT3nH1ywQ==",
+      "tarball": "https://registry.npmjs.org/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-1.0.7.tgz",
+      "archiveSha256": "f66adae2046128ac9affc632603f435b50ad4fa481d140c4f8306bcef66f66b9",
+      "tree": {
+        "files": 4,
+        "bytes": 38409250,
+        "sha256": "a26e5ff6df439b83ff36e2e651a9702049a988e1d17ac5e37abfd2f6c20dfc3b"
+      },
+      "manifestSha256": "01ac3765f14ceb9faf943722e93e530e762eb56d3c0581a22dc82e6f7ebd45f9",
+      "noticeComplete": false,
+      "finding": "Published native subpackage has no gitHead or root full licence. Contains skia.win32-x64-msvc.node and icudtl.dat. Parent @napi-rs/canvas 1.0.7 registry gitHead is 062130c03715f275fd46a59a4bb224e907c91686; its MIT LICENSE and Skia gitlink are supporting source leads, not proof of this binary's build inputs.",
+      "supportingSources": [
+        "https://raw.githubusercontent.com/Brooooooklyn/canvas/062130c03715f275fd46a59a4bb224e907c91686/LICENSE",
+        "https://github.com/Brooooooklyn/canvas/tree/062130c03715f275fd46a59a4bb224e907c91686",
+        "https://github.com/google/skia/tree/7219df0fb0ff64f26adad448f94e8c001b964e6a"
+      ],
+      "nextAction": "Establish native artifact build provenance and enabled Skia/ICU/other-library inventory with full terms, or prove absence from the actual final Windows payload. Parent MIT terms alone do not clear the addon/data."
+    },
+    {
+      "name": "brotli",
+      "version": "1.3.3",
+      "gitHead": "e36051345f6d27a56e5f39ea70d2f789b8574046",
+      "integrity": "sha512-oTKjJdShmDuGW94SyyaoQvAjf30dZaHnjJ8uAF+u2/vGJkJbJPJAT1gDiOJP5v1Zb6f9KEyW/1HpuaWIXtGHPg==",
+      "tarball": "https://registry.npmjs.org/brotli/-/brotli-1.3.3.tgz",
+      "archiveSha256": "3c7c260f6263df95fee49a9119e9fd21227d628b6c9d99080a75edfd9e2bdb24",
+      "tree": {
+        "files": 19,
+        "bytes": 1503586,
+        "sha256": "29c690cfdc8ff0d7bdf16604876a4c4c248f7cae394dffdda096dfe157830061"
+      },
+      "manifestSha256": "387b47d00ea96cab9b4c521629fbcdc7621053ac061812526f3c69700924cef5",
+      "noticeComplete": false,
+      "finding": "MIT declaration/README are not full project terms. Seven decoder files retain Google 2013 Apache-2.0 headers. build/encode.js and build/mem.js are compiled/encoded payloads; package-level MIT is not their native source inventory.",
+      "supportingSources": [
+        "https://github.com/devongovett/brotli.js/tree/e36051345f6d27a56e5f39ea70d2f789b8574046"
+      ],
+      "nextAction": "Retain all decoder copyright/full Apache terms and resolve wrapper MIT attribution plus encoder/data source and build provenance before clearing."
+    },
+    {
+      "name": "dfa",
+      "version": "1.2.0",
+      "gitHead": "3f5e603e5082caedabefefdf53e8a6ca3111e966",
+      "integrity": "sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==",
+      "tarball": "https://registry.npmjs.org/dfa/-/dfa-1.2.0.tgz",
+      "archiveSha256": "d781eb3a307ab6aa2d97028f695b17dbeadf6fd27788c333b1fb96d18d2a23ad",
+      "tree": {
+        "files": 6,
+        "bytes": 137726,
+        "sha256": "ac0649ae92ff8315cfa2e7e340173cf44d4c671780d972f65623f8504b855274"
+      },
+      "manifestSha256": "96c0ce3cc17b34aabd58fd442157766d9e244cba735e54ee4fe10d7841f0460c",
+      "noticeComplete": false,
+      "finding": "Published package and pinned source root lack full licence terms. README ends with the MIT label only; no generic copyright/year is invented.",
+      "supportingSources": [
+        "https://github.com/devongovett/dfa/tree/3f5e603e5082caedabefefdf53e8a6ca3111e966"
+      ],
+      "nextAction": "Obtain attributable version-bound full upstream terms, or replace/remove the dependency with fidelity and licence checks. Contacting upstream requires a separately approved external message."
+    },
+    {
+      "name": "fontkit",
+      "version": "2.0.4",
+      "gitHead": "fbf3b9ef21eebd219eb73e666faed573af0fba09",
+      "integrity": "sha512-syetQadaUEDNdxdugga9CpEYVaQIxOwk7GlwZWWZ19//qW4zE5bknOKeMBDYAASwnpaSHKJITRLMF9m1fp3s6g==",
+      "tarball": "https://registry.npmjs.org/fontkit/-/fontkit-2.0.4.tgz",
+      "archiveSha256": "f686a9515af33fce16ab4bffe50570728197e53165068548c6f75a1793797a08",
+      "tree": {
+        "files": 131,
+        "bytes": 5610637,
+        "sha256": "7417577fd5dc2d3118deaf147a1eadf55486124466c2357bd220159748bcca2d"
+      },
+      "manifestSha256": "49c60605b92316a5d5fe57b9a3bca8950ad9a8beab1cb633d6f29862d1bd163d",
+      "noticeComplete": false,
+      "finding": "Published package and pinned source root lack full project terms. src/utils.js explicitly derives base64 decoding from niklasvh/base64-arraybuffer under MIT; that attribution also needs review rather than being lost behind the package MIT label.",
+      "supportingSources": [
+        "https://github.com/foliojs/fontkit/tree/fbf3b9ef21eebd219eb73e666faed573af0fba09",
+        "https://github.com/niklasvh/base64-arraybuffer"
+      ],
+      "nextAction": "Obtain attributable version-bound project terms and retain derivative-code notices; do not substitute a licence from a different PDF fontkit fork."
+    },
+    {
+      "name": "tr46",
+      "version": "0.0.3",
+      "gitHead": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
+      "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==",
+      "tarball": "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz",
+      "archiveSha256": "164ae1eb32cea353551bbc7f9358dcaae4ffabbe65ec37a92ca464a9570a2a0a",
+      "tree": {
+        "files": 5,
+        "bytes": 268388,
+        "sha256": "9e350a75fbe04de81195554070fefc8ce578ca520c610c0a8f303fcc40b51759"
+      },
+      "manifestSha256": "615087f58ee138fd35c2b414c355b72e36e5919725b8aecc1c34f6a5585b9779",
+      "noticeComplete": false,
+      "finding": "MIT declaration but no full packaged/root source terms. lib/mappingTable.json is generated Unicode mapping data; package metadata alone does not settle the data notice.",
+      "supportingSources": [
+        "https://github.com/Sebmaster/tr46.js/tree/a8009f9ce80ff5dbe71dd71e203afe4e4c878d28"
+      ],
+      "nextAction": "Bind full project terms and the exact Unicode data release/attribution, or remove/replace with tested compatible input handling."
+    }
+  ]
+}
