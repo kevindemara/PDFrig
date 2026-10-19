@@ -94,6 +94,11 @@ Every operation can refuse a document it cannot safely preserve.
   before initialization and rechecks it immediately before native recognition.
   A fixed ASCII header area keeps pixels out of the wrapper's first-500-byte
   EXIF probe, preventing pixel bytes from being treated as orientation metadata.
+  Before native model initialization, the editor also streams a size-bounded model
+  and checks its exact SHA-256. Corrupt/missing models stop OCR without applying a
+  copy; restore verified application assets rather than disabling integrity checks.
+  Native JSON results have collection, text-length and geometry limits before
+  composition. These do not clear native model parsing or result allocation.
 - **Signatures:** visual signatures are not certificate-backed signatures or proof
   of identity. Editing may invalidate existing digital signatures.
 - **Redaction:** the separately gated raster-removal beta is not a black-box overlay;
@@ -130,6 +135,9 @@ the upstream public repository. Worker/core assets come from locked npm packages
 After preparation, OCR uses only local `/ocr/` assets—no runtime CDN or document
 upload. The Windows bundle includes these assets for offline use. Asset preparation
 fails if required versions or hashes differ; do not disable its checks.
+Runtime model checks repeat the exact size/hash verification before native
+initialization, with no worker-side model refetch, gzip or cache. See the
+[model/API review](docs/dependencies/ocr-model-api-review.json) for scope and limits.
 
 No credentials or paid services are needed for this loopback development preview.
 Do not expose the development server to the internet. The repository retains its
@@ -393,8 +401,10 @@ format dispatch. Targeted preflight sanitizer mutation tests and malformed-input
 checks through the actual WASM API are separate from full parser/model fuzz clearance.
 Six unused alternate image-ingestion bindings (raw buffers, external Pix pointers
 and page/file processing) abort before dereferencing arguments, so those exports
-cannot bypass the guarded worker image entry. This does not clear all remaining
-pointer, renderer or model APIs and is not a general-purpose Tesseract replacement.
+cannot bypass the guarded worker image entry. Nine unused native PDF-renderer
+bindings also abort before allocation, argument access or deletion; PDFrig composes
+invisible text through its own PDF engine instead. This does not clear remaining
+pointer/model APIs and is not a general-purpose Tesseract replacement.
 Old Tesseract code, the remaining API/parser surface, broader export/accuracy/platform
 tests and final notice/security review remain gates. The candidate record distinguishes
 each artifact's reproducibility evidence. No candidate binaries are stored in Git.
@@ -425,6 +435,27 @@ an isolated loopback server/headless Chromium and synthetic canvas text;
 it never changes a user tab or substitutes the candidate into the local app.
 It is a baseline-only smoke, not verification of the SIMD variants or permission
 to ship the candidate. Do not copy a candidate over the pinned application assets.
+
+The broader scan/export browser suite covers English/French, coloured portrait
+scans and nonzero cropped landscape pages, plus an untouched second page. Independent
+renders before/after OCR match exactly at 96 and 144 DPI using both MediaBox and
+CropBox; independent extraction checks recognized text and French accents. A
+same-size corrupt model is rejected before native initialization. These are synthetic
+Chromium tests, not recognition benchmarks or installed Windows verification.
+
+With the same qpdf/Poppler prerequisites as the browser suite, maintainers may run
+it against a generated research candidate without changing application assets:
+
+```powershell
+$env:PDFRIG_OCR_QA_CANDIDATE='tmp/ocr-minimal-REPLACE/tesseract-core-lstm.wasm.cjs'
+try { pnpm exec playwright test tests/browser/ocr-scans.spec.ts }
+finally { Remove-Item Env:PDFRIG_OCR_QA_CANDIDATE }
+```
+
+The test validates the candidate receipt/hash and asserts that test-only request
+interception actually loaded it. It maps all three feature-choice URLs to the
+baseline candidate, so it does not validate SIMD. Without this environment variable,
+the suite tests the unchanged pinned application core.
 
 Use synthetic/licensed fixtures only. Never put PDFs, extracted text, filenames,
 passwords or signature data into logs, issue attachments or analytics. Report

@@ -125,7 +125,7 @@ for (const [mode, filename] of [
       for (const [file, prefix] of [
         [fixture, before],
         [output, after],
-      ])
+      ] as const)
         execFileSync('pdftoppm', ['-singlefile', '-png', '-r', '144', file, prefix], {
           stdio: 'pipe',
         });

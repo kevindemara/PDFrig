@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "featureIds": ["OCR-001"],
+  "reviewDate": "2026-10-19",
+  "status": "bounded-model-admission-and-result-review-native-clearance-incomplete",
+  "publicReleaseApproved": false,
+  "runtimeReplacementApproved": false,
+  "completeNativeVulnerabilityClearance": false,
+  "models": {
+    "version": "tessdata_fast/4.1.0",
+    "license": "Apache-2.0",
+    "format": "raw traineddata, not gzip",
+    "pins": [
+      {
+        "language": "eng",
+        "bytes": 4113088,
+        "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/eng.traineddata"
+      },
+      {
+        "language": "fra",
+        "bytes": 1130365,
+        "sha256": "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca",
+        "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/fra.traineddata"
+      }
+    ],
+    "buildAdmission": "prepare-local-ocr-assets.mjs uses exact size and SHA-256 for cached and downloaded bytes, bounded streaming into a fixed-size buffer, a 60-second fetch timeout and redirect refusal. No user PDFs enter preparation.",
+    "runtimeAdmission": "local-ocr-models.ts reads exact-size local assets into owned storage and verifies SHA-256 before passing provided byte data to loadLanguage. The editor supplies only eng or fra, gzip:false, cacheMethod:none, lstmOnly:true. It uses no credentials, redirects, model URL payload or worker model cache. The 180-second worker deadline and cancellation abort the pending fetch; stop reasons survive asynchronous races.",
+    "trustLimit": "This verifies the allowed model bytes before native parsing, not their internal safety. It does not protect a compromised application bundle, same-origin executable code or substituted native core, and does not establish that arbitrary traineddata is safe. Native Init bindings and traineddata/LSTM parsers still need separate review and fuzzing."
+  },
+  "sourceReview": {
+    "worker": "https://github.com/naptha/tesseract.js/blob/v7.0.0/src/worker-script/index.js",
+    "resultDump": "https://github.com/naptha/tesseract.js/blob/v7.0.0/src/worker-script/utils/dump.js",
+    "modelParserReference": "https://github.com/tesseract-ocr/tesseract/blob/5.3.0/src/ccutil/tessdatamanager.cpp",
+    "finding": "The worker accepts provided model data as well as fetchable language names. The application previously relied only on preparation-time checks and let the worker fetch models. It now provides admitted bytes so changed same-origin assets cannot silently reach initialization through the editor path. Init2/3/4 and wider native ABI are not disabled or cleared by this caller-side check. The pinned fork, not upstream version labels alone, remains the security review target."
+  },
+  "nativeResultBoundary": {
+    "implementation": "packages/pdf-engine/src/local-ocr-result.ts",
+    "limits": {
+      "blocks": 1000,
+      "totalParagraphs": 1000,
+      "totalLines": 10000,
+      "totalWordEntriesIncludingBlank": 10000,
+      "wordUtf16Units": 256
+    },
+    "validation": "Require arrays/records, bounded collections, string words, finite baseline and ordered finite boxes inside the raster. Normalize only admitted geometry; reject invalid output with content-free errors. Blank entries count toward the budget before filtering.",
+    "limitsOfReview": "These checks bound traversal and composition in the parent, not native recognition, result serialization/allocation or worker-to-parent structured clone. Worker termination and memory limits do not constitute whole-native security clearance."
+  },
+  "researchApiReduction": {
+    "record": "ocr-minimal-candidate.json",
+    "additionalDeniedRendererBindings": 9,
+    "scope": "Exact optional native PDF-renderer signatures/bodies now abort in the research candidate before allocation/dereference/deletion. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The application does not use native PDF rendering. No research core is installed into the app."
+  },
+  "verification": {
+    "unitSuites": [
+      "local-ocr-models.test.ts",
+      "local-ocr-worker-client.test.ts",
+      "local-ocr-result.test.ts"
+    ],
+    "browserSuite": "tests/browser/ocr-scans.spec.ts",
+    "runtimesTested": ["pinned application core", "renderer-disabled baseline research candidate"],
+    "syntheticScanCasesPerRuntime": 4,
+    "languages": ["eng", "fra"],
+    "layouts": ["portrait", "landscape-crop"],
+    "colouredGraphicsAndPaperSpecks": true,
+    "exactIndependentRenderEqualityDpi": [96, 144],
+    "renderBoxes": ["MediaBox", "CropBox"],
+    "untouchedSecondPageVerified": true,
+    "frenchAccentExtractionVerified": true,
+    "sameSizeCorruptModelRefusedBeforeNativeInitialization": true,
+    "sourceBytesUnchanged": true,
+    "qpdfAndIndependentExtraction": true,
+    "noUnexpectedRequestsOrPageErrors": true,
+    "scope": "Purpose-created synthetic fixtures in isolated Chromium; visible scan bytes render identically before/after invisible text export. No customer documents, public accuracy claim, OCR reconstruction, general corpus equivalence or native WebView2 certification. Unit digest mock covers control flow only; browser integrity tests use actual WebCrypto and model bytes."
+  },
+  "remainingGates": [
+    "Exact native fork/API ownership and traineddata/LSTM/PNM parser review and broader native sanitizer/fuzz coverage.",
+    "Final candidate source-to-binary integration, notices/security approval and baseline/SIMD performance/platform policy; candidate is not adopted.",
+    "Recognition/alignment benchmarks and browser diversity beyond the synthetic Chromium cases; reference Windows WebView2/offline installer testing on an approved host.",
+    "Project licence decision, remaining Windows dependency notice gaps and exact final artifact clearance. No billing or Windows security changes are authorized by this review."
+  ]
+}

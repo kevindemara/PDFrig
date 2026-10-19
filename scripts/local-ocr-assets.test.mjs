@@ -21,6 +21,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.publicApiSelftestCycles, 100);
   assert.equal(pins.evidence.deniedRawOwnershipBindingsTested, 25);
   assert.equal(pins.evidence.deniedAlternateImageBindingsTested, 6);
+  assert.equal(pins.evidence.deniedRendererBindingsTested, 9);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.equal(
@@ -70,6 +71,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.doesNotMatch(build, /#include.*pix_internal/u);
   assert.ok(build.includes('patch_bindings(glue)'));
   assert.ok(build.includes('patch_input_apis(glue)'));
+  assert.ok(build.includes('patch_renderer_apis(glue)'));
   assert.ok(build.includes("'deniedAlternateImageBindings': denied_image_bindings"));
   assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
   assert.ok(build.includes('p6_tests = test_preflight(work)'));
@@ -80,6 +82,53 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(bindings.includes('unsupported raw/ownership API'));
   assert.ok(bindings.includes('OCR_CANDIDATE_BINDING_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_IMAGE_API_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_RENDERER_API_DRIFT'));
+});
+
+test('OCR-001 build/runtime model admission shares exact reviewed pins and no worker refetch', async () => {
+  const review = JSON.parse(
+    await readFile(path.join(root, 'docs/dependencies/ocr-model-api-review.json'), 'utf8'),
+  );
+  assert.equal(review.publicReleaseApproved, false);
+  assert.equal(review.runtimeReplacementApproved, false);
+  assert.equal(review.completeNativeVulnerabilityClearance, false);
+  const runtime = await readFile(
+    path.join(root, 'packages/pdf-engine/src/local-ocr-models.ts'),
+    'utf8',
+  );
+  const build = await readFile(path.join(root, 'scripts/prepare-local-ocr-assets.mjs'), 'utf8');
+  const client = await readFile(
+    path.join(root, 'packages/pdf-engine/src/local-ocr-worker-client.ts'),
+    'utf8',
+  );
+  assert.deepEqual(
+    review.models.pins.map((pin) => pin.language),
+    ['eng', 'fra'],
+  );
+  for (const pin of review.models.pins) {
+    assert.equal(
+      pin.url,
+      `https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/${pin.language}.traineddata`,
+    );
+    assert.ok(runtime.includes(pin.sha256));
+    assert.ok(runtime.replaceAll('_', '').includes(`bytes: ${pin.bytes}`));
+    assert.ok(build.includes(`'${pin.language}', '${pin.sha256}', ${pin.bytes}`));
+  }
+  for (const guard of [
+    "redirect: 'error'",
+    "credentials: 'omit'",
+    "cache: 'no-store'",
+    "crypto.subtle.digest('SHA-256'",
+    'pin.bytes - length',
+    'reader?.cancel()',
+  ])
+    assert.ok(runtime.includes(guard));
+  assert.ok(build.includes('size - length'));
+  assert.ok(build.includes('reader.cancel()'));
+  assert.ok(client.includes('data: model'));
+  assert.ok(client.includes("gzip: false, cacheMethod: 'none', lstmOnly: true"));
+  assert.ok(client.includes('modelController.abort()'));
+  assert.doesNotMatch(client, /langPath:|cachePath:/u);
 });
 
 test('OCR-001 research native image preflight is exact, bounded and hash-bound', async () => {
