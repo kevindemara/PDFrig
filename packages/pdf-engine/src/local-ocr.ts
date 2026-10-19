@@ -1,8 +1,8 @@
 import type { BrowserPdfDocument } from './browser-document.js';
 import type { LocalOcrWord } from './local-ocr-compose.js';
-import type { Page } from 'tesseract.js';
 import { runLocalOcrWorker } from './local-ocr-worker-client.js';
 import { encodeOcrPixels } from './local-ocr-pixels.js';
+import { readLocalOcrWords } from './local-ocr-result.js';
 /** OCR-001: only a locally rendered canvas enters OCR; URLs/documents never do. */
 export async function recognizeLocalPage(
   document: BrowserPdfDocument,
@@ -34,33 +34,7 @@ export async function recognizeLocalPage(
     );
     const raw = await runLocalOcrWorker(image, language, base, signal, progress);
     if (isCancelled()) throw new Error('OCR_CANCELLED');
-    if (
-      typeof raw !== 'object' ||
-      raw === null ||
-      !('blocks' in raw) ||
-      !Array.isArray(raw.blocks) ||
-      raw.blocks.length > 1000
-    )
-      throw new Error('OCR_OUTPUT_INVALID');
-    const blocks = raw.blocks as NonNullable<Page['blocks']>;
-    const words: LocalOcrWord[] = [];
-    for (const block of blocks)
-      for (const paragraph of block.paragraphs)
-        for (const line of paragraph.lines)
-          for (const word of line.words) {
-            if (!word.text.trim()) continue;
-            words.push({
-              text: word.text,
-              x: word.bbox.x0 / canvas.width,
-              y: word.bbox.y0 / canvas.height,
-              width: (word.bbox.x1 - word.bbox.x0) / canvas.width,
-              height: (word.bbox.y1 - word.bbox.y0) / canvas.height,
-              baseline: Math.min(1, Math.max(0, line.baseline.y0 / canvas.height)),
-            });
-            if (words.length > 10_000) throw new Error('OCR_WORD_LIMIT');
-          }
-    if (!words.length) throw new Error('OCR_NO_TEXT_FOUND');
-    return words;
+    return readLocalOcrWords(raw, canvas.width, canvas.height);
   } finally {
     canvas.width = canvas.height = 0;
   }

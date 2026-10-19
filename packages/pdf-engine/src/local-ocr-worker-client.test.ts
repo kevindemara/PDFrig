@@ -1,6 +1,13 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runLocalOcrWorker } from './local-ocr-worker-client.js';
 import { encodeOcrPixels } from './local-ocr-pixels.js';
+import { loadPinnedOcrModel } from './local-ocr-models.js';
+vi.mock('./local-ocr-models.js', () => ({ loadPinnedOcrModel: vi.fn() }));
+beforeEach(() => {
+  vi.mocked(loadPinnedOcrModel)
+    .mockReset()
+    .mockResolvedValue(new Uint8Array([4, 3, 2, 1]));
+});
 class FakeWorker {
   static latest: FakeWorker;
   onmessage: ((event: { data: unknown }) => void) | null = null;
@@ -64,9 +71,9 @@ describe('OCR-001 initialization ownership and cleanup', () => {
   });
   it('runs the pinned local protocol sequentially and cleans up success', async () => {
     const { result } = start();
-    for (let index = 0; index < 3; index++) {
+    for (const action of ['loadLanguage', 'initialize', 'recognize']) {
       FakeWorker.latest.reply('resolve');
-      await Promise.resolve();
+      await vi.waitFor(() => expect(FakeWorker.latest.sent.at(-1)?.action).toBe(action));
     }
     FakeWorker.latest.reply('resolve', { blocks: [] });
     expect(await result).toEqual({ blocks: [] });
@@ -76,6 +83,42 @@ describe('OCR-001 initialization ownership and cleanup', () => {
       'initialize',
       'recognize',
     ]);
+    expect(FakeWorker.latest.terminate).toHaveBeenCalledOnce();
+    expect(FakeWorker.latest.sent[1]?.payload).toEqual({
+      langs: [{ code: 'eng', data: new Uint8Array([4, 3, 2, 1]) }],
+      options: { gzip: false, cacheMethod: 'none', lstmOnly: true },
+    });
+  });
+  it('never submits a failed model to the worker or initializes the native parser', async () => {
+    vi.mocked(loadPinnedOcrModel).mockRejectedValue(new Error('OCR_MODEL_FAILED'));
+    const { result } = start();
+    const outcome = result.catch((error: unknown) =>
+      error instanceof Error ? error.message : 'unknown',
+    );
+    FakeWorker.latest.reply('resolve');
+    expect(await outcome).toBe('OCR_MODEL_FAILED');
+    expect(FakeWorker.latest.sent.map((packet) => packet.action)).toEqual(['load']);
+    expect(FakeWorker.latest.terminate).toHaveBeenCalledOnce();
+  });
+  it('aborts a pending model read on the owned deadline', async () => {
+    vi.useFakeTimers();
+    vi.mocked(loadPinnedOcrModel).mockImplementation(
+      (_language, _base, signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(new Error('OCR_CANCELLED')), {
+            once: true,
+          });
+        }),
+    );
+    const { result } = start();
+    const outcome = result.catch((error: unknown) =>
+      error instanceof Error ? error.message : 'unknown',
+    );
+    FakeWorker.latest.reply('resolve');
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(180_000);
+    expect(await outcome).toBe('OCR_TIMEOUT');
+    expect(FakeWorker.latest.sent).toHaveLength(1);
     expect(FakeWorker.latest.terminate).toHaveBeenCalledOnce();
   });
   it('does not spawn for already-cancelled work', async () => {
@@ -113,9 +156,9 @@ describe('OCR-001 initialization ownership and cleanup', () => {
     const outcome = result.catch((error: unknown) =>
       error instanceof Error ? error.message : 'unknown',
     );
-    for (let index = 0; index < 2; index++) {
+    for (const action of ['loadLanguage', 'initialize']) {
       FakeWorker.latest.reply('resolve');
-      await Promise.resolve();
+      await vi.waitFor(() => expect(FakeWorker.latest.sent.at(-1)?.action).toBe(action));
     }
     image[0] = 0;
     FakeWorker.latest.reply('resolve');

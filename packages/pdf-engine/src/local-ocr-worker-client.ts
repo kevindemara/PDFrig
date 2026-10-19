@@ -1,4 +1,5 @@
 import { assertOcrPixels } from './local-ocr-pixels.js';
+import { loadPinnedOcrModel } from './local-ocr-models.js';
 /** Pinned Tesseract.js v7 worker protocol. Own the worker before initialization so
  * aborts, initialization failures and deadlines always terminate it immediately. */
 export async function runLocalOcrWorker(
@@ -12,8 +13,10 @@ export async function runLocalOcrWorker(
   if (!['eng', 'fra'].includes(language)) throw new Error('OCR_LANGUAGE_UNSUPPORTED');
   assertOcrPixels(image);
   const worker = new Worker(`${base}worker.min.js`);
+  const modelController = new AbortController();
   let sequence = 0;
   let stopped = false;
+  let stopCode: string | undefined;
   let pending:
     | {
         id: string;
@@ -25,6 +28,8 @@ export async function runLocalOcrWorker(
   const stop = (code: string) => {
     if (stopped) return;
     stopped = true;
+    stopCode = code;
+    modelController.abort();
     worker.terminate();
     pending?.reject(new Error(code));
     pending = undefined;
@@ -74,15 +79,19 @@ export async function runLocalOcrWorker(
     });
   try {
     await job('load', { options: { lstmOnly: true, corePath: base, logging: false } });
+    const model = await loadPinnedOcrModel(language, base, modelController.signal);
     await job('loadLanguage', {
-      langs: language,
-      options: { langPath: base, gzip: false, cacheMethod: 'none', lstmOnly: true },
+      langs: [{ code: language, data: model }],
+      options: { gzip: false, cacheMethod: 'none', lstmOnly: true },
     });
     await job('initialize', { langs: language, oem: 1, config: {} });
     // Initialization yields to the caller. Recheck immediately before the
     // synchronous structured clone so a changed/detached header cannot reach native code.
     assertOcrPixels(image);
     return await job('recognize', { image, options: {}, output: { blocks: true, text: true } });
+  } catch (error) {
+    if (stopCode) throw new Error(stopCode);
+    throw error;
   } finally {
     stop('OCR_CANCELLED');
     clearTimeout(timer);

@@ -222,15 +222,17 @@ export function SourceTextDialog({
                     ? 'A safely editable uniform paragraph could not be identified. Mixed fonts, linked text, complex graphics or unsupported text structures may prevent paragraph wrapping. No copy was applied.'
                     : error instanceof Error && error.message === 'SOURCE_TEXT_GLYPH_UNSUPPORTED'
                       ? 'The original font does not contain these characters. No substitution was made.'
-                      : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
-                        ? 'This page already contains searchable text. OCR was not added a second time; use Select text or Edit existing text.'
-                        : error instanceof Error &&
-                            error.message === 'SOURCE_TEXT_SELECTION_UNSUPPORTED'
-                          ? 'This selection crosses an unsupported text boundary. Select a complete supported word or choose a line below. Nothing was changed.'
+                      : error instanceof Error && error.message === 'OCR_MODEL_FAILED'
+                        ? 'The local OCR language model failed integrity checks. No text was added. Restore verified application assets and try again.'
+                        : error instanceof Error && error.message === 'OCR_PAGE_ALREADY_SEARCHABLE'
+                          ? 'This page already contains searchable text. OCR was not added a second time; use Select text or Edit existing text.'
                           : error instanceof Error &&
-                              error.message === 'SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED'
-                            ? 'This selection cannot yet be edited while preserving its accessibility text. Nothing was changed.'
-                            : 'Could not safely build this copy. The source is unchanged. Review and apply stay unavailable until a preview succeeds. Try a supported page or shorter text.'),
+                              error.message === 'SOURCE_TEXT_SELECTION_UNSUPPORTED'
+                            ? 'This selection crosses an unsupported text boundary. Select a complete supported word or choose a line below. Nothing was changed.'
+                            : error instanceof Error &&
+                                error.message === 'SOURCE_TEXT_ACCESSIBILITY_UNSUPPORTED'
+                              ? 'This selection cannot yet be edited while preserving its accessibility text. Nothing was changed.'
+                              : 'Could not safely build this copy. The source is unchanged. Review and apply stay unavailable until a preview succeeds. Try a supported page or shorter text.'),
         );
       }
     } finally {

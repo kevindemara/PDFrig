@@ -19,8 +19,8 @@ if (
 )
   throw new Error('OCR_WORKER_ASSET_MISMATCH');
 const models = [
-  ['eng', '7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2'],
-  ['fra', 'ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca'],
+  ['eng', '7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2', 4113088],
+  ['fra', 'ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca', 1130365],
 ];
 const coreHashes = {
   'tesseract-core-lstm.wasm.js': 'eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680',
@@ -50,7 +50,7 @@ for (const location of ['apps/web/public/ocr', 'apps/desktop/public/ocr']) {
       await readFile(path.join(root, 'docs/dependencies/LOCAL_OCR_JS_NOTICES.txt'), 'utf8'),
     ].join('\n'),
   );
-  for (const [language, expected] of models) {
+  for (const [language, expected, size] of models) {
     const file = path.join(destination, `${language}.traineddata`);
     let bytes;
     try {
@@ -58,13 +58,32 @@ for (const location of ['apps/web/public/ocr', 'apps/desktop/public/ocr']) {
     } catch {
       /* First build fetches fixed public model assets, never documents. */
     }
-    if (!bytes || createHash('sha256').update(bytes).digest('hex') !== expected) {
+    if (
+      !bytes ||
+      bytes.length !== size ||
+      createHash('sha256').update(bytes).digest('hex') !== expected
+    ) {
       const response = await fetch(
         `https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/${language}.traineddata`,
-        { signal: AbortSignal.timeout(60_000) },
+        { signal: AbortSignal.timeout(60_000), redirect: 'error' },
       );
-      if (!response.ok) throw new Error('OCR_MODEL_DOWNLOAD_FAILED');
-      bytes = new Uint8Array(await response.arrayBuffer());
+      if (!response.ok || !response.body) throw new Error('OCR_MODEL_DOWNLOAD_FAILED');
+      bytes = new Uint8Array(size);
+      const reader = response.body.getReader();
+      let length = 0;
+      try {
+        for (;;) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          if (chunk.value.length > size - length) throw new Error('OCR_MODEL_DOWNLOAD_LIMIT');
+          bytes.set(chunk.value, length);
+          length += chunk.value.length;
+        }
+        if (length !== size) throw new Error('OCR_MODEL_ASSET_MISMATCH');
+      } finally {
+        await reader.cancel().catch(() => undefined);
+        reader.releaseLock();
+      }
       if (createHash('sha256').update(bytes).digest('hex') !== expected)
         throw new Error('OCR_MODEL_ASSET_MISMATCH');
       await writeFile(file, bytes);
