@@ -12,6 +12,8 @@ import {
   retainPackageLicenseTexts,
 } from './desktop-license-texts.mjs';
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
+import { brotliDictionaryEvidence } from './brotli-dictionary-evidence.mjs';
+import { brotliCompressSync } from 'node:zlib';
 
 const repository = fileURLToPath(new URL('../', import.meta.url));
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -100,18 +102,24 @@ test('Brotli decoder attribution and full adopted terms are retained without cle
   const options = { root: repository, npmPartials, supplements: { packages: [], texts: [] } };
   const result = await collectDesktopLicenseNotices([pkg], options);
   assert.deepEqual(result.gaps, ['brotli@1.3.3']);
-  assert.equal(result.provenance.length, 8);
+  assert.equal(result.provenance.length, 9);
+  const dictionary = result.provenance.find(
+    (entry) => entry.origin === 'reviewed-partial-npm-derived-data-notice',
+  );
+  assert.equal(dictionary?.file, 'dec/dictionary.bin.js');
+  assert.equal(dictionary?.derivation.bytes, 122784);
   assert.ok(result.provenance.every((entry) => entry.packageNoticeComplete === false));
   assert.ok(result.provenance.every((entry) => entry.scopeLicense === 'Apache-2.0'));
   assert.equal(result.components[0].licenses[0].expression, 'MIT');
   assert.match(result.text, /Copyright 2013 Google Inc/u);
   assert.match(result.text, /END OF TERMS AND CONDITIONS/u);
-  for (const mutation of ['tree', 'terms', 'source', 'prefix']) {
+  for (const mutation of ['tree', 'terms', 'source', 'prefix', 'dictionary']) {
     const changed = structuredClone(npmPartials);
     if (mutation === 'tree') changed.binding.tree.sha256 = '0'.repeat(64);
     if (mutation === 'terms') changed.terms.sha256 = '0'.repeat(64);
     if (mutation === 'source') changed.sources[0].sha256 = '0'.repeat(64);
     if (mutation === 'prefix') changed.noticePrefixSha256 = '0'.repeat(64);
+    if (mutation === 'dictionary') changed.derivedPayloads[0].sha256 = '0'.repeat(64);
     await assert.rejects(
       collectDesktopLicenseNotices([pkg], { ...options, npmPartials: changed }),
       /DESKTOP_NOTICES_PARTIAL_NOTICE_/u,
@@ -120,6 +128,28 @@ test('Brotli decoder attribution and full adopted terms are retained without cle
   const unknown = await collectDesktopLicenseNotices([{ ...pkg, name: 'unknown' }], options);
   assert.deepEqual(unknown.gaps, ['unknown@1.3.3']);
   assert.equal(unknown.provenance.length, 0);
+});
+
+test('Brotli browser dictionary evidence refuses code, corruption, mismatches and excessive decoded bytes without executing package code', async () => {
+  const dir = path.join(repository, 'node_modules/.pnpm/brotli@1.3.3/node_modules/brotli/dec');
+  const source = await readFile(path.join(dir, 'dictionary-data.js'));
+  const packed = await readFile(path.join(dir, 'dictionary.bin.js'));
+  assert.equal(brotliDictionaryEvidence(source, packed).bytes, 122784);
+  const oversized = Buffer.from(
+    `module.exports="${brotliCompressSync(Buffer.alloc(122785)).toString('base64')}";`,
+  );
+  for (const [raw, payload] of [
+    [source, Buffer.concat([packed, Buffer.from('globalThis.executed = true;')])],
+    [Buffer.from(source.toString('utf8').replace('0x74', '0x75')), packed],
+    [source, Buffer.from('module.exports="AAAA";')],
+    [source, oversized],
+    [Buffer.concat([source, source]), packed],
+    [source, Buffer.alloc(128 * 1024 + 1)],
+  ])
+    assert.throws(
+      () => brotliDictionaryEvidence(raw, payload),
+      /^Error: BROTLI_DICTIONARY_EVIDENCE_INVALID$/u,
+    );
 });
 test('exact reviewed supplements bind archive, original manifest, VCS commit/path, expression and notice hash', async () => {
   const f = await fixture();

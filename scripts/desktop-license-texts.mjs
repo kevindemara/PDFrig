@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { installedNpmEvidence, npmTreeEvidence } from './npm-notice-evidence.mjs';
+import { brotliDictionaryEvidence } from './brotli-dictionary-evidence.mjs';
 
 const fail = (code) => {
   throw new Error(`DESKTOP_NOTICES_${code}`);
@@ -87,7 +88,11 @@ export async function loadDesktopNpmPartialNotices(root) {
     partial.terms.source !== 'https://www.apache.org/licenses/LICENSE-2.0.txt' ||
     partial.terms.sha256 !== 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30' ||
     partial.sources.length !== 7 ||
-    new Set(partial.sources.map((entry) => entry.file)).size !== 7
+    new Set(partial.sources.map((entry) => entry.file)).size !== 7 ||
+    partial.derivedPayloads?.length !== 1 ||
+    partial.derivedPayloads[0].file !== 'dec/dictionary.bin.js' ||
+    partial.derivedPayloads[0].sourceFile !== 'dec/dictionary-data.js' ||
+    partial.derivedPayloads[0].encoding !== 'brotli-base64-js-literal'
   )
     return fail('PARTIAL_NOTICE_INVALID');
   const binding = review.packages.find(
@@ -140,6 +145,38 @@ async function retainPartialNpmNotice(pkg, { root, npmPartials }) {
       scopeLicense: partial.license,
       commit: partial.commit,
       text: prefix,
+    });
+  }
+  for (const payload of partial.derivedPayloads) {
+    const source = await boundedFile(pkg.directory, payload.sourceFile);
+    const packed = await boundedFile(pkg.directory, payload.file);
+    let evidence;
+    try {
+      evidence = brotliDictionaryEvidence(source, packed);
+    } catch {
+      return fail('PARTIAL_NOTICE_DICTIONARY');
+    }
+    if (
+      !['sourceSha256', 'payloadSha256', 'bytes', 'sha256'].every(
+        (key) => evidence[key] === payload[key],
+      ) ||
+      !partial.sources.some(
+        (entry) => entry.file === payload.sourceFile && entry.sha256 === payload.sourceSha256,
+      )
+    )
+      return fail('PARTIAL_NOTICE_DICTIONARY');
+    const notice = retained.find((entry) => entry.file === payload.sourceFile);
+    if (!notice) return fail('PARTIAL_NOTICE_DICTIONARY');
+    retained.push({
+      file: payload.file,
+      sha256: notice.sha256,
+      sourceSha256: payload.payloadSha256,
+      origin: 'reviewed-partial-npm-derived-data-notice',
+      packageNoticeComplete: false,
+      scopeLicense: partial.license,
+      commit: partial.commit,
+      derivation: { source: payload.sourceFile, bytes: payload.bytes, sha256: payload.sha256 },
+      text: notice.text,
     });
   }
   return retained;

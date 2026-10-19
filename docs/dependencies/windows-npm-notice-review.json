@@ -51,11 +51,11 @@
       },
       "manifestSha256": "387b47d00ea96cab9b4c521629fbcdc7621053ac061812526f3c69700924cef5",
       "noticeComplete": false,
-      "finding": "MIT declaration/README are not full project terms. Seven decoder files retain Google 2013 Apache-2.0 headers. Their original attribution and full explicitly adopted steward terms are now retained through desktop-npm-partial-notices.json with packageNoticeComplete false. build/encode.js and build/mem.js remain compiled/encoded payloads without a complete native source inventory.",
+      "finding": "MIT declaration/README are not full project terms. Seven decoder files retain Google 2013 Apache-2.0 headers. Their attribution/full terms are retained with packageNoticeComplete false. The entire compressed browser dictionary dec/dictionary.bin.js now has a bounded byte-for-byte binding to the explicitly licensed dictionary-data.js table (122784 bytes, SHA-256 20e42eb1b511c21806d4d227d07e5dd06877d8ce7b3a817f378f313653f35c70), without executing package JS. Its derived-data attribution is retained too. build/encode.js and build/mem.js still lack complete native source/build provenance; this data binding does not clear them or package terms.",
       "supportingSources": [
         "https://github.com/devongovett/brotli.js/tree/e36051345f6d27a56e5f39ea70d2f789b8574046"
       ],
-      "nextAction": "Decoder attribution/terms are retained; resolve wrapper MIT attribution and encoder/data source/build provenance before clearing the package."
+      "nextAction": "Decoder and byte-identical browser-dictionary attribution/terms are retained; resolve wrapper MIT attribution and encoder/encoder-memory source/build provenance before clearing the package."
     },
     {
       "name": "dfa",
