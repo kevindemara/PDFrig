@@ -68,6 +68,36 @@ RENDERER_APIS = {
 }
 
 
+MODEL_APIS = {
+    'Init_2': ('int', 'TessBaseAPI* self, const char* datapath, const char* language',
+               'return self->Init(datapath, language);'),
+    'ReadConfigFile_1': ('void', 'TessBaseAPI* self, const char* filename', 'self->ReadConfigFile(filename);'),
+    'ReadDebugConfigFile_1': ('void', 'TessBaseAPI* self, const char* filename', 'self->ReadDebugConfigFile(filename);'),
+}
+GUARDED_INIT = ('int EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_Init_4'
+                '(TessBaseAPI* self, const char* datapath, const char* language, OcrEngineMode oem, char* config) {\n'
+                '  char *configs[64] = {config};\n'
+                '  return self->Init(datapath, language, oem, configs, 1, nullptr, nullptr, false);\n}')
+GUARDED_INIT3 = ('int EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_Init_3'
+                 '(TessBaseAPI* self, const char* datapath, const char* language, OcrEngineMode oem) {\n'
+                 '  return self->Init(datapath, language, oem);\n}')
+
+
+def patch_model_apis(glue):
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    inventory = re.findall(r'EMSCRIPTEN_KEEPALIVE (' + prefix + r'(?:Init_\d+|Read\w*ConfigFile_\d+))\(', glue)
+    if (sorted(inventory) != sorted([prefix + name for name in MODEL_APIS] + [prefix + 'Init_3', prefix + 'Init_4'])
+            or glue.count(GUARDED_INIT) != 1 or glue.count(GUARDED_INIT3) != 1):
+        raise RuntimeError('OCR_CANDIDATE_MODEL_API_DRIFT')
+    for name, (result, parameters, body) in MODEL_APIS.items():
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_MODEL_API_DRIFT')
+        glue = glue.replace(original, original.replace(body,
+            'abort(); /* PDFrig research: unused model/config entry is not supported. */'))
+    return glue, [prefix + name for name in MODEL_APIS]
+
+
 def patch_renderer_apis(glue):
     prefix = 'emscripten_bind_TessPDFRenderer_'
     inventory = re.findall(r'EMSCRIPTEN_KEEPALIVE (' + prefix + r'\w+)\(', glue)

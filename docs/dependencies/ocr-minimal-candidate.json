@@ -54,10 +54,10 @@
   "evidence": {
     "date": "2026-10-19",
     "variant": "baseline-lstm",
-    "sha256": "a415a652fc3bc1ead743a8e20b7e69b9e417c6d1b9d293eb5aead78fac4ebe22",
-    "bytes": 2408943,
+    "sha256": "6ddd58e8b6b2c93f680fcf03de53791bb8d17f65ab4726538e71a732ba2f015c",
+    "bytes": 2410233,
     "repeatedArtifactMatch": true,
-    "reproductionScope": "Two independent fresh source-tree builds of this renderer-disabled revision produced identical artifacts and receipts under the pinned image. Both passed nine renderer traps, six alternate-ingestion traps, existing native preflight sanitizers, RecodeNode controls/ownership sanitizers, public API tests, 1072 actual WASM image refusals and English/French browser smoke. Cross-host reproducibility is not certified.",
+    "reproductionScope": "Two independent fresh source-tree builds of this model-directory-hardened revision produced identical artifacts and receipts under the pinned image. Both passed directory/image preflight sanitizers, RecodeNode controls/ownership sanitizers, public API tests, three model/config traps, nine renderer traps, six alternate-ingestion traps, 1970 actual WASM model-directory checks, 1072 image refusals and English/French browser smoke. Cross-host reproducibility is not certified.",
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
@@ -65,7 +65,7 @@
     "browserPageErrors": 0,
     "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
     "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
-    "modifiedGlueSha256": "8c4685a014b3647975e64a47765e258e1453fd4b7463e41e7d703fff4af619ec",
+    "modifiedGlueSha256": "a1b80dfa129a2d0a703a7f031bcc781ddd52e3e33e140ae52e909086edd49eac",
     "modifiedRecodebeamSha256": "785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43",
     "modifiedBaseapiSha256": "dbe5d76fb88a318fdf2ea329727c3e65b200ff19919252df929e2f630bd03d84",
     "nativeP6PreflightSha256": "9915881dbe155a95006f24554fe3835cd66edcba70e1a696967a1fc88ca4560a",
@@ -84,6 +84,22 @@
     "deniedRawOwnershipBindingsTested": 25,
     "deniedAlternateImageBindingsTested": 6,
     "deniedRendererBindingsTested": 9,
+    "deniedModelBindingsTested": 3,
+    "modifiedModelLoaderSha256": "bd5e48bb3d3de33fc3d2130dffcefa613caec1904d33c310cb585b848cde3abe",
+    "nativeModelPreflightSha256": "7302c9ef1217815d6247a9c8a8ba7eb72763d0eb0f4922e8f0ffc613d3f1d2b0",
+    "nativeModelPreflightVerification": {
+      "sanitizers": ["address", "undefined"],
+      "warningsAsErrors": true,
+      "directoryByteMutations": 50176,
+      "deterministicMutations": 10000,
+      "bothByteOrders": true,
+      "directoryTruncations": true,
+      "maximumModelBytes": 16777216,
+      "maximumComponents": 24,
+      "actualModelDirectoryCases": 1970,
+      "pinnedModelDirectoriesAdmitted": 2,
+      "scope": "Actual no-allocation directory preflight under sanitizers plus real patched TessdataManager::LoadMemBuffer via a research WASM export. Includes malformed/valid controls, both byte orders and exact eng/fra directories. Not LSTM/DAWG/unicharset decoding, arbitrary pointer or whole-native fuzz clearance."
+    },
     "scanExportVerification": {
       "suite": "tests/browser/ocr-scans.spec.ts",
       "syntheticCases": 4,
@@ -116,7 +132,7 @@
       "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
       "The RecodeNode nontrivial memcpy was replaced by a hash-bound upstream member-wise assignment with a self-assignment guard. Targeted ownership sanitizer tests pass; other old-engine code and legacy move-like copy semantics are not cleared.",
-      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate image and nine optional PDF-renderer exports abort before argument access. Remaining TessBaseAPI pointer APIs and the model parser are not cleared by these narrow checks.",
+      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate image, nine optional renderer and three unused model/config exports abort before argument access. Both worker-used Init3/4 remain available. A strict model directory preflight now precedes component allocation. Remaining TessBaseAPI pointer APIs and deeper LSTM/DAWG/unicharset decoding are not cleared by these narrow checks.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
     ]
@@ -126,7 +142,16 @@
     "completeNativeVulnerabilityClearance": false,
     "scope": "Research artifact only; application runtime is unchanged. Public getter and owned-object self-tests do not establish arbitrary pointer safety or general binding compatibility.",
     "leptonica": "Removed pix_internal.h coupling. Seventeen scalar getters use public APIs and reject null pointers; 25 raw-array, reference-count/internal-capacity and ownership-ambiguous destroy accessors abort. The current worker uses TessBaseAPI JSON text results, not those Leptonica wrappers. The synthetic self-test owns all six object types locally and releases them through their matching public destroy functions for 100 cycles.",
-    "patchContractTests": "Nine Python unittest cases execute before the isolated build. They check the public Leptonica patch, six exact alternate-ingestion signatures/bodies and nine exact renderer signatures/bodies, preserve the guarded worker entry, and reject missing/duplicate/new overloads, changed calls and repeated application. Native verifier checks valid getters, 25 ownership traps, six alternate-input traps and nine renderer traps; English/French worker smoke uses the same candidate.",
+    "patchContractTests": "Eleven Python unittest cases execute before the isolated build. They check public Leptonica getters, six alternate-image, nine renderer and three model/config signatures/bodies; preserve guarded image/Init3/Init4 entries; and reject missing/duplicate/new overloads, changed calls and repeated application. Native verification checks the corresponding real WASM exports plus the actual model directory loader. English/French worker smoke uses the same candidate.",
+    "modelDirectoryAndApis": {
+      "source": "src/ccutil/tessdatamanager.cpp",
+      "originalSha256": "3189b1ad5f4b1ff1e4603346a546a817664568711ea51081aa47e8daa2a7aca3",
+      "finding": "Old loader trusts offsets when sizing component vectors and indexes zero-length vectors. The exact-source research patch adds a strict directory preflight before TFile/vector allocation and refuses empty/oversized files before indexing/narrowing. Original Apache copyright/header and explicit modification comments are retained. This is a source finding, not a CVE/exploitability assertion.",
+      "deniedBindings": ["Init_2", "ReadConfigFile_1", "ReadDebugConfigFile_1"],
+      "retainedInitialization": "Both Init3/4 are required: generated JS dispatches empty configuration to Init3, even when the worker syntactically supplies four arguments. A real integration test caught an initial mistaken refusal; the final candidate retains both and regression-tests recognition with the unchanged editor protocol.",
+      "validation": "No-allocation byte reads support little/big endian, 1..24 slots, complete directory, -1 sentinel only, a contiguous first component and strictly increasing nonempty offsets inside at most 16 MiB. Sanitizer mutation checks and real LoadMemBuffer controls are recorded above. These checks bound directory allocation, not component internals or the preceding file-reader allocation.",
+      "remaining": "Review deeper traineddata/LSTM/DAWG/unicharset deserialization, other pointer APIs and exact-native advisories. Current application core remains unchanged and the editor still accepts only hash-verified eng/fra bytes."
+    },
     "optionalPdfRenderer": {
       "deniedBindings": [
         "TessPDFRenderer_3",

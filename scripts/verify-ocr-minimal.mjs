@@ -53,11 +53,27 @@ assert.equal(receipt.nativeP6PreflightTests.allTruncations, true);
 assert.equal(receipt.nativeP6PreflightTests.exactPixelLimit, 20_000_000);
 assert.equal(receipt.nativeP6PreflightTests.warningsAsErrors, true);
 assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'));
+assert.equal(receipt.sha256, pins.evidence.sha256);
+assert.equal(coreBytes.length, pins.evidence.bytes);
 assert.equal(receipt.leptonicaPrivateLayouts, false);
 assert.equal(
   receipt.modifiedGlueSha256,
-  '8c4685a014b3647975e64a47765e258e1453fd4b7463e41e7d703fff4af619ec',
+  'a1b80dfa129a2d0a703a7f031bcc781ddd52e3e33e140ae52e909086edd49eac',
 );
+assert.equal(
+  receipt.modifiedModelLoaderSha256,
+  'bd5e48bb3d3de33fc3d2130dffcefa613caec1904d33c310cb585b848cde3abe',
+);
+assert.equal(
+  receipt.nativeModelPreflightSha256,
+  createHash('sha256')
+    .update(await readFile(path.join(root, 'scripts/ocr-candidate-model.h')))
+    .digest('hex'),
+);
+assert.deepEqual(receipt.nativeModelPreflightTests.sanitizers, ['address', 'undefined']);
+assert.equal(receipt.nativeModelPreflightTests.warningsAsErrors, true);
+assert.equal(receipt.nativeModelPreflightTests.directoryByteMutations, 50176);
+assert.equal(receipt.nativeModelPreflightTests.deterministicMutations, 10000);
 assert.equal(receipt.publicApiSelftestCycles, 100);
 assert.equal(receipt.deniedRawOwnershipBindings.length, 25);
 assert.equal(new Set(receipt.deniedRawOwnershipBindings).size, 25);
@@ -104,6 +120,83 @@ for (const name of rendererBindings) {
   assert.throws(() => isolated[`_${name}`](pointer, pointer, 1), WebAssembly.RuntimeError);
 }
 assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
+const modelBindings = ['Init_2', 'ReadConfigFile_1', 'ReadDebugConfigFile_1'].map(
+  (name) => `emscripten_bind_TessBaseAPI_${name}`,
+);
+assert.deepEqual(receipt.deniedModelBindings, modelBindings);
+for (const name of modelBindings) {
+  const isolated = await factory({ printErr: () => undefined });
+  const ownedApi = new isolated.TessBaseAPI();
+  const pointer = isolated._malloc(128);
+  assert.ok(ownedApi.ptr > 0 && pointer > 0);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(
+    () => isolated[`_${name}`](ownedApi.ptr, pointer, pointer, 1),
+    WebAssembly.RuntimeError,
+  );
+}
+const directoryFixture = (big = false) => {
+  const bytes = Buffer.alloc(204, 120);
+  bytes[big ? 'writeUInt32BE' : 'writeUInt32LE'](24, 0);
+  for (let i = 0; i < 24; i++) bytes.fill(255, 4 + i * 8, 12 + i * 8);
+  bytes[big ? 'writeBigUInt64BE' : 'writeBigUInt64LE'](196n, 4 + 17 * 8);
+  bytes[big ? 'writeBigUInt64BE' : 'writeBigUInt64LE'](200n, 4 + 23 * 8);
+  return bytes;
+};
+const directoryAllows = (bytes) => {
+  if (bytes.length < 12 || bytes.length > 16777216) return false;
+  let count = bytes.readUInt32LE(0);
+  const big = count > 1000;
+  if (big) count = bytes.readUInt32BE(0);
+  if (!count || count > 24 || 4 + count * 8 >= bytes.length) return false;
+  let previous;
+  for (let i = 0; i < count; i++) {
+    const offset = bytes[big ? 'readBigInt64BE' : 'readBigInt64LE'](4 + i * 8);
+    if (offset === -1n) continue;
+    if (
+      offset < BigInt(4 + count * 8) ||
+      offset >= BigInt(bytes.length) ||
+      (previous === undefined ? offset !== BigInt(4 + count * 8) : offset <= previous)
+    )
+      return false;
+    previous = offset;
+  }
+  return previous !== undefined;
+};
+let modelDirectoryCases = 0;
+const checkDirectory = (bytes, expected, declaredSize = bytes.length) => {
+  const pointer = native._malloc(Math.max(1, bytes.length));
+  assert.ok(pointer > 0);
+  try {
+    for (let i = 0; i < bytes.length; i++) native.setValue(pointer + i, bytes[i], 'i8');
+    assert.equal(native._pdfrig_candidate_model_directory(pointer, declaredSize), expected ? 1 : 0);
+    modelDirectoryCases++;
+  } finally {
+    native._free(pointer);
+  }
+};
+assert.equal(native._pdfrig_candidate_model_directory(0, 100), 0);
+for (const big of [false, true]) {
+  const bytes = directoryFixture(big);
+  checkDirectory(bytes, true);
+  checkDirectory(bytes, false, -1);
+  checkDirectory(bytes, false, 16777217);
+  for (let length = 0; length <= 196; length++) checkDirectory(bytes.subarray(0, length), false);
+  for (let position = 0; position < 196; position++)
+    for (const value of [0, 1, 127, 255]) {
+      const changed = Buffer.from(bytes);
+      changed[position] = value;
+      checkDirectory(changed, directoryAllows(changed));
+    }
+}
+for (const [language, sha256] of [
+  ['eng', '7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2'],
+  ['fra', 'ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca'],
+]) {
+  const bytes = await readFile(path.join(root, `apps/web/public/ocr/${language}.traineddata`));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), sha256);
+  checkDirectory(bytes, true);
+}
 // Exercise the real WASM worker entry point, not only the standalone preflight.
 // Layout-only init avoids model parsing in these format-boundary tests.
 const api = new native.TessBaseAPI();
@@ -300,6 +393,10 @@ try {
     deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
     deniedAlternateImageBindingsTested: imageBindings.length,
     deniedRendererBindingsTested: rendererBindings.length,
+    deniedModelBindingsTested: modelBindings.length,
+    nativeModelPreflightTests: receipt.nativeModelPreflightTests,
+    actualModelDirectoryCases: modelDirectoryCases,
+    pinnedModelDirectoriesAdmitted: 2,
     legacyApiTrapsTested: legacyBindings.length,
     recodeNodeOwnershipTests: receipt.recodeNodeOwnershipTests,
     nativeP6PreflightTests: receipt.nativeP6PreflightTests,

@@ -32,7 +32,15 @@
     "worker": "https://github.com/naptha/tesseract.js/blob/v7.0.0/src/worker-script/index.js",
     "resultDump": "https://github.com/naptha/tesseract.js/blob/v7.0.0/src/worker-script/utils/dump.js",
     "modelParserReference": "https://github.com/tesseract-ocr/tesseract/blob/5.3.0/src/ccutil/tessdatamanager.cpp",
-    "finding": "The worker accepts provided model data as well as fetchable language names. The application previously relied only on preparation-time checks and let the worker fetch models. It now provides admitted bytes so changed same-origin assets cannot silently reach initialization through the editor path. Init2/3/4 and wider native ABI are not disabled or cleared by this caller-side check. The pinned fork, not upstream version labels alone, remains the security review target."
+    "finding": "The worker accepts provided model data as well as fetchable language names. The editor now provides admitted bytes before native initialization. The unchanged application core's Init2/3/4 and wider ABI are not cleared by caller-side checks. In the research candidate only, unused Init2 and standalone config-file reads now abort. Both Init3/4 remain: the generated JS dispatches empty config to Init3 even when the worker supplies four arguments. Native directory validation is recorded below, distinct from deeper component parser clearance."
+  },
+  "researchNativeModelDirectory": {
+    "source": "Balearica/tesseract@2a9c1c49c360462733c386d2a44fcd22c4e21411/src/ccutil/tessdatamanager.cpp",
+    "originalSha256": "3189b1ad5f4b1ff1e4603346a546a817664568711ea51081aa47e8daa2a7aca3",
+    "finding": "The pinned loader sizes component vectors from unvalidated offsets, permits zero-entry tables and indexes empty vectors. This is a source-level finding, not a CVE or claim that an untrusted model can reach the editor's hash-admitted path.",
+    "change": "Hash-bound research modification checks a no-allocation directory preflight before TFile/component allocation. Accept only 1..24 known slots, a complete table, -1 absence sentinels, at least one nonempty component, first offset exactly after the directory, strictly increasing offsets inside the buffer and at most 16 MiB raw data. Both byte orders are supported. File loading refuses empty/oversized data before indexing/narrowing. Original copyright/licence headers and explicit modification comments are retained.",
+    "verification": "The actual added preflight runs under ASan/UBSan with warnings-as-errors, both byte orders, directory truncations, 50176 one-byte mutations and 10000 deterministic mutations. A research-only export invokes the real patched TessdataManager::LoadMemBuffer for 1970 valid/invalid controls and mutations, including both exact bundled language models. The three disabled model/config bindings trap in fresh WASM instances with owned APIs/in-bounds storage. English/French recognition and independent scan/export tests are separate regressions.",
+    "limitations": "This validates the directory and bounds copied components, not LSTM/DAWG/unicharset contents, arbitrary pointer provenance, later native result allocation or every entry path. The size cap in Init is after its existing file-reader allocation; the editor independently bounds/validates bytes before native initialization. No candidate core replaced app assets and no Windows policy was bypassed."
   },
   "nativeResultBoundary": {
     "implementation": "packages/pdf-engine/src/local-ocr-result.ts",
@@ -49,7 +57,8 @@
   "researchApiReduction": {
     "record": "ocr-minimal-candidate.json",
     "additionalDeniedRendererBindings": 9,
-    "scope": "Exact optional native PDF-renderer signatures/bodies now abort in the research candidate before allocation/dereference/deletion. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The application does not use native PDF rendering. No research core is installed into the app."
+    "additionalDeniedModelBindings": 3,
+    "scope": "Exact optional native PDF-renderer signatures/bodies and three unused model/config entry points abort in the research candidate before argument access. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The current worker requires Init3/4, not Init2 or standalone config reads. No research core is installed into the app."
   },
   "verification": {
     "unitSuites": [

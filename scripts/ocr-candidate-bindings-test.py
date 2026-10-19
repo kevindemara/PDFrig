@@ -1,7 +1,8 @@
 """Dependency-free patch contract checks, run before the isolated research build."""
 import unittest
-from ocr_candidate_bindings import (FIELDS, INPUT_APIS, RENDERER_APIS, patch_bindings,
-                                    patch_input_apis, patch_renderer_apis)
+from ocr_candidate_bindings import (FIELDS, INPUT_APIS, RENDERER_APIS, MODEL_APIS,
+                                    GUARDED_INIT, GUARDED_INIT3, patch_bindings, patch_input_apis,
+                                    patch_renderer_apis, patch_model_apis)
 
 
 def fixture():
@@ -109,6 +110,34 @@ class RendererContract(unittest.TestCase):
                         patch_renderer_apis(source)[0]]:
             with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_RENDERER_API_DRIFT'):
                 patch_renderer_apis(altered)
+
+
+def model_fixture():
+    return '\n\n'.join(f'{result} EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_{name}'
+                       f'({parameters}) {{\n  {body}\n}}'
+                       for name, (result, parameters, body) in MODEL_APIS.items()) + '\n' + GUARDED_INIT + '\n' + GUARDED_INIT3
+
+
+class ModelApiContract(unittest.TestCase):
+    def test_unused_entries_refuse_but_worker_init_survives(self):
+        patched, denied = patch_model_apis(model_fixture())
+        self.assertEqual(len(denied), 3)
+        self.assertEqual(patched.count('abort();'), 3)
+        self.assertEqual(patched.count('self->'), 2)
+        self.assertIn(GUARDED_INIT, patched)
+        self.assertIn(GUARDED_INIT3, patched)
+
+    def test_drift_missing_duplicate_overload_and_reapplication_refused(self):
+        source = model_fixture()
+        for altered in [source.replace('self->ReadConfigFile(filename);', 'changed;'),
+                        source.replace('const char* datapath', 'char* datapath', 1),
+                        source[source.index('\n\n') + 2:], source + source,
+                        source.replace('configs, 1, nullptr', 'configs, 2, nullptr'),
+                        source.replace('self->Init(datapath, language, oem);', 'changed;'),
+                        source + '\nvoid EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_Init_5() {\n}\n',
+                        patch_model_apis(source)[0]]:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_MODEL_API_DRIFT'):
+                patch_model_apis(altered)
 
 
 if __name__ == '__main__':

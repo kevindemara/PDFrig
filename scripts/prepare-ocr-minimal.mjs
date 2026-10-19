@@ -66,6 +66,9 @@ for (const [source, destination] of [
   ['ocr-candidate-p6.py', 'ocr_candidate_p6.py'],
   ['ocr-candidate-p6.h', 'pdfrig-candidate-p6.h'],
   ['ocr-p6-preflight-test.cpp', 'p6-test.cpp'],
+  ['ocr-candidate-model.py', 'ocr_candidate_model.py'],
+  ['ocr-candidate-model.h', 'pdfrig-candidate-model.h'],
+  ['ocr-model-directory-test.cpp', 'model-directory-test.cpp'],
 ])
   await copyFile(path.join(root, 'scripts', source), path.join(output, destination));
 const reference = pins.recodeNodeBackport;

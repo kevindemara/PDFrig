@@ -22,6 +22,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.deniedRawOwnershipBindingsTested, 25);
   assert.equal(pins.evidence.deniedAlternateImageBindingsTested, 6);
   assert.equal(pins.evidence.deniedRendererBindingsTested, 9);
+  assert.equal(pins.evidence.deniedModelBindingsTested, 3);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.equal(
@@ -72,6 +73,8 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('patch_bindings(glue)'));
   assert.ok(build.includes('patch_input_apis(glue)'));
   assert.ok(build.includes('patch_renderer_apis(glue)'));
+  assert.ok(build.includes('patch_model_apis(glue)'));
+  assert.ok(build.includes('patch_model_loader(model_path.read_bytes())'));
   assert.ok(build.includes("'deniedAlternateImageBindings': denied_image_bindings"));
   assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
   assert.ok(build.includes('p6_tests = test_preflight(work)'));
@@ -83,6 +86,45 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(bindings.includes('OCR_CANDIDATE_BINDING_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_IMAGE_API_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_RENDERER_API_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_MODEL_API_DRIFT'));
+});
+
+test('OCR-001 native model directory is hash-bound, bounded and independently exercised', async () => {
+  const read = (name) => readFile(path.join(root, 'scripts', name), 'utf8');
+  const patch = await read('ocr-candidate-model.py');
+  for (const guard of [
+    '3189b1ad5f4b1ff1e4603346a546a817664568711ea51081aa47e8daa2a7aca3',
+    'OCR_CANDIDATE_MODEL_SOURCE_DRIFT',
+    'pdfrigModelDirectory(data, size)',
+    'data.empty()',
+    'data.data()',
+    '-fsanitize=address,undefined',
+    '-Werror',
+  ])
+    assert.ok(patch.includes(guard));
+  const header = await read('ocr-candidate-model.h');
+  const pins = JSON.parse(
+    await readFile(path.join(root, 'docs/dependencies/ocr-minimal-candidate.json'), 'utf8'),
+  );
+  assert.equal(
+    pins.evidence.nativeModelPreflightSha256,
+    createHash('sha256').update(header).digest('hex'),
+  );
+  assert.equal(pins.evidence.nativeModelPreflightVerification.directoryByteMutations, 50176);
+  assert.equal(pins.evidence.nativeModelPreflightVerification.actualModelDirectoryCases, 1970);
+  for (const guard of [
+    'size < 12',
+    'size > 16 * 1024 * 1024',
+    'count == 0 || count > 24',
+    'offset >= static_cast<unsigned>(size)',
+    'offset <= previous',
+    'offset != header',
+  ])
+    assert.ok(header.includes(guard));
+  assert.doesNotMatch(header, /malloc|new |resize|reinterpret_cast<.*int64_t\*/u);
+  const verify = await read('verify-ocr-minimal.mjs');
+  assert.ok(verify.includes('native._pdfrig_candidate_model_directory(pointer, declaredSize)'));
+  assert.ok(verify.includes('directoryFixture(big)'));
 });
 
 test('OCR-001 build/runtime model admission shares exact reviewed pins and no worker refetch', async () => {
