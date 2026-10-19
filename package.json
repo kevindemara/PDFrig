@@ -37,7 +37,7 @@
     "repo:history": "node scripts/audit-repository-history.mjs",
     "secret:scan": "node scripts/check-sensitive-files.mjs",
     "security:audit": "pnpm audit --prod --audit-level high",
-    "test": "node --test scripts/workspace-scripts.test.mjs scripts/db-concurrency-session.test.mjs scripts/check-browser-verifiers.test.mjs scripts/brand-assets.test.mjs scripts/source-text-evaluation-policy.test.mjs scripts/release-documentation.test.mjs scripts/repository-hygiene.test.mjs scripts/local-ocr-assets.test.mjs scripts/desktop-license-texts.test.mjs scripts/npm-notice-evidence.test.mjs && turbo run test",
+    "test": "node --test scripts/workspace-scripts.test.mjs scripts/db-concurrency-session.test.mjs scripts/check-browser-verifiers.test.mjs scripts/brand-assets.test.mjs scripts/source-text-evaluation-policy.test.mjs scripts/release-documentation.test.mjs scripts/repository-hygiene.test.mjs scripts/local-ocr-assets.test.mjs scripts/desktop-license-texts.test.mjs scripts/npm-notice-evidence.test.mjs scripts/ocr-node-fetch.test.mjs && turbo run test",
     "test:browser": "playwright test",
     "test:db-concurrency": "node scripts/test-db-concurrency.mjs",
     "test:component": "pnpm build:packages && pnpm --filter @pdfmason/ui test:component",

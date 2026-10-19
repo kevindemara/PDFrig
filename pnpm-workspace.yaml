@@ -41,6 +41,9 @@ overrides:
   pako: 2.2.0
   source-map-js: 1.2.2
   tesseract.js-core: 7.0.0
+  # Node >=22.13 supplies fetch; Tesseract 7 already prefers it in both Node
+  # adapters. Drop only its unused legacy fallback, not another consumer's fetch.
+  'tesseract.js@7.0.0>node-fetch': '-'
 
 # Exact, reviewed security patches only; see checkpoint 058. No wildcard age exemption.
 minimumReleaseAgeExclude:

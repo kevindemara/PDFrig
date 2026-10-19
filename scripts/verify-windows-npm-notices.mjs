@@ -25,7 +25,6 @@ const expected = [
   'brotli@1.3.3',
   'dfa@1.2.0',
   'fontkit@2.0.4',
-  'tr46@0.0.3',
 ];
 assert.deepEqual(
   review.packages.map((entry) => `${entry.name}@${entry.version}`),
@@ -64,5 +63,5 @@ for (const entry of review.packages) {
   }
 }
 console.log(
-  `Five Windows npm payload bindings passed (${registry ? 'registry + installed' : 'offline installed'}). Five notice gaps remain; no legal/native clearance.`,
+  `Four Windows npm payload bindings passed (${registry ? 'registry + installed' : 'offline installed'}). Four notice gaps remain; no legal/native clearance.`,
 );

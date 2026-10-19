@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import {
   collectDesktopLicenseNotices,
   loadDesktopLicenseSupplements,
+  loadDesktopNpmPartialNotices,
   retainPackageLicenseTexts,
 } from './desktop-license-texts.mjs';
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
@@ -84,6 +85,40 @@ test('README/licence declarations alone are gaps, never generic template permiss
   assert.deepEqual(result.gaps, ['sample@1.0.0']);
   assert.deepEqual(result.provenance, []);
   assert.ok(!result.text.includes('declaration only'));
+});
+
+test('Brotli decoder attribution and full adopted terms are retained without clearing the package gap', async () => {
+  const npmPartials = await loadDesktopNpmPartialNotices(repository);
+  const pkg = {
+    ecosystem: 'npm',
+    name: 'brotli',
+    version: '1.3.3',
+    license: 'MIT',
+    directory: path.join(repository, 'node_modules/.pnpm/brotli@1.3.3/node_modules/brotli'),
+  };
+  const options = { root: repository, npmPartials, supplements: { packages: [], texts: [] } };
+  const result = await collectDesktopLicenseNotices([pkg], options);
+  assert.deepEqual(result.gaps, ['brotli@1.3.3']);
+  assert.equal(result.provenance.length, 8);
+  assert.ok(result.provenance.every((entry) => entry.packageNoticeComplete === false));
+  assert.ok(result.provenance.every((entry) => entry.scopeLicense === 'Apache-2.0'));
+  assert.equal(result.components[0].licenses[0].expression, 'MIT');
+  assert.match(result.text, /Copyright 2013 Google Inc/u);
+  assert.match(result.text, /END OF TERMS AND CONDITIONS/u);
+  for (const mutation of ['tree', 'terms', 'source', 'prefix']) {
+    const changed = structuredClone(npmPartials);
+    if (mutation === 'tree') changed.binding.tree.sha256 = '0'.repeat(64);
+    if (mutation === 'terms') changed.terms.sha256 = '0'.repeat(64);
+    if (mutation === 'source') changed.sources[0].sha256 = '0'.repeat(64);
+    if (mutation === 'prefix') changed.noticePrefixSha256 = '0'.repeat(64);
+    await assert.rejects(
+      collectDesktopLicenseNotices([pkg], { ...options, npmPartials: changed }),
+      /DESKTOP_NOTICES_PARTIAL_NOTICE_/u,
+    );
+  }
+  const unknown = await collectDesktopLicenseNotices([{ ...pkg, name: 'unknown' }], options);
+  assert.deepEqual(unknown.gaps, ['unknown@1.3.3']);
+  assert.equal(unknown.provenance.length, 0);
 });
 test('exact reviewed supplements bind archive, original manifest, VCS commit/path, expression and notice hash', async () => {
   const f = await fixture();

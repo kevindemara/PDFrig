@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   collectDesktopLicenseNotices,
   loadDesktopLicenseSupplements,
+  loadDesktopNpmPartialNotices,
 } from './desktop-license-texts.mjs';
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
 
@@ -80,6 +81,7 @@ export async function prepareDesktopNotices({
   const result = await collectDesktopLicenseNotices(packages, {
     root,
     supplements: await loadDesktopLicenseSupplements(root),
+    npmPartials: await loadDesktopNpmPartialNotices(root),
   });
   const targetScope = desktopNoticeScope(
     cargo,

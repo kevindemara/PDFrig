@@ -3,7 +3,7 @@
   "reviewDate": "2026-10-19",
   "publicReleaseApproved": false,
   "allNoticesComplete": false,
-  "scope": "Five prospective Windows npm inputs. Exact archive-to-installed payload binding, not final installer scope, licence certification or native binary source attestation. No package code or native addon is executed by this review.",
+  "scope": "Four active prospective Windows npm gaps, plus historical evidence for the removed tr46 input. Exact archive-to-installed payload binding, not final installer scope, licence certification or native binary source attestation. No package code or native addon is executed by this review.",
   "treeDigest": "Sort relative regular-file paths by code point. SHA-256 of UTF-8 path + NUL + decimal byte length + NUL + lowercase content SHA-256 + LF for every file. Symlinks and special files are rejected.",
   "packages": [
     {
@@ -42,14 +42,19 @@
       },
       "manifestSha256": "387b47d00ea96cab9b4c521629fbcdc7621053ac061812526f3c69700924cef5",
       "noticeComplete": false,
-      "finding": "MIT declaration/README are not full project terms. Seven decoder files retain Google 2013 Apache-2.0 headers. build/encode.js and build/mem.js are compiled/encoded payloads; package-level MIT is not their native source inventory.",
+      "finding": "MIT declaration/README are not full project terms. Seven decoder files retain Google 2013 Apache-2.0 headers. Their original attribution and full explicitly adopted steward terms are now retained through desktop-npm-partial-notices.json with packageNoticeComplete false. build/encode.js and build/mem.js remain compiled/encoded payloads without a complete native source inventory.",
       "supportingSources": [
         "https://github.com/devongovett/brotli.js/tree/e36051345f6d27a56e5f39ea70d2f789b8574046"
       ],
-      "nextAction": "Retain all decoder copyright/full Apache terms and resolve wrapper MIT attribution plus encoder/data source and build provenance before clearing."
+      "nextAction": "Decoder attribution/terms are retained; resolve wrapper MIT attribution and encoder/data source/build provenance before clearing the package."
     },
     {
       "name": "dfa",
+      "upstreamRequest": {
+        "thread": "https://github.com/foliojs/dfa/issues/7",
+        "postingStatus": "follow-up-not-posted-integration-403",
+        "draft": "Could a maintainer provide or link the complete copyright and MIT permission notice applicable to npm dfa 1.2.0, gitHead 3f5e603e5082caedabefefdf53e8a6ca3111e966, including inherited-code notices? The published package and pinned source root provide an MIT declaration but no full notice. This asks for the existing terms, not a licensing change."
+      },
       "version": "1.2.0",
       "gitHead": "3f5e603e5082caedabefefdf53e8a6ca3111e966",
       "integrity": "sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==",
@@ -70,6 +75,12 @@
     },
     {
       "name": "fontkit",
+      "upstreamRequest": {
+        "thread": "https://github.com/foliojs/fontkit/issues/255",
+        "proposedLicensePr": "https://github.com/foliojs/fontkit/pull/300",
+        "postingStatus": "follow-up-not-posted-integration-403",
+        "draft": "Could a maintainer identify the authoritative full copyright and MIT permission notice for fontkit 2.0.4, gitHead fbf3b9ef21eebd219eb73e666faed573af0fba09, and clarify whether the proposed notice in PR 300 applies to that release? src/utils.js also identifies base64-arraybuffer-derived code; please identify any notice required for that code. This asks for the existing terms, not a licensing change."
+      },
       "version": "2.0.4",
       "gitHead": "fbf3b9ef21eebd219eb73e666faed573af0fba09",
       "integrity": "sha512-syetQadaUEDNdxdugga9CpEYVaQIxOwk7GlwZWWZ19//qW4zE5bknOKeMBDYAASwnpaSHKJITRLMF9m1fp3s6g==",
@@ -88,9 +99,14 @@
         "https://github.com/niklasvh/base64-arraybuffer"
       ],
       "nextAction": "Obtain attributable version-bound project terms and retain derivative-code notices; do not substitute a licence from a different PDF fontkit fork."
-    },
+    }
+  ],
+  "removedInputs": [
     {
       "name": "tr46",
+      "removalReason": "Removed Tesseract 7's unused node-fetch fallback using a scoped pnpm override. Both unchanged Node adapters already select global.fetch on the supported Node >=22.13 runtime. The locked node-fetch/whatwg-url/tr46/webidl-conversions chain is absent. Local HTTP image/model English/French recognition passed without cache writes; no source/worker/core bytes were patched.",
+      "licenseCleared": false,
+      "upstreamStatus": "https://github.com/jsdom/tr46/issues/58",
       "version": "0.0.3",
       "gitHead": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==",

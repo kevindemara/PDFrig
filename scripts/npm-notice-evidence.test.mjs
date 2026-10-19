@@ -122,7 +122,7 @@ test('registry review refuses non-registry origins without making a request', as
     await assert.rejects(boundedRegistryFetch(url, 10));
 });
 
-test('five provenance reviews cannot silently clear the existing notice gate', async () => {
+test('active provenance reviews cannot silently clear the existing notice gate', async () => {
   const review = JSON.parse(
     await readFile(new URL('../docs/dependencies/windows-npm-notice-review.json', import.meta.url)),
   );
@@ -132,6 +132,9 @@ test('five provenance reviews cannot silently clear the existing notice gate', a
   const gaps = all.remainingGroups.find((group) => group.id === 'npm-and-optional-native').packages;
   assert.equal(review.publicReleaseApproved, false);
   assert.equal(review.allNoticesComplete, false);
+  assert.equal(review.packages.length, 4);
+  assert.equal(review.removedInputs[0].name, 'tr46');
+  assert.equal(review.removedInputs[0].licenseCleared, false);
   assert.deepEqual(
     review.packages.map((entry) => `${entry.name}@${entry.version}`),
     gaps,

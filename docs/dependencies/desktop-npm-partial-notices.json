@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "publicReleaseApproved": false,
+  "packageNoticeComplete": false,
+  "scope": "Retains known explicitly adopted decoder terms and original attribution only. Does not clear the brotli package's wrapper/encoder/data gaps or alter its npm MIT declaration. No inferred grant or full-package approval.",
+  "name": "brotli",
+  "version": "1.3.3",
+  "commit": "e36051345f6d27a56e5f39ea70d2f789b8574046",
+  "license": "Apache-2.0",
+  "sourceLicenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+  "noticePrefixSha256": "e422ec4747a913fb1aa7aecf7826bb06bd49d1a0de0dca5ec55b6b06214af613",
+  "terms": {
+    "path": "docs/dependencies/upstream/Apache-2.0-steward.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+    "retrieved": "2026-10-19"
+  },
+  "sources": [
+    {
+      "file": "dec/bit_reader.js",
+      "sha256": "1c7488ebdbcb2dba8a61965f5458452fe8cac38c06c3db0cc5184408a5aacf77"
+    },
+    {
+      "file": "dec/context.js",
+      "sha256": "5cd72c7ce643693ff902cd9c1ada003b45f70b4daec1bfb1a6a4a842efca811e"
+    },
+    {
+      "file": "dec/decode.js",
+      "sha256": "f66d1fd1ea9e54c843b7f5f4bc02cf028f28fed69404f279f86869b097dace5e"
+    },
+    {
+      "file": "dec/dictionary-data.js",
+      "sha256": "e2a9bd8348d01afc08f49730d08b7f33fc5dbbc198cdea54da49afbeae45da4d"
+    },
+    {
+      "file": "dec/dictionary.js",
+      "sha256": "f7bd7462acad204047edc609009dfeb28239f14fe6f06ca42661f1d751382946"
+    },
+    {
+      "file": "dec/prefix.js",
+      "sha256": "e65fb2183d6fc1058020ba55939ea08334d39ae33bf4832d952d9acab5db2d8a"
+    },
+    {
+      "file": "dec/transform.js",
+      "sha256": "56c0ebea0ce70b4d7afa7225eca2e5c9e0046dbdc9a4d6b568c5d5f4b47f170b"
+    }
+  ]
+}

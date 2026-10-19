@@ -16,11 +16,11 @@
   "installedAppTested": false,
   "unresolvedLicenseTextGaps": 51,
   "noticeAudit": {
-    "date": "2026-10-16",
+    "date": "2026-10-19",
     "command": "pnpm desktop:notices",
-    "declaredInputCount": 575,
-    "uniqueComponentCount": 575,
-    "remainingTextGaps": 29,
+    "declaredInputCount": 571,
+    "uniqueComponentCount": 571,
+    "remainingTextGaps": 28,
     "resolvedExactSourceTexts": [
       "webview2-com@0.38.2",
       "webview2-com-macros@0.8.1",
@@ -48,7 +48,7 @@
     "evidence": "Exact-source supplemental notices bind commits, manifests, archives and retained-text hashes. selectors additionally binds its MPL header to the steward's versioned terms and unmodified-source availability notice. Target metadata does not certify final artifact scope.",
     "nativeBuildAttempted": false,
     "publicReleaseApproved": false,
-    "windowsCandidateGaps": 5,
+    "windowsCandidateGaps": 4,
     "finalArtifactContentsVerified": false
   },
   "notAttempted": [

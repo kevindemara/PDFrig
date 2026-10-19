@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto';
 import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { installedNpmEvidence, npmTreeEvidence } from './npm-notice-evidence.mjs';
 
 const fail = (code) => {
   throw new Error(`DESKTOP_NOTICES_${code}`);
@@ -64,9 +65,89 @@ export async function loadDesktopLicenseSupplements(root) {
   return manifest;
 }
 
+export async function loadDesktopNpmPartialNotices(root) {
+  const partial = JSON.parse(
+    (await boundedFile(root, 'docs/dependencies/desktop-npm-partial-notices.json')).toString(
+      'utf8',
+    ),
+  );
+  const review = JSON.parse(
+    (await boundedFile(root, 'docs/dependencies/windows-npm-notice-review.json')).toString('utf8'),
+  );
+  if (
+    review.publicReleaseApproved !== false ||
+    review.allNoticesComplete !== false ||
+    partial.schemaVersion !== 1 ||
+    partial.publicReleaseApproved !== false ||
+    partial.packageNoticeComplete !== false ||
+    partial.name !== 'brotli' ||
+    partial.version !== '1.3.3' ||
+    partial.license !== 'Apache-2.0' ||
+    partial.sourceLicenseUrl !== 'http://www.apache.org/licenses/LICENSE-2.0' ||
+    partial.terms.source !== 'https://www.apache.org/licenses/LICENSE-2.0.txt' ||
+    partial.terms.sha256 !== 'cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30' ||
+    partial.sources.length !== 7 ||
+    new Set(partial.sources.map((entry) => entry.file)).size !== 7
+  )
+    return fail('PARTIAL_NOTICE_INVALID');
+  const binding = review.packages.find(
+    (entry) => entry.name === partial.name && entry.version === partial.version,
+  );
+  if (!binding || binding.noticeComplete !== false || binding.gitHead !== partial.commit)
+    return fail('PARTIAL_NOTICE_BINDING');
+  return { ...partial, binding };
+}
+
+async function retainPartialNpmNotice(pkg, { root, npmPartials }) {
+  if (!npmPartials || pkg.name !== npmPartials.name || pkg.version !== npmPartials.version)
+    return [];
+  const partial = npmPartials;
+  const files = await installedNpmEvidence(pkg.directory);
+  const tree = npmTreeEvidence(files);
+  if (!['files', 'bytes', 'sha256'].every((key) => tree[key] === partial.binding.tree[key]))
+    return fail('PARTIAL_NOTICE_BINDING');
+  const terms = await boundedFile(root, partial.terms.path);
+  if (hash(terms) !== partial.terms.sha256) return fail('PARTIAL_NOTICE_TEXT');
+  const retained = [
+    {
+      file: partial.terms.path,
+      sha256: hash(terms),
+      origin: 'reviewed-partial-npm-terms',
+      packageNoticeComplete: false,
+      scopeLicense: partial.license,
+      commit: partial.commit,
+      text: terms.toString('utf8'),
+    },
+  ];
+  for (const source of partial.sources) {
+    const bytes = await boundedFile(pkg.directory, source.file);
+    const prefix = bytes
+      .toString('utf8')
+      .match(/^\/\* Copyright[\s\S]*?limitations under the License\.\n/u)?.[0];
+    if (
+      hash(bytes) !== source.sha256 ||
+      !prefix ||
+      hash(Buffer.from(prefix)) !== partial.noticePrefixSha256 ||
+      !prefix.includes(partial.sourceLicenseUrl)
+    )
+      return fail('PARTIAL_NOTICE_SOURCE');
+    retained.push({
+      file: source.file,
+      sha256: hash(Buffer.from(prefix)),
+      sourceSha256: hash(bytes),
+      origin: 'reviewed-partial-npm-source-notice',
+      packageNoticeComplete: false,
+      scopeLicense: partial.license,
+      commit: partial.commit,
+      text: prefix,
+    });
+  }
+  return retained;
+}
+
 /** Reads only packaged notice files or exact-version/source reviewed supplements.
  * Does not fetch dependencies, synthesize templates or treat a README as a licence. */
-export async function retainPackageLicenseTexts(pkg, { root, supplements }) {
+export async function retainPackageLicenseTexts(pkg, { root, supplements, npmPartials }) {
   if (
     !/^(?:@[a-z0-9_.-]+\/)?[a-zA-Z0-9_.-]+$/u.test(pkg.name) ||
     !/^[a-zA-Z0-9.+_-]{1,100}$/u.test(pkg.version)
@@ -93,6 +174,8 @@ export async function retainPackageLicenseTexts(pkg, { root, supplements }) {
       text: bytes.toString('utf8'),
     });
   }
+  if (pkg.ecosystem === 'npm')
+    return [...retained, ...(await retainPartialNpmNotice(pkg, { root, npmPartials }))];
   if (retained.length || pkg.ecosystem !== 'cargo') return retained;
   const matches = supplements.packages.filter(
     (entry) => entry.name === pkg.name && entry.version === pkg.version,
@@ -193,7 +276,10 @@ export async function collectDesktopLicenseNotices(packages, options) {
       licenses: pkg.license ? [{ expression: pkg.license }] : [],
     });
     const files = await retainPackageLicenseTexts(pkg, options);
-    if (!files.length) gaps.push(`${pkg.name}@${pkg.version}`);
+    // Retaining an explicit vendored-component notice must not clear the
+    // package's other missing terms, binary/data attribution or provenance.
+    if (!files.some((file) => file.packageNoticeComplete !== false))
+      gaps.push(`${pkg.name}@${pkg.version}`);
     for (const { text, ...evidence } of files) {
       provenance.push({ purl, ...evidence });
       texts.push(`\n=== ${pkg.name} ${pkg.version} ${evidence.file} ===\n${text}\n`);
