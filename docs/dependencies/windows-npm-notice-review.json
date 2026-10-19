@@ -5,6 +5,15 @@
   "allNoticesComplete": false,
   "scope": "Four active prospective Windows npm gaps, plus historical evidence for the removed tr46 input. Exact archive-to-installed payload binding, not final installer scope, licence certification or native binary source attestation. No package code or native addon is executed by this review.",
   "treeDigest": "Sort relative regular-file paths by code point. SHA-256 of UTF-8 path + NUL + decimal byte length + NUL + lowercase content SHA-256 + LF for every file. Symlinks and special files are rejected.",
+  "latestRecheck": {
+    "date": "2026-10-19",
+    "command": "node scripts/verify-windows-npm-notices.mjs --registry",
+    "exactPublishedAndInstalledPayloadsMatched": 4,
+    "remainingWindowsNoticeGaps": 4,
+    "upstreamEvidence": "Fontkit PR 300 remains open and unmerged; the October 18 request for approval is not an authoritative version-bound grant. dfa issue 7 remains open without a full notice. Brotli's pinned manifest still supplies only a MIT label for its project terms, and the canvas parent manifest does not attest the native addon/data build inputs.",
+    "externalPosting": "Previously approved follow-ups were refused by the GitHub integration with HTTP 403. Drafts and existing threads are retained below. No retry, duplicate issue or alternate-auth workaround was attempted.",
+    "licenseOrDistributionApproval": false
+  },
   "packages": [
     {
       "name": "@napi-rs/canvas-win32-x64-msvc",
@@ -71,7 +80,7 @@
       "supportingSources": [
         "https://github.com/devongovett/dfa/tree/3f5e603e5082caedabefefdf53e8a6ca3111e966"
       ],
-      "nextAction": "Obtain attributable version-bound full upstream terms, or replace/remove the dependency with fidelity and licence checks. Contacting upstream requires a separately approved external message."
+      "nextAction": "Obtain attributable version-bound full upstream terms, or replace/remove the dependency with fidelity and licence checks. The approved follow-up is drafted but posting was refused by the integration; do not duplicate the existing request or bypass that permission block."
     },
     {
       "name": "fontkit",
