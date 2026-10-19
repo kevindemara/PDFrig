@@ -297,7 +297,10 @@ It never executes package scripts or loads the native addon. These checks verify
 provenance, **not complete notices**: missing project terms, derivative code,
 bundled Skia/ICU/encoder attribution remain explicit blockers. Known Brotli decoder
 headers and full explicitly adopted Apache terms are now retained, but are marked
-partial and do not clear the other package terms. Missing-notice requests already
+partial and do not clear the other package terms. Fontkit's inherited Base64
+decoder copyright and full MIT terms are also retained with
+[source evidence](docs/dependencies/fontkit-derived-notice.json), but do not clear
+Fontkit's missing project-level terms. Missing-notice requests already
 exist upstream; follow-up drafts and the integration's posting restriction are
 recorded in the review.
 
@@ -388,6 +391,10 @@ formats, metadata, non-default orientation/rotation and inputs over 20 million p
 The same validated open stream goes directly to the PNM reader, not general image
 format dispatch. Targeted preflight sanitizer mutation tests and malformed-input
 checks through the actual WASM API are separate from full parser/model fuzz clearance.
+Six unused alternate image-ingestion bindings (raw buffers, external Pix pointers
+and page/file processing) abort before dereferencing arguments, so those exports
+cannot bypass the guarded worker image entry. This does not clear all remaining
+pointer, renderer or model APIs and is not a general-purpose Tesseract replacement.
 Old Tesseract code, the remaining API/parser surface, broader export/accuracy/platform
 tests and final notice/security review remain gates. The candidate record distinguishes
 each artifact's reproducibility evidence. No candidate binaries are stored in Git.

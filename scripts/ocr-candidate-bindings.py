@@ -27,6 +27,53 @@ GETTERS = {
 }
 DENY = 'abort(); /* PDFrig candidate: unsupported raw/ownership API. */'
 
+# The local worker supplies only canonical P6 via SetImageFile. These alternate
+# pointer/file/renderer ingestion routes bypass that entry point and are unused.
+INPUT_APIS = {
+    'SetInputImage_1': (
+        'void', 'TessBaseAPI* self, Pix* pix', 'self->SetInputImage(pix);'),
+    'TesseractRect_7': (
+        'char*', 'TessBaseAPI* self, const Uint8Array imagedata, int bytes_per_pixel, '
+        'int bytes_per_line, int left, int top, int width, int height',
+        'return self->TesseractRect(imagedata, bytes_per_pixel, bytes_per_line, left, top, width, height);'),
+    'SetImage_1': (
+        'void', 'TessBaseAPI* self, Pix* imagedata, int exif, const float angle',
+        'self->SetImage(imagedata, exif, angle);'),
+    'SetImage_5': (
+        'void', 'TessBaseAPI* self, const Uint8Array imagedata, int width, int height, '
+        'int bytes_per_pixel, int bytes_per_line, int exif, const float angle',
+        'self->SetImage(imagedata, width, height, bytes_per_pixel, bytes_per_line, exif, angle);'),
+    'ProcessPages_4': (
+        'bool', 'TessBaseAPI* self, const char* filename, const char* retry_config, '
+        'int timeout_millisec, TessResultRenderer* renderer',
+        'return self->ProcessPages(filename, retry_config, timeout_millisec, renderer);'),
+    'ProcessPage_6': (
+        'bool', 'TessBaseAPI* self, Pix* pix, int page_index, const char* filename, '
+        'const char* retry_config, int timeout_millisec, TessResultRenderer* renderer',
+        'return self->ProcessPage(pix, page_index, filename, retry_config, timeout_millisec, renderer);'),
+}
+
+
+def patch_input_apis(glue):
+    """Keep ABI names but refuse before dereferencing self or any other pointer."""
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    guarded = 'int EMSCRIPTEN_KEEPALIVE ' + prefix + 'SetImageFile_1' + \
+        '(TessBaseAPI* self, int exif, const float angle) {\n' + \
+        '  return self->SetImageFile(exif, angle);\n}'
+    inventory = re.findall(r'EMSCRIPTEN_KEEPALIVE (' + prefix +
+                           r'(?:SetInputImage|SetImage|TesseractRect|ProcessPage)[A-Za-z]*_\d+)\(', glue)
+    expected_names = [prefix + name for name in INPUT_APIS] + [prefix + 'SetImageFile_1']
+    if sorted(inventory) != sorted(expected_names) or glue.count(guarded) != 1:
+        raise RuntimeError('OCR_CANDIDATE_IMAGE_API_DRIFT')
+    for name, (result, parameters, body) in INPUT_APIS.items():
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_IMAGE_API_DRIFT')
+        replacement = original.replace(body,
+            'abort(); /* PDFrig research: alternate image ingestion is not supported. */')
+        glue = glue.replace(original, replacement)
+    return glue, [prefix + name for name in INPUT_APIS]
+
 
 def patch_bindings(glue):
     """Exact expected signatures/bodies; upstream drift is an error, not a fallback."""

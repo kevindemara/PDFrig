@@ -1,6 +1,6 @@
 """Dependency-free patch contract checks, run before the isolated research build."""
 import unittest
-from ocr_candidate_bindings import FIELDS, patch_bindings
+from ocr_candidate_bindings import FIELDS, INPUT_APIS, patch_bindings, patch_input_apis
 
 
 def fixture():
@@ -44,6 +44,44 @@ class BindingContract(unittest.TestCase):
     def test_not_idempotent_or_silent_fallback(self):
         with self.assertRaises(RuntimeError):
             patch_bindings(patch_bindings(fixture())[0])
+
+
+def image_fixture():
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    parts = [f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+             for name, (result, parameters, body) in INPUT_APIS.items()]
+    parts.append('int EMSCRIPTEN_KEEPALIVE ' + prefix + 'SetImageFile_1'
+                 '(TessBaseAPI* self, int exif, const float angle) {\n'
+                 '  return self->SetImageFile(exif, angle);\n}')
+    return '\n\n'.join(parts)
+
+
+class ImageApiContract(unittest.TestCase):
+    def test_six_alternates_trap_but_worker_entry_survives(self):
+        patched, denied = patch_input_apis(image_fixture())
+        self.assertEqual(len(denied), 6)
+        self.assertEqual(len(set(denied)), 6)
+        self.assertEqual(patched.count('abort();'), 6)
+        self.assertEqual(patched.count('self->'), 1)
+        self.assertIn('return self->SetImageFile(exif, angle);', patched)
+        for name in INPUT_APIS:
+            self.assertIn('emscripten_bind_TessBaseAPI_' + name, patched)
+
+    def test_body_signature_missing_duplicate_and_new_overload_fail(self):
+        original = image_fixture()
+        for altered in [original.replace('self->SetInputImage(pix);', 'changed;'),
+                        original.replace('Pix* pix', 'Other* pix', 1),
+                        original.replace('SetImage_1(', 'SetImage_2(', 1),
+                        original[original.index('\n\n') + 2:], original + original,
+                        original + '\nvoid EMSCRIPTEN_KEEPALIVE '
+                        'emscripten_bind_TessBaseAPI_SetImageNew_9() {\n}\n',
+                        original.replace('self->SetImageFile(exif, angle);', 'changed;')]:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_IMAGE_API_DRIFT'):
+                patch_input_apis(altered)
+
+    def test_no_second_application(self):
+        with self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_IMAGE_API_DRIFT'):
+            patch_input_apis(patch_input_apis(image_fixture())[0])
 
 
 if __name__ == '__main__':

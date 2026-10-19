@@ -20,6 +20,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.leptonicaPrivateLayouts, false);
   assert.equal(pins.evidence.publicApiSelftestCycles, 100);
   assert.equal(pins.evidence.deniedRawOwnershipBindingsTested, 25);
+  assert.equal(pins.evidence.deniedAlternateImageBindingsTested, 6);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.equal(
@@ -68,6 +69,8 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('MAXIMUM_MEMORY=1073741824'));
   assert.doesNotMatch(build, /#include.*pix_internal/u);
   assert.ok(build.includes('patch_bindings(glue)'));
+  assert.ok(build.includes('patch_input_apis(glue)'));
+  assert.ok(build.includes("'deniedAlternateImageBindings': denied_image_bindings"));
   assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
   assert.ok(build.includes('p6_tests = test_preflight(work)'));
   assert.ok(build.includes("run('python3', str(work / 'bindings_test.py'))"));
@@ -76,6 +79,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(bindings.includes('pixGetWidth'));
   assert.ok(bindings.includes('unsupported raw/ownership API'));
   assert.ok(bindings.includes('OCR_CANDIDATE_BINDING_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_IMAGE_API_DRIFT'));
 });
 
 test('OCR-001 research native image preflight is exact, bounded and hash-bound', async () => {

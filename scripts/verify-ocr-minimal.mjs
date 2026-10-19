@@ -54,10 +54,36 @@ assert.equal(receipt.nativeP6PreflightTests.exactPixelLimit, 20_000_000);
 assert.equal(receipt.nativeP6PreflightTests.warningsAsErrors, true);
 assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'));
 assert.equal(receipt.leptonicaPrivateLayouts, false);
+assert.equal(
+  receipt.modifiedGlueSha256,
+  'db5ddd68c93cb99b13ae5c87942bd500cd2f0d52685fe2f1778d4d8f5f700488',
+);
 assert.equal(receipt.publicApiSelftestCycles, 100);
 assert.equal(receipt.deniedRawOwnershipBindings.length, 25);
 assert.equal(new Set(receipt.deniedRawOwnershipBindings).size, 25);
 const factory = createRequire(import.meta.url)(candidate);
+const imageBindings = [
+  'SetInputImage_1',
+  'TesseractRect_7',
+  'SetImage_1',
+  'SetImage_5',
+  'ProcessPages_4',
+  'ProcessPage_6',
+].map((name) => `emscripten_bind_TessBaseAPI_${name}`);
+assert.deepEqual(receipt.deniedAlternateImageBindings, imageBindings);
+for (const name of imageBindings) {
+  // Fresh instances: abort intentionally invalidates that instance. Use a real
+  // owned API and valid in-bounds storage, not a null-pointer failure as proof.
+  const isolated = await factory({ printErr: () => undefined });
+  const ownedApi = new isolated.TessBaseAPI();
+  const pointer = isolated._malloc(128);
+  assert.ok(ownedApi.ptr > 0 && pointer > 0);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(
+    () => isolated[`_${name}`](ownedApi.ptr, pointer, pointer, 1, 1, 1, 1, 1, 1),
+    WebAssembly.RuntimeError,
+  );
+}
 const native = await factory({ printErr: () => undefined });
 assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
 // Exercise the real WASM worker entry point, not only the standalone preflight.
@@ -253,6 +279,7 @@ try {
     bytes: coreBytes.length,
     publicApiSelftestCycles: 100,
     deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
+    deniedAlternateImageBindingsTested: imageBindings.length,
     legacyApiTrapsTested: legacyBindings.length,
     recodeNodeOwnershipTests: receipt.recodeNodeOwnershipTests,
     nativeP6PreflightTests: receipt.nativeP6PreflightTests,
