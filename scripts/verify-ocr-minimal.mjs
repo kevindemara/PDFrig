@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { readFile, realpath, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
@@ -15,6 +16,49 @@ assert.ok(
 );
 assert.match(candidate, /tesseract-core-lstm\.wasm\.(?:js|cjs)$/u);
 const coreBytes = await readFile(candidate);
+const receipt = JSON.parse(
+  await readFile(path.join(path.dirname(candidate), 'candidate-build.json'), 'utf8'),
+);
+const pins = JSON.parse(
+  await readFile(path.join(root, 'docs/dependencies/ocr-minimal-candidate.json'), 'utf8'),
+);
+assert.equal(receipt.publicReleaseApproved, false);
+assert.equal(receipt.runtimeReplacementApproved, false);
+assert.deepEqual(receipt.sourcePins, pins.sources);
+assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'));
+assert.equal(receipt.leptonicaPrivateLayouts, false);
+assert.equal(receipt.publicApiSelftestCycles, 100);
+assert.equal(receipt.deniedRawOwnershipBindings.length, 25);
+assert.equal(new Set(receipt.deniedRawOwnershipBindings).size, 25);
+const factory = createRequire(import.meta.url)(candidate);
+const native = await factory({ printErr: () => undefined });
+assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
+for (const name of receipt.deniedRawOwnershipBindings) {
+  assert.match(
+    name,
+    /^emscripten_bind_(?:Box|Boxa|PixColormap|Pta|Pix|Pixa)_(?:get_[a-z]+|__destroy__)_0$/u,
+  );
+  // abort poisons the module instance; use a fresh disposable instance for each call.
+  const isolated = await factory({ printErr: () => undefined });
+  assert.equal(typeof isolated[`_${name}`], 'function');
+  // A real in-bounds allocation ensures this is an explicit API refusal, not
+  // merely an invalid-address trap. No object may be read/freed by these calls.
+  const pointer = isolated._malloc(128);
+  assert.ok(pointer > 0);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(() => isolated[`_${name}`](pointer), WebAssembly.RuntimeError);
+}
+const legacyBindings = [
+  'emscripten_bind_TessBaseAPI_ClearAdaptiveClassifier_0',
+  'emscripten_bind_TessBaseAPI_GetOsdText_1',
+  'emscripten_bind_TessBaseAPI_DetectOS_1',
+  'emscripten_bind_OSResults_print_scores_0',
+];
+for (const name of legacyBindings) {
+  const isolated = await factory({ printErr: () => undefined });
+  assert.equal(typeof isolated[`_${name}`], 'function');
+  assert.throws(() => isolated[`_${name}`](0, 0), WebAssembly.RuntimeError);
+}
 const assets = new Map([
   [
     '/engine/local-ocr-worker-client.js',
@@ -138,6 +182,9 @@ try {
     variant: 'baseline-lstm-served-for-all-worker-feature-choices',
     sha256: createHash('sha256').update(coreBytes).digest('hex'),
     bytes: coreBytes.length,
+    publicApiSelftestCycles: 100,
+    deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
+    legacyApiTrapsTested: legacyBindings.length,
     results,
     unexpectedRequests: outbound.length,
     pageErrors: errors.length,

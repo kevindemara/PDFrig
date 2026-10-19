@@ -46,6 +46,14 @@ for (const source of pins.sources) {
   await writeFile(path.join(output, `${source.id}.tar.gz`), bytes, { flag: 'wx' });
 }
 await copyFile(path.join(root, 'scripts/ocr-minimal-build.py'), path.join(output, 'build.py'));
+await copyFile(
+  path.join(root, 'scripts/ocr-candidate-bindings.py'),
+  path.join(output, 'ocr_candidate_bindings.py'),
+);
+await copyFile(
+  path.join(root, 'scripts/ocr-candidate-bindings-test.py'),
+  path.join(output, 'bindings_test.py'),
+);
 await writeFile(path.join(output, 'source-pins.json'), JSON.stringify(pins, null, 2));
 console.log(
   `OCR research inputs: ${path.relative(root, output)}. Application assets remain unchanged.`,

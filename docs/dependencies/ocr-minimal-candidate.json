@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "featureIds": ["OCR-001"],
-  "status": "baseline-built-repeatable-smoke-tested-not-adopted",
+  "status": "public-api-baseline-smoke-tested-not-adopted",
   "publicReleaseApproved": false,
   "runtimeReplacementApproved": false,
   "toolchain": {
@@ -37,27 +37,31 @@
   "scope": "Research-only LSTM WASM build using the existing Tesseract.js bindings and patched Tesseract fork, refreshed Leptonica 1.87.0 and no optional compressed-image codecs or OpenLibm. No source or generated binary is installed into the application.",
   "remainingGates": [
     "full candidate source/licence/attribution and exact-native vulnerability review, including old Tesseract and compiler warnings",
-    "updated public-API bindings rather than unreviewed internal-structure coupling",
+    "complete review of remaining TessBaseAPI/raw pointer and model/PNM parser surface beyond the narrowed Leptonica getters",
     "SIMD/relaxed-SIMD or reviewed baseline-only performance and platform policy",
     "broader English/French recognition, scan-preserving export and reference browser/WebView2 regressions",
     "clean reference Windows installer testing on an approved host; no security bypass",
     "approved reproducible artifact delivery/build-from-source integration; existing application OCR remains unchanged"
   ],
   "evidence": {
-    "date": "2026-10-16",
+    "date": "2026-10-19",
     "variant": "baseline-lstm",
-    "sha256": "dc64eaea17bdf06a28dbc7f5e6fc7f35c065095a0c401c3bd0bc01c7b8a79759",
-    "bytes": 2468340,
+    "sha256": "4663a40e9778b284ffe11c433d019471ec91c60e6f766b9876e07f4a6e551705",
+    "bytes": 2470159,
     "repeatedArtifactMatch": true,
-    "reproductionScope": "Repaired initial tree and independent fresh source build produced identical baseline bytes under the pinned image; broader cross-host reproducibility is not certified.",
+    "reproductionScope": "Two independent fresh source-tree builds of the public-API baseline produced identical artifacts and build receipts under the pinned image. Both passed API traps, 100 owned allocation/read/free cycles and English/French browser smoke. Cross-host reproducibility is not certified.",
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
     "unexpectedRequests": 0,
     "browserPageErrors": 0,
     "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
-    "modifiedWrapperSha256": "092404581164a1be3908c8b4b2a22ae113022e138858ae22f6825637a584b093",
-    "modifiedGlueSha256": "88e9ec9644f90fe031536f13a604ad2212cc007aa5e933c13c18bfc38d6b9a4b",
+    "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
+    "modifiedGlueSha256": "27b4ebcdaf686b5b9d8b1fd3087de9d5e293dc4df01fa3f6133d02b840e51e2e",
+    "leptonicaPrivateLayouts": false,
+    "publicApiSelftestCycles": 100,
+    "deniedRawOwnershipBindingsTested": 25,
+    "legacyApiTrapsTested": 4,
     "disabledCodecMacros": [
       "HAVE_LIBGIF",
       "HAVE_LIBJP2K",
@@ -73,11 +77,30 @@
     "maximumWasmMemoryBytes": 1073741824,
     "knownLimits": [
       "Old Tesseract 5.3.0 fork remains; no complete native vulnerability clearance.",
-      "Existing generated bindings need Leptonica internal structure definitions; ABI/API review is required.",
+      "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
       "Compiler emitted nontrivial memcpy warnings in RecodeNode; these are not declared benign or fixed.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
+    ]
+  },
+  "apiSecurityReview": {
+    "date": "2026-10-19",
+    "completeNativeVulnerabilityClearance": false,
+    "scope": "Research artifact only; application runtime is unchanged. Public getter and owned-object self-tests do not establish arbitrary pointer safety or general binding compatibility.",
+    "leptonica": "Removed pix_internal.h coupling. Seventeen scalar getters use public APIs and reject null pointers; 25 raw-array, reference-count/internal-capacity and ownership-ambiguous destroy accessors abort. The current worker uses TessBaseAPI JSON text results, not those Leptonica wrappers. The synthetic self-test owns all six object types locally and releases them through their matching public destroy functions for 100 cycles.",
+    "patchContractTests": "Four Python unittest cases, including changed/missing/duplicate/new binding and second-application rejection, execute before the isolated build. Native verifier checks valid public getters and all 25 denied calls; English/French worker smoke uses the same candidate.",
+    "compilerWarning": {
+      "file": "src/lstm/recodebeam.h",
+      "finding": "The pinned old fork copy assignment deletes its owned dawgs pointer and memcpy-copies a non-trivially-copyable RecodeNode, then clears the source pointer. Current upstream uses member assignments and a self-assignment guard instead. The existing warning is not suppressed or declared harmless; no CVE or exploitability is asserted from this observation alone.",
+      "upstreamComparison": "https://raw.githubusercontent.com/tesseract-ocr/tesseract/565e3bd72a0ecc4814ccffbda3f17afcb40d75ef/src/lstm/recodebeam.h",
+      "upstreamFileSha256": "52cb49e0bf288160d5a6b892f5060014a66681e3180010a7cd84a901210b0347",
+      "nextAction": "Evaluate a reviewed upstream backport or refreshed fork with ownership/self-assignment tests and sanitizer/fuzz coverage. A cast to suppress the compiler diagnostic is not a fix."
+    },
+    "remaining": [
+      "Old Tesseract fork advisories and source delta review; model and PNM parsing fuzz/limit coverage.",
+      "Other TessBaseAPI pointer ownership, optional renderers and exported functionality outside the current worker path.",
+      "Final candidate notices, binary/source delivery, SIMD/baseline performance policy and WebView2/export regressions."
     ]
   }
 }

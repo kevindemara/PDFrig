@@ -17,6 +17,11 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   );
   assert.equal(pins.publicReleaseApproved, false);
   assert.equal(pins.runtimeReplacementApproved, false);
+  assert.equal(pins.evidence.leptonicaPrivateLayouts, false);
+  assert.equal(pins.evidence.publicApiSelftestCycles, 100);
+  assert.equal(pins.evidence.deniedRawOwnershipBindingsTested, 25);
+  assert.equal(pins.evidence.legacyApiTrapsTested, 4);
+  assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.match(pins.toolchain.image, /^emscripten\/emsdk@sha256:[a-f0-9]{64}$/u);
   assert.deepEqual(
     pins.sources.map((source) => source.id),
@@ -49,6 +54,14 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('OCR_CANDIDATE_PATCH_DRIFT'));
   assert.ok(build.includes("'--parallel', '4'"));
   assert.ok(build.includes('MAXIMUM_MEMORY=1073741824'));
+  assert.doesNotMatch(build, /#include.*pix_internal/u);
+  assert.ok(build.includes('patch_bindings(glue)'));
+  assert.ok(build.includes("run('python3', str(work / 'bindings_test.py'))"));
+  const bindings = await readFile(path.join(root, 'scripts/ocr-candidate-bindings.py'), 'utf8');
+  assert.ok(bindings.includes('boxGetGeometry'));
+  assert.ok(bindings.includes('pixGetWidth'));
+  assert.ok(bindings.includes('unsupported raw/ownership API'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_BINDING_DRIFT'));
 });
 test('OCR-001 pins the unchanged worker/core and ships all selected-engine notices', async () => {
   for (const directory of [wrapper, core])

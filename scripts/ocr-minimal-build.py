@@ -6,12 +6,15 @@ import re
 import shutil
 import subprocess
 import tarfile
+from ocr_candidate_bindings import patch_bindings, selftest_source
 
 work = Path('/work')
 pins = json.loads((work / 'source-pins.json').read_text())
 
 def run(*args):
     subprocess.run(args, check=True)
+
+run('python3', str(work / 'bindings_test.py'))
 
 def unpack(source, destination):
     archive = work / (source['id'] + '.tar.gz')
@@ -64,14 +67,12 @@ wrapper_path = core / 'javascript/src/wrapper.cpp'
 wrapper = wrapper_path.read_text()
 if wrapper.count('#include <allheaders.h>') != 1:
     raise RuntimeError('OCR_CANDIDATE_PATCH_DRIFT')
-# Upstream's generated glue uses concrete Pix/Box/Pta fields. Leptonica 1.87
-# separates those definitions; this research-only compatibility change needs
-# an independent ABI/API review before any adoption.
-wrapper = wrapper.replace('#include <allheaders.h>',
-    '#include <allheaders.h>\n#include "' + str(locations['leptonica'] / 'src/pix_internal.h') + '"')
-wrapper_path.write_text(wrapper)
+# Do not expose private Leptonica layouts merely to compile old generated glue.
+if 'pix_internal.h' in wrapper:
+    raise RuntimeError('OCR_CANDIDATE_PRIVATE_LAYOUT')
 glue_path = core / 'javascript/src/glue.cpp'
 glue = glue_path.read_text()
+glue, denied_bindings = patch_bindings(glue)
 for unavailable in ['self->ClearAdaptiveClassifier();',
                     'return self->GetOsdText(page_number);',
                     'return self->DetectOS(osr);', 'self->print_scores();']:
@@ -80,6 +81,8 @@ for unavailable in ['self->ClearAdaptiveClassifier();',
     # LSTM-only candidate deliberately refuses legacy/OSD APIs. Keep strict
     # linking rather than letting Emscripten synthesize missing-symbol stubs.
     glue = glue.replace(unavailable, 'abort(); /* PDFrig candidate: unsupported legacy/OSD API. */')
+# glue.cpp closes its own extern-C block; these names live in namespace tesseract.
+glue += selftest_source()
 glue_path.write_text(glue)
 
 dep = work / 'dep'
@@ -119,6 +122,9 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'modifiedTesseractCmakeSha256': hashlib.sha256(cmake_path.read_bytes()).hexdigest(),
           'modifiedWrapperSha256': hashlib.sha256(wrapper_path.read_bytes()).hexdigest(),
           'modifiedGlueSha256': hashlib.sha256(glue_path.read_bytes()).hexdigest(),
+          'leptonicaPrivateLayouts': False,
+          'deniedRawOwnershipBindings': denied_bindings,
+          'publicApiSelftestCycles': 100,
           'disabledCodecMacros': disabled,
           'linkedApplicationArchives': sorted(Path(archive).name for archive in archives),
           'removedForcedArchives': ['gif', 'jpeg', 'png', 'tiff', 'webp', 'zlib', 'openlibm']}
