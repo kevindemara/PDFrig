@@ -270,7 +270,7 @@ It does not download or compile anything. If Cargo is not on PATH, set
 `PDFRIG_CARGO_PATH` to its approved installed executable; do not use another toolchain
 to evade a security-policy block. Reports stay in an ignored, fresh `tmp/desktop-notices-*`
 directory. The strict form exits unsuccessfully while any text gaps remain. As of
-October 19, 2026, 29 of the conservative 575 declared build-input records still lack
+October 19, 2026, 28 of the conservative 571 declared build-input records still lack
 retained notice text (down from 51); this is not a final-artifact SBOM or legal clearance.
 Twenty-two exact-version supplements are checked against pinned commits, original
 manifests, crate archive hashes and retained-text hashes. Where an upstream crate
@@ -282,20 +282,32 @@ dependency cleared merely because a Windows build may omit it; establish the fin
 artifact's contents separately. The internal installer uses this same collector.
 
 The audit also emits `windows-msvc-scope.json`: locked target metadata currently
-narrows the unresolved prospective Windows inputs to five npm packages; the other
+narrows the unresolved prospective Windows inputs to four npm packages; the other
 24 Rust gaps are retained in the full audit. This is not evidence that any package
 is absent from the installed artifact. `selectors` retains its explicit MPL-2.0
 notice, full steward terms and exact unmodified-source location; project restrictions
 cannot override that component's source rights. `r-efi` retains its original full
 AUTHORS text with the offered MIT branch recorded. No author notices are invented.
 
-The [five-package Windows review](docs/dependencies/windows-npm-notice-review.json)
+The [Windows package review](docs/dependencies/windows-npm-notice-review.json)
 binds installed package contents to exact integrity-checked npm archives. Run
 `pnpm license:notices:windows` on the Windows x64 checkout for an offline comparison,
 or add `--registry` to recheck published metadata and archives (network required).
 It never executes package scripts or loads the native addon. These checks verify
 provenance, **not complete notices**: missing project terms, derivative code,
-Unicode data and bundled Skia/ICU/encoder attribution remain explicit blockers.
+bundled Skia/ICU/encoder attribution remain explicit blockers. Known Brotli decoder
+headers and full explicitly adopted Apache terms are now retained, but are marked
+partial and do not clear the other package terms. Missing-notice requests already
+exist upstream; follow-up drafts and the integration's posting restriction are
+recorded in the review.
+
+One gap was removed by eliminating an unused dependency, not by changing its
+license: Tesseract 7 already uses built-in `fetch` on supported Node >=22.13.
+A version-scoped pnpm override removes its legacy `node-fetch` fallback and the
+exclusive `whatwg-url`/`tr46`/`webidl-conversions` subtree. Node image and language
+model fetches pass English/French local-HTTP tests without patching upstream code.
+`node scripts/verify-ocr-node-fetch.mjs` repeats that synthetic check after OCR asset
+preparation. Old runtimes without platform `fetch` are not supported.
 
 Use only a disposable Windows x64 VM/reference machine. In a clean test checkout,
 `pnpm desktop:internal-build` prepares a current-user NSIS alpha installer,
@@ -366,9 +378,12 @@ codec libraries/OpenLibm. It is **not adopted or security-cleared**. Synthetic
 English/French recognition passed. Private Leptonica layout access was removed:
 17 scalar bindings use public getters, and 25 raw/ownership-ambiguous calls now
 trap. A synthetic native check exercises owned allocation/read/free cycles;
-patch-drift and forbidden-call tests also pass. Old Tesseract code, its nontrivial
-copy warning, the remaining API surface, broader export/accuracy/platform tests
-and final notice/security review remain gates. The candidate record distinguishes
+patch-drift and forbidden-call tests also pass. The candidate backports the upstream
+RecodeNode assignment fix; a failing original-source control and 1,000 targeted
+ownership cycles pass AddressSanitizer/UndefinedBehaviorSanitizer checks in the
+pinned Linux container. These use the actual extracted struct, not the whole engine.
+Old Tesseract code, the remaining API/parser surface, broader export/accuracy/platform
+tests and final notice/security review remain gates. The candidate record distinguishes
 each artifact's reproducibility evidence. No candidate binaries are stored in Git.
 
 On an approved Docker host with sufficient disk space, maintainers can explicitly run:

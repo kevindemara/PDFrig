@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tarfile
 from ocr_candidate_bindings import patch_bindings, selftest_source
+from ocr_candidate_recode import patch_recodebeam, test_backport
 
 work = Path('/work')
 pins = json.loads((work / 'source-pins.json').read_text())
@@ -53,6 +54,11 @@ for source in pins['sources']:
 # Copy the pinned toolchain cache into the only writable mount, never alter the image.
 shutil.copytree('/emsdk/upstream/emscripten/cache', work / 'em-cache')
 tess = locations['tesseract']
+recode_path = tess / 'src/lstm/recodebeam.h'
+original_recode = recode_path.read_bytes()
+patched_recode = patch_recodebeam(original_recode, (work / 'upstream-recodebeam.h').read_bytes())
+recode_tests = test_backport(work, original_recode, patched_recode)
+recode_path.write_bytes(patched_recode)
 cmake_path = tess / 'CMakeLists.txt'
 cmake = cmake_path.read_text()
 start = cmake.index('target_link_libraries         (libtesseract PUBLIC\n  ${CMAKE_PREFIX_PATH}/lib/libgif.a')
@@ -122,6 +128,8 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'modifiedTesseractCmakeSha256': hashlib.sha256(cmake_path.read_bytes()).hexdigest(),
           'modifiedWrapperSha256': hashlib.sha256(wrapper_path.read_bytes()).hexdigest(),
           'modifiedGlueSha256': hashlib.sha256(glue_path.read_bytes()).hexdigest(),
+          'modifiedRecodebeamSha256': hashlib.sha256(patched_recode).hexdigest(),
+          'recodeNodeOwnershipTests': recode_tests,
           'leptonicaPrivateLayouts': False,
           'deniedRawOwnershipBindings': denied_bindings,
           'publicApiSelftestCycles': 100,

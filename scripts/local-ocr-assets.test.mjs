@@ -22,6 +22,18 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.deniedRawOwnershipBindingsTested, 25);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
+  assert.equal(
+    pins.recodeNodeBackport.sha256,
+    '52cb49e0bf288160d5a6b892f5060014a66681e3180010a7cd84a901210b0347',
+  );
+  const recode = await readFile(path.join(root, 'scripts/ocr-candidate-recode.py'), 'utf8');
+  for (const guard of [
+    'OCR_CANDIDATE_RECODE_SOURCE_DRIFT',
+    '-fsanitize=address,undefined',
+    "flags.append('-Werror')",
+    "('original-control', original, 17)",
+  ])
+    assert.ok(recode.includes(guard));
   assert.match(pins.toolchain.image, /^emscripten\/emsdk@sha256:[a-f0-9]{64}$/u);
   assert.deepEqual(
     pins.sources.map((source) => source.id),

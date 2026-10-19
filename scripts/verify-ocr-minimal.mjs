@@ -25,6 +25,17 @@ const pins = JSON.parse(
 assert.equal(receipt.publicReleaseApproved, false);
 assert.equal(receipt.runtimeReplacementApproved, false);
 assert.deepEqual(receipt.sourcePins, pins.sources);
+assert.equal(
+  receipt.modifiedRecodebeamSha256,
+  '785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43',
+);
+assert.equal(receipt.recodeNodeOwnershipTests.cycles, 1000);
+assert.deepEqual(receipt.recodeNodeOwnershipTests.sanitizers, ['address', 'undefined']);
+assert.equal(receipt.recodeNodeOwnershipTests.patchedWarningsAsErrors, true);
+assert.deepEqual(receipt.recodeNodeOwnershipTests.results, [
+  { source: 'original-control', exitCode: 17 },
+  { source: 'patched', exitCode: 0 },
+]);
 assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'));
 assert.equal(receipt.leptonicaPrivateLayouts, false);
 assert.equal(receipt.publicApiSelftestCycles, 100);
@@ -185,6 +196,7 @@ try {
     publicApiSelftestCycles: 100,
     deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
     legacyApiTrapsTested: legacyBindings.length,
+    recodeNodeOwnershipTests: receipt.recodeNodeOwnershipTests,
     results,
     unexpectedRequests: outbound.length,
     pageErrors: errors.length,

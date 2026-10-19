@@ -4,6 +4,14 @@
   "status": "public-api-baseline-smoke-tested-not-adopted",
   "publicReleaseApproved": false,
   "runtimeReplacementApproved": false,
+  "recodeNodeBackport": {
+    "commit": "565e3bd72a0ecc4814ccffbda3f17afcb40d75ef",
+    "url": "https://raw.githubusercontent.com/tesseract-ocr/tesseract/565e3bd72a0ecc4814ccffbda3f17afcb40d75ef/src/lstm/recodebeam.h",
+    "bytes": 22267,
+    "sha256": "52cb49e0bf288160d5a6b892f5060014a66681e3180010a7cd84a901210b0347",
+    "license": "Apache-2.0",
+    "scope": "Assignment method only, retaining source copyright and explicit modification notice. Research build, not application adoption."
+  },
   "toolchain": {
     "image": "emscripten/emsdk@sha256:27bc6267cb285223b8aebb7627bfebae7cb3ad2aaa0d5923b8aa5321793033e8",
     "version": "4.0.15"
@@ -36,7 +44,7 @@
   ],
   "scope": "Research-only LSTM WASM build using the existing Tesseract.js bindings and patched Tesseract fork, refreshed Leptonica 1.87.0 and no optional compressed-image codecs or OpenLibm. No source or generated binary is installed into the application.",
   "remainingGates": [
-    "full candidate source/licence/attribution and exact-native vulnerability review, including old Tesseract and compiler warnings",
+    "full candidate source/licence/attribution and exact-native vulnerability review beyond the narrowly tested RecodeNode ownership backport",
     "complete review of remaining TessBaseAPI/raw pointer and model/PNM parser surface beyond the narrowed Leptonica getters",
     "SIMD/relaxed-SIMD or reviewed baseline-only performance and platform policy",
     "broader English/French recognition, scan-preserving export and reference browser/WebView2 regressions",
@@ -46,10 +54,10 @@
   "evidence": {
     "date": "2026-10-19",
     "variant": "baseline-lstm",
-    "sha256": "4663a40e9778b284ffe11c433d019471ec91c60e6f766b9876e07f4a6e551705",
-    "bytes": 2470159,
+    "sha256": "76e81295013e8cc04f59ed810d7f21d1d00d8faab89d161d3127a1fbef72fc71",
+    "bytes": 2471411,
     "repeatedArtifactMatch": true,
-    "reproductionScope": "Two independent fresh source-tree builds of the public-API baseline produced identical artifacts and build receipts under the pinned image. Both passed API traps, 100 owned allocation/read/free cycles and English/French browser smoke. Cross-host reproducibility is not certified.",
+    "reproductionScope": "Two independent fresh source-tree builds of this RecodeNode-backported revision produced identical artifacts and build receipts under the pinned image. Both passed the original-source negative control, patched ownership sanitizer cycles, public API traps and English/French browser smoke. Cross-host reproducibility is not certified.",
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
@@ -58,6 +66,7 @@
     "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
     "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
     "modifiedGlueSha256": "27b4ebcdaf686b5b9d8b1fd3087de9d5e293dc4df01fa3f6133d02b840e51e2e",
+    "modifiedRecodebeamSha256": "785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43",
     "leptonicaPrivateLayouts": false,
     "publicApiSelftestCycles": 100,
     "deniedRawOwnershipBindingsTested": 25,
@@ -79,7 +88,7 @@
       "Old Tesseract 5.3.0 fork remains; no complete native vulnerability clearance.",
       "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
-      "Compiler emitted nontrivial memcpy warnings in RecodeNode; these are not declared benign or fixed.",
+      "The RecodeNode nontrivial memcpy was replaced by a hash-bound upstream member-wise assignment with a self-assignment guard. Targeted ownership sanitizer tests pass; other old-engine code and legacy move-like copy semantics are not cleared.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
     ]
@@ -92,10 +101,18 @@
     "patchContractTests": "Four Python unittest cases, including changed/missing/duplicate/new binding and second-application rejection, execute before the isolated build. Native verifier checks valid public getters and all 25 denied calls; English/French worker smoke uses the same candidate.",
     "compilerWarning": {
       "file": "src/lstm/recodebeam.h",
-      "finding": "The pinned old fork copy assignment deletes its owned dawgs pointer and memcpy-copies a non-trivially-copyable RecodeNode, then clears the source pointer. Current upstream uses member assignments and a self-assignment guard instead. The existing warning is not suppressed or declared harmless; no CVE or exploitability is asserted from this observation alone.",
+      "finding": "The original fork lost its owned dawgs pointer on self-assignment and memcpy-copied a non-trivially-copyable object. The candidate now backports the exact upstream assignment method with explicit fields and a self-assignment guard, preserving original copyright plus an explicit modification notice. No casts suppress the warning. No CVE or exploitability is asserted.",
       "upstreamComparison": "https://raw.githubusercontent.com/tesseract-ocr/tesseract/565e3bd72a0ecc4814ccffbda3f17afcb40d75ef/src/lstm/recodebeam.h",
       "upstreamFileSha256": "52cb49e0bf288160d5a6b892f5060014a66681e3180010a7cd84a901210b0347",
-      "nextAction": "Evaluate a reviewed upstream backport or refreshed fork with ownership/self-assignment tests and sanitizer/fuzz coverage. A cast to suppress the compiler diagnostic is not a fix."
+      "verification": {
+        "cycles": 1000,
+        "sanitizers": ["address", "undefined"],
+        "patchedWarningsAsErrors": true,
+        "originalControlExit": 17,
+        "patchedExit": 0,
+        "scope": "Actual extracted RecodeNode struct with instrumented external ownership stubs. Checks self-assignment, replacement of an owned destination, constructor/assignment transfer, all fields, null transfer and destruction. Not whole-engine fuzz/sanitizer clearance."
+      },
+      "nextAction": "Review remaining old-fork deltas, legacy move-like copy assumptions and parser/model surface. Broader engine tests and exact final artifact clearance remain required."
     },
     "remaining": [
       "Old Tesseract fork advisories and source delta review; model and PNM parsing fuzz/limit coverage.",

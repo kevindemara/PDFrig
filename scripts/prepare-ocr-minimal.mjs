@@ -54,6 +54,44 @@ await copyFile(
   path.join(root, 'scripts/ocr-candidate-bindings-test.py'),
   path.join(output, 'bindings_test.py'),
 );
+await copyFile(
+  path.join(root, 'scripts/ocr-candidate-recode.py'),
+  path.join(output, 'ocr_candidate_recode.py'),
+);
+await copyFile(
+  path.join(root, 'scripts/ocr-recode-node-test.cpp'),
+  path.join(output, 'recode-test.cpp'),
+);
+const reference = pins.recodeNodeBackport;
+if (
+  reference.url !==
+    `https://raw.githubusercontent.com/tesseract-ocr/tesseract/${reference.commit}/src/lstm/recodebeam.h` ||
+  !/^[a-f0-9]{40}$/u.test(reference.commit) ||
+  !/^[a-f0-9]{64}$/u.test(reference.sha256) ||
+  !Number.isSafeInteger(reference.bytes) ||
+  reference.bytes < 1 ||
+  reference.bytes > 64 * 1024
+)
+  throw new Error('OCR_CANDIDATE_BACKPORT_INVALID');
+const response = await fetch(reference.url, {
+  redirect: 'error',
+  signal: AbortSignal.timeout(60_000),
+});
+if (!response.ok || !response.body) throw new Error('OCR_CANDIDATE_BACKPORT_FETCH_FAILED');
+const chunks = [];
+let referenceBytes = 0;
+for await (const chunk of response.body) {
+  referenceBytes += chunk.length;
+  if (referenceBytes > reference.bytes) throw new Error('OCR_CANDIDATE_BACKPORT_LIMIT');
+  chunks.push(chunk);
+}
+const referenceBody = Buffer.concat(chunks);
+if (
+  referenceBody.length !== reference.bytes ||
+  createHash('sha256').update(referenceBody).digest('hex') !== reference.sha256
+)
+  throw new Error('OCR_CANDIDATE_BACKPORT_MISMATCH');
+await writeFile(path.join(output, 'upstream-recodebeam.h'), referenceBody, { flag: 'wx' });
 await writeFile(path.join(output, 'source-pins.json'), JSON.stringify(pins, null, 2));
 console.log(
   `OCR research inputs: ${path.relative(root, output)}. Application assets remain unchanged.`,
