@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "publicReleaseApproved": false,
+  "packageNoticeComplete": false,
+  "name": "fontkit",
+  "version": "2.0.4",
+  "commit": "fbf3b9ef21eebd219eb73e666faed573af0fba09",
+  "file": "src/utils.js",
+  "sourceSha256": "3924250ad3044efdb5f0d3c07b8061a95b4ffea99b024b66ff4dcf643d824aef",
+  "attribution": "// Based on https://github.com/niklasvh/base64-arraybuffer. MIT license.",
+  "upstream": {
+    "commit": "5339d8f0abed59c893e87116a785bf52acdc17aa",
+    "source": "https://raw.githubusercontent.com/niklasvh/base64-arraybuffer/5339d8f0abed59c893e87116a785bf52acdc17aa/src/index.ts",
+    "sourceSha256": "de5d6002ea60ce936013c75e3633ffe13c55d6fb7f6feb12af64134097dadc56",
+    "terms": "https://raw.githubusercontent.com/niklasvh/base64-arraybuffer/5339d8f0abed59c893e87116a785bf52acdc17aa/LICENSE"
+  },
+  "terms": {
+    "path": "docs/dependencies/upstream/base64-arraybuffer-1.0.2.txt",
+    "sha256": "f3eca6ff762533fa5a77caf954a143e48afa204668cf97dce758c45a9e006be3",
+    "gitBlob": "ed27b41b252ac2adbbbb3dfd6606a32c972948e9",
+    "license": "MIT"
+  },
+  "review": {
+    "date": "2026-10-19",
+    "introduction": "https://github.com/foliojs/fontkit/commit/b893da4b7061ca651bad5934edbd397647c0ee89",
+    "finding": "Fontkit's June 18, 2022 adaptation explicitly names this upstream project. The January 22, 2022 upstream 1.0.2 source contains the same alphabet/lookup, padding-length logic and three output-byte expressions. Fontkit renames variables and returns Uint8Array rather than ArrayBuffer; these are derived sources, not claimed byte-identical. The upstream full copyright/permission text is retained for that inherited code only.",
+    "remaining": "No full project-level permission/copyright text for fontkit 2.0.4 is established. No substitute notice from another fontkit fork is adopted and no whole-package or distribution clearance is granted."
+  }
+}

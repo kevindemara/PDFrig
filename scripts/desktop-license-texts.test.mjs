@@ -8,6 +8,7 @@ import {
   collectDesktopLicenseNotices,
   loadDesktopLicenseSupplements,
   loadDesktopNpmPartialNotices,
+  loadFontkitDerivedNotice,
   retainPackageLicenseTexts,
 } from './desktop-license-texts.mjs';
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
@@ -129,6 +130,53 @@ test('exact reviewed supplements bind archive, original manifest, VCS commit/pat
   assert.ok(result.text.includes('Synthetic notice text'));
   assert.ok(!JSON.stringify(result).includes(f.root));
   assert.deepEqual(await retainPackageLicenseTexts({ ...f.pkg, version: '1.0.1' }, f), []);
+});
+
+test('Fontkit inherited Base64 notice is retained without inventing project permission', async () => {
+  const fontkitDerivative = await loadFontkitDerivedNotice(repository);
+  const pkg = {
+    ecosystem: 'npm',
+    name: 'fontkit',
+    version: '2.0.4',
+    license: 'MIT',
+    directory: path.join(repository, 'node_modules/.pnpm/fontkit@2.0.4/node_modules/fontkit'),
+  };
+  const options = { root: repository, fontkitDerivative, supplements: { packages: [], texts: [] } };
+  const result = await collectDesktopLicenseNotices([pkg], options);
+  assert.deepEqual(result.gaps, ['fontkit@2.0.4']);
+  assert.equal(result.provenance.length, 1);
+  assert.equal(result.provenance[0].packageNoticeComplete, false);
+  assert.match(result.text, /Copyright \(c\) 2012 Niklas von Hertzen/u);
+  assert.match(result.text, /project terms remain unresolved/u);
+  for (const mutation of [
+    'tree',
+    'source',
+    'attribution',
+    'terms',
+    'blob',
+    'commit',
+    'approval',
+    'complete',
+    'license',
+  ]) {
+    const changed = structuredClone(fontkitDerivative);
+    if (mutation === 'tree') changed.binding.tree.sha256 = '0'.repeat(64);
+    if (mutation === 'source') changed.sourceSha256 = '0'.repeat(64);
+    if (mutation === 'attribution') changed.attribution = 'changed';
+    if (mutation === 'terms') changed.terms.sha256 = '0'.repeat(64);
+    if (mutation === 'blob') changed.terms.gitBlob = '0'.repeat(40);
+    if (mutation === 'commit') changed.commit = '0'.repeat(40);
+    if (mutation === 'approval') changed.publicReleaseApproved = true;
+    if (mutation === 'complete') changed.packageNoticeComplete = true;
+    if (mutation === 'license') changed.terms.license = 'other';
+    await assert.rejects(
+      collectDesktopLicenseNotices([pkg], { ...options, fontkitDerivative: changed }),
+      /DESKTOP_NOTICES_DERIVATIVE_NOTICE_/u,
+    );
+  }
+  const other = await collectDesktopLicenseNotices([{ ...pkg, name: 'unknown' }], options);
+  assert.deepEqual(other.gaps, ['unknown@2.0.4']);
+  assert.equal(other.provenance.length, 0);
 });
 for (const mutation of ['commit', 'path', 'manifest', 'archive', 'license', 'text', 'directory'])
   test(`desktop supplemental evidence refuses ${mutation} drift`, async () => {

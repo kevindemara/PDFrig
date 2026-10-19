@@ -102,12 +102,12 @@
       },
       "manifestSha256": "49c60605b92316a5d5fe57b9a3bca8950ad9a8beab1cb633d6f29862d1bd163d",
       "noticeComplete": false,
-      "finding": "Published package and pinned source root lack full project terms. src/utils.js explicitly derives base64 decoding from niklasvh/base64-arraybuffer under MIT; that attribution also needs review rather than being lost behind the package MIT label.",
+      "finding": "Published package and pinned source root lack full project terms. src/utils.js explicitly derives Base64 decoding from niklasvh/base64-arraybuffer. The original upstream 2012 copyright and full MIT notice from the pre-adaptation 1.0.2 commit are now retained through fontkit-derived-notice.json as inherited-code evidence only. Package-level permission/copyright evidence remains missing.",
       "supportingSources": [
         "https://github.com/foliojs/fontkit/tree/fbf3b9ef21eebd219eb73e666faed573af0fba09",
         "https://github.com/niklasvh/base64-arraybuffer"
       ],
-      "nextAction": "Obtain attributable version-bound project terms and retain derivative-code notices; do not substitute a licence from a different PDF fontkit fork."
+      "nextAction": "Inherited Base64 attribution/terms are retained. Obtain attributable version-bound project-level terms; do not substitute a licence from a different PDF fontkit fork or treat the scoped inherited notice as full-package clearance."
     }
   ],
   "removedInputs": [

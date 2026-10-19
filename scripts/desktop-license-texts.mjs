@@ -145,9 +145,97 @@ async function retainPartialNpmNotice(pkg, { root, npmPartials }) {
   return retained;
 }
 
+export async function loadFontkitDerivedNotice(root) {
+  const partial = JSON.parse(
+    (await boundedFile(root, 'docs/dependencies/fontkit-derived-notice.json')).toString('utf8'),
+  );
+  const review = JSON.parse(
+    (await boundedFile(root, 'docs/dependencies/windows-npm-notice-review.json')).toString('utf8'),
+  );
+  if (
+    partial.schemaVersion !== 1 ||
+    partial.publicReleaseApproved !== false ||
+    partial.packageNoticeComplete !== false ||
+    partial.name !== 'fontkit' ||
+    partial.version !== '2.0.4' ||
+    partial.commit !== 'fbf3b9ef21eebd219eb73e666faed573af0fba09' ||
+    partial.file !== 'src/utils.js' ||
+    partial.sourceSha256 !== '3924250ad3044efdb5f0d3c07b8061a95b4ffea99b024b66ff4dcf643d824aef' ||
+    partial.upstream.commit !== '5339d8f0abed59c893e87116a785bf52acdc17aa' ||
+    partial.upstream.source !==
+      `https://raw.githubusercontent.com/niklasvh/base64-arraybuffer/${partial.upstream.commit}/src/index.ts` ||
+    partial.upstream.sourceSha256 !==
+      'de5d6002ea60ce936013c75e3633ffe13c55d6fb7f6feb12af64134097dadc56' ||
+    partial.upstream.terms !==
+      `https://raw.githubusercontent.com/niklasvh/base64-arraybuffer/${partial.upstream.commit}/LICENSE` ||
+    partial.terms.license !== 'MIT' ||
+    partial.terms.sha256 !== 'f3eca6ff762533fa5a77caf954a143e48afa204668cf97dce758c45a9e006be3' ||
+    partial.terms.gitBlob !== 'ed27b41b252ac2adbbbb3dfd6606a32c972948e9' ||
+    review.publicReleaseApproved !== false ||
+    review.allNoticesComplete !== false
+  )
+    return fail('DERIVATIVE_NOTICE_INVALID');
+  const binding = review.packages.find(
+    (entry) => entry.name === partial.name && entry.version === partial.version,
+  );
+  if (!binding || binding.noticeComplete !== false || binding.gitHead !== partial.commit)
+    return fail('DERIVATIVE_NOTICE_BINDING');
+  return { ...partial, binding };
+}
+
+async function retainFontkitDerivative(pkg, { root, fontkitDerivative }) {
+  if (!fontkitDerivative || pkg.name !== 'fontkit' || pkg.version !== '2.0.4') return [];
+  const partial = fontkitDerivative;
+  if (
+    partial.name !== pkg.name ||
+    partial.version !== pkg.version ||
+    partial.commit !== partial.binding.gitHead ||
+    partial.binding.noticeComplete !== false ||
+    partial.publicReleaseApproved !== false ||
+    partial.packageNoticeComplete !== false ||
+    partial.upstream.commit !== '5339d8f0abed59c893e87116a785bf52acdc17aa' ||
+    partial.terms.license !== 'MIT'
+  )
+    return fail('DERIVATIVE_NOTICE_BINDING');
+  const tree = npmTreeEvidence(await installedNpmEvidence(pkg.directory));
+  if (!['files', 'bytes', 'sha256'].every((key) => tree[key] === partial.binding.tree[key]))
+    return fail('DERIVATIVE_NOTICE_BINDING');
+  const source = await boundedFile(pkg.directory, partial.file);
+  const attribution = '// Based on https://github.com/niklasvh/base64-arraybuffer. MIT license.';
+  if (
+    hash(source) !== partial.sourceSha256 ||
+    partial.attribution !== attribution ||
+    !source.toString('utf8').includes(attribution)
+  )
+    return fail('DERIVATIVE_NOTICE_SOURCE');
+  const terms = await boundedFile(root, partial.terms.path);
+  if (
+    hash(terms) !== partial.terms.sha256 ||
+    createHash('sha1').update(`blob ${terms.length}\0`).update(terms).digest('hex') !==
+      partial.terms.gitBlob
+  )
+    return fail('DERIVATIVE_NOTICE_TEXT');
+  return [
+    {
+      file: partial.terms.path,
+      sha256: hash(terms),
+      sourceSha256: hash(source),
+      origin: 'reviewed-partial-npm-derivative-terms',
+      packageNoticeComplete: false,
+      scopeLicense: 'MIT',
+      commit: partial.commit,
+      upstreamCommit: partial.upstream.commit,
+      text: `${partial.name} ${partial.version} ${partial.file}\n${attribution}\nUpstream terms: ${partial.upstream.terms}\nScope: inherited Base64 decoder only; project terms remain unresolved.\n\n${terms.toString('utf8')}`,
+    },
+  ];
+}
+
 /** Reads only packaged notice files or exact-version/source reviewed supplements.
  * Does not fetch dependencies, synthesize templates or treat a README as a licence. */
-export async function retainPackageLicenseTexts(pkg, { root, supplements, npmPartials }) {
+export async function retainPackageLicenseTexts(
+  pkg,
+  { root, supplements, npmPartials, fontkitDerivative },
+) {
   if (
     !/^(?:@[a-z0-9_.-]+\/)?[a-zA-Z0-9_.-]+$/u.test(pkg.name) ||
     !/^[a-zA-Z0-9.+_-]{1,100}$/u.test(pkg.version)
@@ -175,7 +263,11 @@ export async function retainPackageLicenseTexts(pkg, { root, supplements, npmPar
     });
   }
   if (pkg.ecosystem === 'npm')
-    return [...retained, ...(await retainPartialNpmNotice(pkg, { root, npmPartials }))];
+    return [
+      ...retained,
+      ...(await retainPartialNpmNotice(pkg, { root, npmPartials })),
+      ...(await retainFontkitDerivative(pkg, { root, fontkitDerivative })),
+    ];
   if (retained.length || pkg.ecosystem !== 'cargo') return retained;
   const matches = supplements.packages.filter(
     (entry) => entry.name === pkg.name && entry.version === pkg.version,

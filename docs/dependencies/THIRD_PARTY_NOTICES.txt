@@ -14,9 +14,15 @@ No Poppler/qpdf/native OCR container is included in the browser/Windows path.
 This technical adoption review is not a legal certification or a complete
 vulnerability clearance of the compiled native graph. Public release remains gated.
 
-Checkpoint 090 adds fontkit 2.0.4 (MIT, <https://github.com/foliojs/fontkit>) and
-development-only @types/fontkit 2.0.9 (MIT). The complete locked permissively
-licensed graph remains part of release SBOM/notices generation.
+Fontkit 2.0.4 declares MIT (<https://github.com/foliojs/fontkit>), but complete
+project-level permission/copyright text remains a release gap. Its src/utils.js
+attributes a Base64 decoder to niklasvh/base64-arraybuffer. The original 2012
+Niklas von Hertzen MIT notice is retained verbatim in
+upstream/base64-arraybuffer-1.0.2.txt, with exact source evidence and scoped
+desktop notice retention in fontkit-derived-notice.json. This inherited-code
+notice does not grant or establish permission for the whole Fontkit package.
+Development-only @types/fontkit 2.0.9 declares MIT. Complete final-distribution
+SBOM/notices and licence compatibility review remain required.
 
 Dancing Script, Copyright 2016 The Dancing Script Project Authors
 (<https://github.com/googlefonts/DancingScript>), Reserved Font Name 'Dancing Script',

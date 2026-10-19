@@ -7,6 +7,7 @@ import {
   collectDesktopLicenseNotices,
   loadDesktopLicenseSupplements,
   loadDesktopNpmPartialNotices,
+  loadFontkitDerivedNotice,
 } from './desktop-license-texts.mjs';
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
 
@@ -82,6 +83,7 @@ export async function prepareDesktopNotices({
     root,
     supplements: await loadDesktopLicenseSupplements(root),
     npmPartials: await loadDesktopNpmPartialNotices(root),
+    fontkitDerivative: await loadFontkitDerivedNotice(root),
   });
   const targetScope = desktopNoticeScope(
     cargo,
