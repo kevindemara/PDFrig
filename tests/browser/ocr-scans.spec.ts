@@ -30,6 +30,7 @@ for (const language of ['eng', 'fra'] as const)
     }, info) => {
       test.setTimeout(120_000);
       await page.goto('/workspace');
+      await expect(page.getByLabel('Open PDF')).toBeEnabled();
       const png = await page.evaluate((language) => {
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
@@ -170,6 +171,7 @@ test('OCR-001 same-size corrupted model is rejected before native model initiali
     await route.fulfill({ response, body: bytes });
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles('packages/test-corpus/fixtures/scanned-ocr.pdf');
   await page.getByRole('button', { name: 'Text', exact: true }).click();
   await page.getByRole('button', { name: 'OCR this page', exact: true }).click();

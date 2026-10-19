@@ -10,6 +10,7 @@ test('FORM-003 JSON review, all-field undo, export, refusal and immutable PDF ro
   const source = path.resolve('packages/test-corpus/fixtures/acroform-text-field.pdf');
   const sourceBefore = await readFile(source);
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.locator('input[type="file"]').first().setInputFiles(source);
   await expect(page.getByRole('heading', { name: 'Fill fields' })).toBeVisible();
   const input = page.getByLabel('Import form data JSON');
@@ -155,6 +156,7 @@ test('FORM-003 never exposes data import or export on an active-content locked d
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()

@@ -11,6 +11,7 @@ for (const [mode, replacement] of [['positioned', 'EDIT']] as const) {
     });
     const before = await readFile(source);
     await page.goto('/workspace');
+    await expect(page.getByLabel('Open PDF')).toBeEnabled();
     await page.getByLabel('Open PDF').setInputFiles(source);
     await expect(page.locator('.pdf-text-status')).toContainText('Text is selectable');
     await page.locator('.pdf-text-layer').evaluate((element) => {
@@ -89,6 +90,7 @@ test('EDIT-002 snapshots the final live selection and explains preview/review ga
     stdio: 'pipe',
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await expect(page.locator('.pdf-text-status')).toContainText('Text is selectable');
   // Capture an intermediate drag; then finish and open in the same event turn,

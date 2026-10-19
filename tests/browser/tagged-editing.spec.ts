@@ -12,6 +12,7 @@ test('EDIT-001 FORM-002 VIEW-006 edits tagged/bookmarked PDFs and preserves thei
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.name));
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await expect(page.locator('.workspace-warning')).toContainText('Editing available');
   await expect(page.getByText('Protected document', { exact: true })).toHaveCount(0);

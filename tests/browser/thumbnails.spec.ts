@@ -20,6 +20,7 @@ test('VIEW-004 virtualizes 500 mixed pages and preserves keyboard ordering/expor
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/many-pages-500.pdf');
   const before = await readFile(source);
   await page.getByLabel('Open PDF').setInputFiles(source);
@@ -177,6 +178,7 @@ test('VIEW-004 preserves pointer reorder across a virtual scroll and replaces so
   page.on('pageerror', (error) => pageErrors.push(error.name));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/many-pages-25.pdf'));

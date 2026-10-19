@@ -28,6 +28,7 @@ const drag = async (page: Page, control: Locator, dx: number, dy: number) => {
 const open = async (page: Page) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await expect(page.getByLabel('Rendered page 1')).toBeVisible();
 };

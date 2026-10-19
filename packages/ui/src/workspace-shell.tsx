@@ -69,6 +69,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 import { BrandLockup } from './brand-lockup.js';
@@ -1640,6 +1641,10 @@ const CommentReviewLedger = ({
   );
 };
 
+// SSR controls must not accept a file before hydration installs their handlers.
+const subscribeToWorkspaceHydration = () => () => undefined;
+const workspaceClientReady = () => true;
+const workspaceServerReady = () => false;
 export const WorkspaceShell = ({
   accountControl,
   commentReviewEnabled = false,
@@ -1653,6 +1658,11 @@ export const WorkspaceShell = ({
   stampsEnabled = false,
   surface,
 }: WorkspaceShellProps) => {
+  const hydrated = useSyncExternalStore(
+    subscribeToWorkspaceHydration,
+    workspaceClientReady,
+    workspaceServerReady,
+  );
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const pasteboardRef = useRef<HTMLDivElement>(null);
@@ -2397,6 +2407,7 @@ export const WorkspaceShell = ({
   }, [platformAdapter, refreshRecentFiles]);
 
   const onOpenFile = (event: ChangeEvent<HTMLInputElement>): void => {
+    if (!hydrated) return;
     const file = event.target.files?.[0];
     event.target.value = '';
     if (file !== undefined) void readPdfFile(file);
@@ -3076,8 +3087,10 @@ export const WorkspaceShell = ({
   return (
     <main
       className={`app-frame${isPresenting ? ' app-frame--presenting' : ''}`}
-      onDragOver={desktopAccess === 'ready' ? (event) => event.preventDefault() : undefined}
-      onDrop={desktopAccess === 'ready' ? onDrop : undefined}
+      onDragOver={
+        hydrated && desktopAccess === 'ready' ? (event) => event.preventDefault() : undefined
+      }
+      onDrop={hydrated && desktopAccess === 'ready' ? onDrop : undefined}
     >
       <header className="app-topbar">
         <a aria-label="Back to PDFrig home" className="brand-link" href={marketingHref}>
@@ -3170,7 +3183,12 @@ export const WorkspaceShell = ({
               </div>
               <ul id="workspace-tool-list">
                 <li>
-                  <button onClick={() => void choosePrimaryPdf()} title="Open PDF" type="button">
+                  <button
+                    disabled={!hydrated}
+                    onClick={() => void choosePrimaryPdf()}
+                    title="Open PDF"
+                    type="button"
+                  >
                     <span aria-hidden="true" className="tool-glyph">
                       <ToolIcon name="open" />
                     </span>
@@ -3267,6 +3285,7 @@ export const WorkspaceShell = ({
                 accept="application/pdf,.pdf"
                 aria-label="Open PDF"
                 className="visually-hidden"
+                disabled={!hydrated}
                 onChange={onOpenFile}
                 ref={openInputRef}
                 type="file"
@@ -3275,7 +3294,7 @@ export const WorkspaceShell = ({
                 accept="application/pdf,.pdf"
                 aria-label="Insert PDF"
                 className="visually-hidden"
-                disabled={loading}
+                disabled={!hydrated || loading}
                 onChange={(event) => void onInsertPdf(event)}
                 ref={insertInputRef}
                 type="file"
@@ -3284,7 +3303,7 @@ export const WorkspaceShell = ({
                 accept="image/png,image/jpeg,image/webp"
                 aria-label="Insert image"
                 className="visually-hidden"
-                disabled={loading}
+                disabled={!hydrated || loading}
                 onChange={(event) => void onInsertImage(event)}
                 ref={imageInputRef}
                 type="file"
@@ -3791,7 +3810,7 @@ export const WorkspaceShell = ({
                   </p>
                   <button
                     className="button button--primary"
-                    disabled={loading}
+                    disabled={!hydrated || loading}
                     onClick={() => void choosePrimaryPdf()}
                     type="button"
                   >

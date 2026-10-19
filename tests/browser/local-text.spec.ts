@@ -42,6 +42,7 @@ for (const [mode, filename] of [
         outbound.push('unexpected-request');
     });
     await page.goto('/workspace');
+    await expect(page.getByLabel('Open PDF')).toBeEnabled();
     await page.getByLabel('Open PDF').setInputFiles(fixture);
     await page.getByRole('button', { name: 'Text', exact: true }).click();
     await page
@@ -138,6 +139,7 @@ for (const [mode, filename] of [
 
 test('OCR-001 refuses duplicate searchable text and Cancel leaves no change', async ({ page }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles('packages/test-corpus/fixtures/smoke-one-page.pdf');

@@ -6,6 +6,7 @@ import path from 'node:path';
 
 const addSignature = async (page: Page, fixture: string): Promise<void> => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture);
   await page.getByRole('button', { name: 'Sign', exact: true }).click();
   await page.getByLabel('Type your signature').fill('Synthetic Repeat');

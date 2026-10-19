@@ -25,6 +25,7 @@ test('VIEW-001 VIEW-007 approved PDFrig name appears throughout customer-facing 
     await expect(page).toHaveTitle(/PDFrig/u);
   }
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf'));

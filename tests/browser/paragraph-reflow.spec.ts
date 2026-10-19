@@ -12,6 +12,7 @@ for (const variant of ['normal', 'crop-rotated', 'graphics-state'])
     });
     const original = await readFile(source);
     await page.goto('/workspace');
+    await expect(page.getByLabel('Open PDF')).toBeEnabled();
     await page.getByLabel('Open PDF').setInputFiles(source);
     await expect(page.locator('.pdf-text-status')).toContainText('Text is selectable');
     await page.locator('.pdf-text-layer').evaluate((element) => {
@@ -92,6 +93,7 @@ test('EDIT-002 paragraph overflow blocks review without squeezing or applying', 
     stdio: 'pipe',
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await page.getByRole('button', { name: 'Text', exact: true }).click();
   await page.getByRole('button', { name: 'Edit existing text', exact: true }).click();
@@ -114,6 +116,7 @@ test('EDIT-002 a cross-line selection reflows and preview controls invalidate re
     stdio: 'pipe',
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await expect(page.locator('.pdf-text-status')).toContainText('Text is selectable');
   await page.locator('.pdf-text-layer').evaluate((element) => {

@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { renderToString } from 'react-dom/server';
 import { calibrateMeasurement, createPageMeasurement } from '@pdfmason/editor-core';
 import * as pdfEngine from '@pdfmason/pdf-engine/browser';
 import { MeasurementPanel } from './measurement-panel.js';
@@ -18,6 +19,17 @@ import {
 } from './index.js';
 
 describe('shared application shell', () => {
+  it('keeps file entry points disabled in server HTML and enables them after hydration', () => {
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(<WorkspaceShell surface="Web" />);
+    for (const input of container.querySelectorAll<HTMLInputElement>('input[type="file"]'))
+      expect(input.disabled).toBe(true);
+    const open = container.querySelector<HTMLButtonElement>('button[title="Open PDF"]');
+    expect(open?.disabled).toBe(true);
+    const view = render(<WorkspaceShell surface="Web" />);
+    expect(view.getByLabelText('Open PDF')).toBeEnabled();
+    expect(view.getByRole('button', { name: 'Choose a PDF' })).toBeEnabled();
+  });
   it('shows source sampling coverage, uncertainty, and warning navigation without certifying placement', () => {
     const navigate = vi.fn();
     render(

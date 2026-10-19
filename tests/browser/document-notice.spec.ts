@@ -14,6 +14,7 @@ test('VIEW-001 dismisses and restores notices without removing export disclosure
     if (message.type() === 'error') errors.push('BROWSER_CONSOLE_ERROR');
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture('tagged-bookmarks.pdf'));
   await expect(page.locator('.workspace-warning')).toContainText('Editing available');
   const dismiss = page.getByRole('button', { name: 'Dismiss document notice' });
@@ -51,6 +52,7 @@ test('VIEW-001 dismisses and restores notices without removing export disclosure
 
 test('SEC-007 dismissing a signature notice never grants editing permission', async ({ page }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture('signature-field-empty.pdf'));
   await expect(page.getByRole('button', { name: 'Continue editing a new copy' })).toBeVisible();
   await page.getByRole('button', { name: 'Dismiss document notice' }).click();

@@ -32,6 +32,7 @@ test('VIEW-003 full-page fit uses the available viewport and follows resize/pane
     if (new URL(request.url()).pathname === '/api/v1/beta/analytics') analyticsRequests += 1;
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await expect(page.getByRole('button', { name: 'Privacy choices', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Optional, content-free analytics' })).toHaveCount(
     0,
@@ -95,6 +96,7 @@ test('VIEW-003 very tall synthetic pages fit below the old zoom floor and retain
   });
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles({
     name: 'synthetic-tall.pdf',
     mimeType: 'application/pdf',

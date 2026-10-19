@@ -16,6 +16,7 @@ test('SIGN-002 initials, date and checkmark export locally without saved assets'
     if (body !== null) requests.push(body);
   });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await page.getByRole('button', { name: 'Sign', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Add a visual signature' });

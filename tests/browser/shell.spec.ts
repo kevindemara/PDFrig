@@ -453,6 +453,7 @@ test('ORG-008 and CREATE-002 normalize WebP and EXIF orientation in the local wo
   await expect(page.getByRole('button', { name: 'Download new copy' })).toHaveCount(0);
 
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf'));
@@ -1570,6 +1571,7 @@ test('local viewer renders, searches, organizes, undoes, and exports a synthetic
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -1618,6 +1620,7 @@ test('VIEW-003 presentation view keeps the document local and supports complete 
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -1679,6 +1682,7 @@ test('VIEW-006 EDIT-001 navigates and preserves bookmarks during local annotatio
   const source = path.resolve('packages/test-corpus/fixtures/outline-navigation.pdf');
   const sourceBefore = await readFile(source);
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
 
   const outline = page.getByRole('region', { name: 'Document outline' });
@@ -1801,6 +1805,7 @@ test('VIEW-007 inspects attachment metadata locally without exposing its payload
   const source = path.resolve('packages/test-corpus/fixtures/file-attachment.pdf');
   const sourceBefore = await readFile(source);
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
 
   const contents = page.getByRole('region', { name: 'Document contents' });
@@ -1822,6 +1827,7 @@ test('VIEW-007 reports optional-content visibility without layer controls', asyn
   const source = path.resolve('packages/test-corpus/fixtures/compression-preservation.pdf');
   const sourceBefore = await readFile(source);
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
 
   const contents = page.getByRole('region', { name: 'Document contents' });
@@ -1841,6 +1847,7 @@ test('ANNO-008 calibrated guides support keyboard input, zoom, rotation, undo, a
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -1906,6 +1913,7 @@ for (const example of [
     page,
   }) => {
     await page.goto('/workspace');
+    await expect(page.getByLabel('Open PDF')).toBeEnabled();
     await page
       .locator('input[type="file"]')
       .first()
@@ -1947,6 +1955,7 @@ for (const example of [
 
 test('passwords stay ephemeral and risky documents lock organizer export', async ({ page }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -1974,6 +1983,7 @@ test('ORG-001 ORG-002 ORG-006 and ORG-007 block incompatible organizer structure
     'packages/test-corpus/fixtures/compression-preservation.pdf',
   );
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(preservationFixture);
   const outline = page.getByRole('region', { name: 'Document outline' });
   await expect(outline.getByText('Synthetic preservation bookmark')).toBeVisible();
@@ -2022,6 +2032,7 @@ test('ORG-001 and ORG-007 review insertion position and preserve final page orde
   const addPdf = page.getByRole('button', { exact: true, name: 'PDF' }).first();
 
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(destination);
   await expect(page.locator('.status-bar')).toContainText('2 pages');
 
@@ -2082,6 +2093,7 @@ test('annotations and a one-time visual signature are keyboard complete and expo
 }) => {
   await page.setViewportSize({ height: 800, width: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -2177,6 +2189,7 @@ test('SEC-007 requires informed confirmation before editing a signature-field co
 }, testInfo) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-field.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2233,6 +2246,7 @@ test('SEC-007 treats an empty signature field as field-only without a current-si
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-field-empty.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2255,6 +2269,7 @@ test('SEC-007 recovers from a malformed signature value without a validity claim
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-malformed-value.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2274,6 +2289,7 @@ test('SEC-007 detects an orphaned signature widget outside the AcroForm field tr
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-orphan-widget.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2293,6 +2309,7 @@ test('SEC-007 keeps action-free form widgets editable after signature acknowledg
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-with-text-field.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2313,6 +2330,7 @@ test('SEC-007 keeps action-free form widgets editable after signature acknowledg
 test('SEC-006 and SEC-007 keep action-bearing form widgets fail-closed', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-with-text-field-action.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2332,6 +2350,7 @@ test('SEC-006 and SEC-007 keep action-bearing form widgets fail-closed', async (
 test('SEC-006 and SEC-007 keep explicit signature-field actions fail-closed', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-field-action.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2351,6 +2370,7 @@ test('SEC-006 and SEC-007 keep explicit signature-field actions fail-closed', as
 test('SEC-006 and SEC-007 keep inherited signature-field actions fail-closed', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-parent-field-action.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2370,6 +2390,7 @@ test('SEC-006 and SEC-007 keep inherited signature-field actions fail-closed', a
 test('SEC-006 and SEC-007 keep child signature-widget actions fail-closed', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-child-widget-action.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2389,6 +2410,7 @@ test('SEC-006 and SEC-007 keep child signature-widget actions fail-closed', asyn
 test('SEC-006 and SEC-007 scan beyond signature pages for annotation actions', async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-cross-page-action.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2410,6 +2432,7 @@ test('SEC-007 strengthens recognized signature metadata warnings without exposin
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-metadata-placeholder.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2449,6 +2472,7 @@ test('SEC-007 gives recognized metadata precedence across mixed signature fields
 }, testInfo) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-mixed-fields.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2506,6 +2530,7 @@ test('SEC-007 keeps out-of-bounds signature byte ranges field-only and content-f
 }) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve(
     'packages/test-corpus/fixtures/signature-byte-range-out-of-bounds.pdf',
   );
@@ -2540,6 +2565,7 @@ test('SEC-007 preserves parent and widget signature-field hierarchy in edited co
 }, testInfo) => {
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/signature-parent-widget.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2592,6 +2618,7 @@ test('PRINT-001 prepares a bounded local range and opens the host dialog without
   test.setTimeout(90_000);
   await page.setViewportSize({ height: 900, width: 1280 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/multipage-three.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2671,6 +2698,7 @@ test('ANNO-003 partially erases styled freehand strokes with pointer and keyboar
   test.setTimeout(90_000);
   await page.setViewportSize({ height: 900, width: 1440 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const source = path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf');
   const sourceBefore = await readFile(source);
   await page.locator('input[type="file"]').first().setInputFiles(source);
@@ -2757,6 +2785,7 @@ test('supported AcroForm fields fill locally with explicit interactive or flatte
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -2783,6 +2812,7 @@ test('verified raster redaction removes synthetic content and hidden structures 
   page,
 }, testInfo) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()
@@ -2839,6 +2869,7 @@ test('verified raster redaction removes synthetic content and hidden structures 
 test('compact workspace keeps the primary canvas within the viewport', async ({ page }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
 
   await expect(page.getByRole('heading', { name: 'Drop in a PDF.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Choose a PDF' })).toBeVisible();

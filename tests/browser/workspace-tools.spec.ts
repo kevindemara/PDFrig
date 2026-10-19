@@ -1,5 +1,31 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+
+test('VIEW-001 file entry points wait for hydration instead of losing an early selection', async ({
+  page,
+}) => {
+  let release: () => void = () => undefined;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(/\/_next\/static\/.*\.js(?:\?.*)?$/u, async (route) => {
+    await gate;
+    await route.continue();
+  });
+  try {
+    await page.goto('/workspace', { waitUntil: 'commit' });
+    await expect(page.getByLabel('Open PDF')).toBeAttached();
+    await expect(page.getByLabel('Open PDF')).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Choose a PDF' })).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
+  await page
+    .getByLabel('Open PDF')
+    .setInputFiles('packages/test-corpus/fixtures/smoke-one-page.pdf');
+  await expect(page.getByLabel('Rendered page 1')).toBeVisible();
+});
 import path from 'node:path';
 
 const fixture = path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf');
@@ -9,6 +35,7 @@ test('VIEW-001 VIEW-004 Pages options collapse independently without losing navi
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/multipage-three.pdf'));
@@ -87,6 +114,7 @@ test('VIEW-001 VIEW-004 tool icons retain labels, keyboard selection and capabil
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   const rail = page.getByRole('navigation', { name: 'Editor tools' });
   const buttons = rail.locator('li button');
   await expect(buttons).toHaveCount(14);
@@ -169,6 +197,7 @@ test('VIEW-001 tool panels fit desktop, tablet, mobile and enlarged text with vi
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture);
   const rail = page.getByRole('navigation', { name: 'Editor tools' });
   await expect(rail.getByRole('button', { name: 'Text', exact: true })).toBeEnabled();
@@ -228,6 +257,7 @@ test('VIEW-001 VIEW-004 compact Pages and collapsible tools return space to the 
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/multipage-three.pdf'));

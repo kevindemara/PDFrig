@@ -32,6 +32,7 @@ test('EDIT-001 drags and resizes text with precise geometry, single-step undo, k
   page.on('pageerror', (error) => errors.push(error.name));
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await page.getByRole('button', { name: 'Text', exact: true }).click();
   await page.getByRole('button', { name: 'Text box', exact: true }).click();
@@ -122,6 +123,7 @@ test('EDIT-001 cancel, zoom, rotation and page boundaries do not publish stale t
 }) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(source);
   await page.getByRole('button', { name: 'Text', exact: true }).click();
   await page.getByRole('button', { name: 'Place at page centre' }).click();

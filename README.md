@@ -305,7 +305,11 @@ It never executes package scripts or loads the native addon. These checks verify
 provenance, **not complete notices**: missing project terms, derivative code,
 bundled Skia/ICU/encoder attribution remain explicit blockers. Known Brotli decoder
 headers and full explicitly adopted Apache terms are now retained, but are marked
-partial and do not clear the other package terms. Fontkit's inherited Base64
+partial and do not clear the other package terms. The compressed browser dictionary
+is now bound byte-for-byte to the explicitly licensed source table using a bounded
+built-in decoder and literal-only parsing; its attribution is retained too. Package
+JavaScript and compiled encoders are never evaluated for that evidence. Wrapper,
+encoder and encoder-memory provenance/terms remain open. Fontkit's inherited Base64
 decoder copyright and full MIT terms are also retained with
 [source evidence](docs/dependencies/fontkit-derived-notice.json), but do not clear
 Fontkit's missing project-level terms. Missing-notice requests already
@@ -405,6 +409,16 @@ cannot bypass the guarded worker image entry. Nine unused native PDF-renderer
 bindings also abort before allocation, argument access or deletion; PDFrig composes
 invisible text through its own PDF engine instead. This does not clear remaining
 pointer/model APIs and is not a general-purpose Tesseract replacement.
+The research model loader now checks the raw directory before component allocation:
+1–24 known slots, at most 16 MiB, complete header, only `-1` absence markers, a
+contiguous start and strictly increasing nonempty in-range components. Empty files
+are refused before vector indexing. Both byte orders, malformed directories and
+the two bundled model directories are tested separately from LSTM/DAWG contents.
+Three unused initialization/config-file bindings also abort; both worker-used
+initialization overloads remain available. With empty configuration, generated JS
+dispatches to the three-argument overload even though the worker supplies four
+arguments. This is research-only structural hardening,
+not permission to load arbitrary models or complete native parser clearance.
 Old Tesseract code, the remaining API/parser surface, broader export/accuracy/platform
 tests and final notice/security review remain gates. The candidate record distinguishes
 each artifact's reproducibility evidence. No candidate binaries are stored in Git.

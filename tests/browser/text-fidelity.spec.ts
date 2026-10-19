@@ -18,6 +18,7 @@ test('VIEW-008 selects and copies source text locally across zoom, rotation and 
   });
   await page.setViewportSize({ width: 1600, height: 1100 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture('rotated-pages.pdf'));
   const layer = page.getByRole('region', { name: 'Selectable PDF text' });
   await expect(layer).toContainText('Synthetic page 1');
@@ -85,6 +86,7 @@ test('VIEW-008 explains image-only scans without fabricating text or uploading t
   page,
 }) => {
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page.getByLabel('Open PDF').setInputFiles(fixture('scanned-ocr.pdf'));
   await expect(page.locator('.pdf-text-status')).toContainText(
     'OCR is needed for image-only scans',
@@ -100,6 +102,7 @@ for (const rotation of [0, 90, 180, 270] as const) {
     const before = await readFile(source);
     await page.setViewportSize({ width: 1600, height: 1100 });
     await page.goto('/workspace');
+    await expect(page.getByLabel('Open PDF')).toBeEnabled();
     await page.getByLabel('Open PDF').setInputFiles(source);
     for (let turn = 0; turn < rotation / 90; turn += 1)
       await page.getByRole('button', { name: 'Rotate right', exact: true }).click();
