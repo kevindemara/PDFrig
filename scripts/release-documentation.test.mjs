@@ -64,6 +64,100 @@ test('Windows setup instructions distinguish development, future installer and u
   assert.equal(qa.buildResult, 'blocked-by-Windows-Application-Control');
 });
 
+test('Windows download routes put finished-app installation before optional source builds', async () => {
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const installHeading = '### Install the finished Windows app';
+  const buildHeading = '### Build from source';
+  const installStart = readme.indexOf(installHeading);
+  const buildStart = readme.indexOf(buildHeading);
+  assert.ok(installStart >= 0 && buildStart > installStart);
+  assert.ok(readme.includes('](#install-the-finished-windows-app)'));
+  assert.ok(readme.includes('](#build-from-source)'));
+  assert.ok(readme.includes('[BUILD_WITH_AI.txt](BUILD_WITH_AI.txt)'));
+  const installation = readme.slice(installStart, buildStart);
+  assert.match(installation, /https:\/\/github\.com\/kevindemara\/PDFrig\/releases/u);
+  assert.ok(installation.includes('no installer is published yet'));
+  assert.ok(installation.includes('Source code (zip)'));
+  assert.ok(installation.includes('Source code (tar.gz)'));
+  assert.match(installation, /not need Node\.js, pnpm, Rust, C\+\+ Build\s+Tools/u);
+  assert.ok(installation.includes('no Windows installer EXE is included'));
+  assert.ok(installation.includes('Stop if installation or execution is blocked'));
+  assert.doesNotMatch(installation, /^pnpm |^cargo /mu);
+  const source = readme.slice(buildStart, readme.indexOf('### Internal installer testing'));
+  assert.ok(source.includes('source ZIPs lack Git metadata'));
+  assert.ok(source.includes('internal QA'));
+  assert.ok(source.includes('pnpm desktop:dev'));
+  assert.ok(source.includes('it does not install PDFrig'));
+});
+
+test('tool-neutral build prompt tracks pinned tools, real commands and review records', async () => {
+  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+  const guide = await load('BUILD_WITH_AI.txt');
+  const pkg = JSON.parse(await load('package.json'));
+  const nodeVersion = (await load('.nvmrc')).trim();
+  const rustVersion = (await load('rust-toolchain.toml')).match(/^channel = "([^"]+)"$/mu)[1];
+  for (const pin of [
+    `Node ${nodeVersion}`,
+    `pnpm ${pkg.packageManager.replace('pnpm@', '')}`,
+    `Rust ${rustVersion}`,
+  ])
+    assert.ok(guide.includes(pin), `Outdated build-guide pin: ${pin}`);
+  const [introduction, body] = guide.split('BEGIN BUILD PROMPT');
+  assert.ok(body.endsWith('END BUILD PROMPT\n'));
+  assert.ok(introduction.includes('A source ZIP lacks Git metadata'));
+  assert.ok(introduction.includes('any coding assistant'));
+  assert.ok(introduction.includes("Your chosen assistant's own access/usage terms are separate"));
+  const commands = [...body.matchAll(/^ {2}((?:pnpm|cargo) .+)$/gmu)].map((match) => match[1]);
+  const manifest = 'apps/desktop/src-tauri/Cargo.toml';
+  assert.deepEqual(commands, [
+    'pnpm install --frozen-lockfile',
+    'pnpm check',
+    `cargo fetch --locked --manifest-path ${manifest}`,
+    `cargo fmt --manifest-path ${manifest} --check`,
+    `cargo clippy --locked --offline --manifest-path ${manifest} --all-targets -- -D warnings`,
+    `cargo test --locked --offline --manifest-path ${manifest}`,
+    'pnpm desktop:notices',
+    'pnpm desktop:internal-build --installer-qa',
+  ]);
+  for (const command of commands.filter((command) => command.startsWith('pnpm '))) {
+    const alias = command.split(' ')[1];
+    if (alias !== 'install') assert.ok(pkg.scripts[alias], `Missing documented command: ${alias}`);
+  }
+  const records = [...body.matchAll(/^ {2}(docs\/\S+)$/gmu)].map((match) => match[1]);
+  assert.equal(records.length, 4);
+  for (const file of [manifest, ...records, 'scripts/build-internal-windows.mjs'])
+    await access(new URL(`../${file}`, import.meta.url));
+  const helper = await load('scripts/build-internal-windows.mjs');
+  assert.ok(helper.includes("process.argv.includes('--installer-qa')"));
+  assert.ok(body.includes('SHA256SUMS.txt'));
+  assert.ok(body.includes('Get-AuthenticodeSignature'));
+  assert.ok(body.includes('updater-signature verification'));
+});
+
+test('AI build instructions retain approval gates instead of treating a build as release clearance', async () => {
+  const guide = await readFile(new URL('../BUILD_WITH_AI.txt', import.meta.url), 'utf8');
+  for (const boundary of [
+    'No supported public installer is available yet',
+    'This file grants no license',
+    'ask before installing or changing tools',
+    'check $LASTEXITCODE immediately',
+    'propose a\nminimal repair for my approval',
+    'partial installer/checksum output is not a successful build',
+    'Ask before installing/uninstalling',
+    'Stop at Windows Application Control',
+    'No purchases, paid certificates/services, billing changes, hosted CI jobs',
+    'NOT license clearance',
+    'unchanged visible\nscans',
+    'independent export/preview comparison',
+    'Do not commit installers, caches or tools',
+  ])
+    assert.ok(guide.includes(boundary), `Missing safety boundary: ${boundary}`);
+  assert.doesNotMatch(
+    guide,
+    /--ignore-scripts|--no-verify|--dangerously|--skip|ExecutionPolicy Bypass/iu,
+  );
+});
+
 test('notice review accounts for every remaining group without treating texts as legal clearance', async () => {
   const load = async (file) =>
     JSON.parse(await readFile(new URL(`../docs/${file}`, import.meta.url), 'utf8'));

@@ -1,0 +1,132 @@
+PDFrig: optional AI-assisted Windows source build
+
+Ordinary users should install a reviewed Windows setup.exe from this repository's
+Releases, once one is published. No supported public installer is available yet.
+The source ZIP and build script are NOT a finished app. A source build requires
+developer tools, disk space, Internet access for initial downloads, and a Windows
+x64 machine authorized for development. An AI assistant cannot guarantee success
+or override licensing, permissions or device security. This file grants no license.
+
+HOW TO USE
+
+1. Prefer a clean Git clone of https://github.com/kevindemara/PDFrig.git in an
+   unused directory. Repository access is required while it is private. Sign in
+   normally; never paste access tokens into a chat. If Git is not installed, ask
+   the assistant to inspect prerequisites and propose official free installers.
+2. Open the checkout folder in any coding assistant with local file/terminal
+   access. A chat-only assistant can guide you but cannot build on your PC itself.
+   You do not need a particular provider, model, subscription or API key for the
+   PDFrig build. Your chosen assistant's own access/usage terms are separate.
+3. Paste the prompt below. Review prerequisite installations and any proposed
+   changes. Keep normal security protections enabled and retain the build report.
+   A source ZIP lacks Git metadata: obtain a clean clone instead of inventing
+   upstream provenance or expecting Git-based hygiene checks to work in the ZIP.
+
+BEGIN BUILD PROMPT
+
+Goal: build and verify a private, internal-only Windows x64 PDFrig QA installer
+from this checkout, then give me its path, checksum and test results. Do not
+publish it, claim release readiness, or install it without my approval.
+
+Read applicable AGENTS.md instructions, README.md (Quick start, Windows, testing
+and license sections), this BUILD_WITH_AI.txt, and these release records first:
+  docs/operations/windows-installer-qa.json
+  docs/dependencies/desktop-notice-review.json
+  docs/dependencies/windows-npm-notice-review.json
+  docs/dependencies/ocr-model-api-review.json
+Inspect scripts/build-internal-windows.mjs before invoking it. Follow existing
+feature IDs and preservation/security/release gates; do not broaden the task.
+
+1. Verify the environment and exact source.
+
+Work only on a Windows x64 machine I own or am authorized to use for development
+and internal QA, under its normal security policy. Inspect the current directory,
+Git remote, branch/tag, exact commit and worktree status. Do not assume any drive
+letter or local username. Preserve unrelated files and changes. If provenance is
+unclear or there are overlapping changes, ask me to select an unused clean clone
+and desired source revision. Do not silently update the revision during the build.
+Record the commit; a historical QA filename/version label is not source provenance.
+
+Read authoritative pins in .nvmrc, package.json and rust-toolchain.toml. Current
+pins are Node 24.19.0, pnpm 11.22.0 and Rust 1.98.0 with rustfmt/clippy. Verify
+x86_64-pc-windows-msvc (not GNU), Microsoft C++ Build Tools with Desktop development
+with C++ (MSVC and Windows SDK), and WebView2. Inspect existing tools first. If
+anything is missing, propose official free downloads whose terms I am eligible
+to use and ask before installing or changing tools. Let me handle necessary
+installer/UAC consent; do not run the whole build as administrator. Initial
+locked dependency/OCR model/WebView2 downloads require Internet; installed-app
+offline verification is a separate test, not a promise that setup is offline.
+
+2. Run verification before packaging.
+
+Use PowerShell or an equivalent local terminal, checking each command's exit code.
+In PowerShell, check $LASTEXITCODE immediately after each external command and
+stop on nonzero; do not continue because a shell happened to return successfully.
+Run from the repository root, in order:
+
+  pnpm install --frozen-lockfile
+  pnpm check
+  cargo fetch --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+  cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml --check
+  cargo clippy --locked --offline --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+  cargo test --locked --offline --manifest-path apps/desktop/src-tauri/Cargo.toml
+  pnpm desktop:notices
+
+The explicit cargo fetch populates the cache needed by the offline native build
+and notice collector. Preserve notice reports: the normal audit can succeed with
+known missing texts; it is NOT license clearance. Missing project terms, native
+OCR review and final installed-artifact review remain release gates. Do not turn
+off OCR asset hashes, change lockfiles, adopt research OCR candidates or relax
+tests/guards. If a normal build/test failure occurs, diagnose it and propose a
+minimal repair for my approval before changing source or dependencies.
+
+3. Produce only the existing isolated internal QA installer.
+
+Only after the preceding commands succeed, run:
+
+  pnpm desktop:internal-build --installer-qa
+
+Use this helper, not the production signed-release workflow. It creates a
+separate QA product/identifier, no PDF associations, a dummy .invalid updater
+endpoint, and ephemeral updater TEST keys. Those signatures are not Windows
+Authenticode publisher verification. Never disclose private key material, reuse
+production credentials or remove existing signing files to force a rerun.
+Confirm private test-key cleanup and the helper's updater-signature verification.
+If it fails, stop; partial installer/checksum output is not a successful build.
+
+Determine the exact output directory and artifact names from the checked-out
+helper, not from old files or a remembered date. Verify Get-FileHash -Algorithm
+SHA256 against its generated SHA256SUMS.txt. Record the actual source commit,
+toolchain, build result and checksum together. Record Get-AuthenticodeSignature
+separately: an unsigned internal artifact is expected, not a trusted publisher.
+Checksums prove byte integrity, not publisher identity, safety or compliance.
+
+4. Report results and prepare installation testing.
+
+Return PASS/FAIL/BLOCKED for each executed check, exact source revision and tool
+versions, installer location and SHA-256, safe diagnostics, remaining gates and
+manual steps. Distinguish source/shared-code tests from native and installed-app
+tests. Never claim that building alone verifies installation or exported PDFs.
+
+Ask before installing/uninstalling, overwriting an existing app, changing network
+connectivity or modifying system settings. Plan tests in an approved disposable
+reference environment: current-user installation, Start-menu/shortcut/taskbar and
+high-DPI icons, no changed PDF associations, offline bundled OCR, unchanged visible
+scans with searchable exported text, existing-text editing/paragraph wrapping,
+independent export/preview comparison and uninstall preserving PDFs/exports. Use
+only synthetic/licensed fixtures. A single install does not prove upgrade safety;
+record upgrade and any unavailable GUI/reference-machine tests as not performed.
+
+Hard boundaries throughout:
+- Stop at Windows Application Control, Defender, SmartScreen or organizational
+  policy blocks. Do not disable protections, add exclusions, change execution
+  policy, use Run anyway, unblock quarantined files, or rename/move/recompile
+  blocked tools to evade restrictions. Do not create a VM to evade device policy.
+- No purchases, paid certificates/services, billing changes, hosted CI jobs,
+  repository visibility changes, publishing/uploading artifacts or pushing commits.
+- No customer/private documents, environment files, tokens or private signing
+  keys in logs, reports or deliverables. Do not commit installers, caches or tools.
+- Continue until verified internal build output exists or a genuine security,
+  permission or build decision needs my input. Do not bypass a blocker.
+
+END BUILD PROMPT

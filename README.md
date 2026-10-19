@@ -11,7 +11,8 @@ and local OCR are connected to the editor with actual-PDF output review and undo
 Do not mistake **Add text** overlays for **Edit existing text**. Not every font or
 PDF is editable. There is no supported public Windows installer yet.
 
-[Quick start](#quick-start) · [Windows](#windows) ·
+[Quick start](#quick-start) · [Install Windows app](#install-the-finished-windows-app) ·
+[Build from source](#build-from-source) ·
 [Self-hosting](#self-hosting) · [Release checklist](#roadmap-and-launch) ·
 [Detailed feature status](docs/product-scope.json)
 
@@ -214,40 +215,34 @@ produced or install-tested. Windows compliance is not certified.** Old internal
 artifacts do not verify today's source. Clean-machine installation, upgrade/uninstall,
 notices and release review remain open; see the [Windows QA record](docs/operations/windows-installer-qa.json).
 
-### Run from source
+Choose the download that matches your goal:
 
-Install Rust **1.98.0**, the free Microsoft C++ Build Tools workload and Windows
-SDK, plus WebView2. See the [official Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
-First complete the Git/Node.js/pnpm setup in [Quick start](#quick-start), clone the
-repository and open PowerShell in its root. Confirm `node --version`,
-`pnpm --version`, `rustc --version` and `cargo --version` match the pinned tools.
-Use the `x86_64-pc-windows-msvc` Rust host, not the GNU host. In the Microsoft
-installer, select **Desktop development with C++**, including MSVC and a Windows
-SDK; install only tools whose terms you are eligible to use. Then run:
+| Goal                             | Download or command                                                 | Developer tools needed?                       |
+| -------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| Use the finished Windows app     | Reviewed `setup.exe` asset from Releases, once published            | No                                            |
+| Run or modify the source         | Git clone recommended; source ZIP is not an installer               | Yes                                           |
+| Build an internal test installer | `pnpm desktop:internal-build --installer-qa` in a prepared checkout | Yes; this is a build script, not an installer |
 
-```powershell
-pnpm install --frozen-lockfile
-pnpm desktop:dev
-```
+### Install the finished Windows app
 
-This opens the native development window; it does not install PDFrig. Keep the
-terminal open, save/export work before closing, and press Ctrl+C to stop it.
-If Windows blocks a build helper, stop: do not disable Application Control,
-rename/move executables, change policies or substitute toolchains to evade it.
-Use the browser preview until an approved developer/reference host is available.
+**For ordinary users: install the finished app; do not build it yourself.**
+There is no supported download yet: **no installer is published yet**. The steps
+below describe the intended path after a reviewed installer is available, not
+evidence that installation or Windows compatibility has already been verified.
 
-Native save creates a new file and refuses overwriting an existing file. The
-shell shares the same feature limits and local OCR assets. Native installed-app
-offline OCR still requires reference-machine verification before release.
+1. Open this repository's [Releases](https://github.com/kevindemara/PDFrig/releases).
+   Access requires repository permission while it remains private.
+2. Download the reviewed Windows x64 `setup.exe` release asset and its checksum,
+   **not** GitHub's automatic **Source code (zip)** or **Source code (tar.gz)**.
+3. Compare `Get-FileHash -Algorithm SHA256` for the downloaded installer with the
+   published checksum. Then follow normal installer prompts only if Windows and
+   your device policy permit it. Stop if installation or execution is blocked.
+4. Launch PDFrig from its Start-menu shortcut.
 
-### What GitHub users will download
-
-**Code → Download ZIP is source code, not an installed Windows app.** It requires
-the development tools and commands above. Once a reviewed installer is published,
-ordinary users will instead open this repository's **Releases**, download the
-Windows x64 `.exe` installer and its checksum, and run the installer. They will
-not need Node.js, pnpm, Rust, C++ Build Tools, Docker or a server. Releases remain
-access-controlled while the repository is private; no installer is published yet.
+Users of that finished installer will **not need Node.js, pnpm, Rust, C++ Build
+Tools, Docker or a server**. The developer build script is not part of their
+installation process. Installers belong in Release assets, not the source tree;
+no Windows installer EXE is included in this repository's tracked files.
 
 The planned NSIS installer installs for the current Windows user and creates a
 Start-menu shortcut. It installs WebView2 if missing (that bootstrap can need an
@@ -263,6 +258,47 @@ download integrity, not publisher identity. Never disable Windows protections or
 circumvent organizational policy. If installation is blocked, use source/browser
 testing instead. No paid code-signing certificate is required to build an internal
 installer, and none has been purchased.
+
+### Build from source
+
+**Code → Download ZIP is source code, not an installed Windows app.** Building
+requires development tools even when an AI assistant runs the commands. The
+repository's builder does not contain a precompiled app or install those tools
+for you. Prefer a Git clone: source ZIPs lack Git metadata required by repository
+hygiene checks. If you only have a ZIP, obtain a clean clone rather than silently
+initializing a new repository and claiming it verifies upstream provenance.
+
+For optional AI assistance, open your checkout in your preferred coding tool and
+paste the prompt in [BUILD_WITH_AI.txt](BUILD_WITH_AI.txt). It is tool-neutral and
+does not require a particular AI provider or paid service. Review the prompt and
+approve any prerequisite installations yourself. It builds an **internal QA
+installer**, not a public release; using AI does not remove licensing, security
+or manual testing requirements.
+
+Install Rust **1.98.0**, the free Microsoft C++ Build Tools workload and Windows
+SDK, plus WebView2. See the [official Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
+First complete the Git/Node.js/pnpm setup in [Quick start](#quick-start), clone the
+repository and open PowerShell in its root. Confirm `node --version`,
+`pnpm --version`, `rustc --version` and `cargo --version` match the pinned tools.
+Use the `x86_64-pc-windows-msvc` Rust host, not the GNU host. In the Microsoft
+installer, select **Desktop development with C++**, including MSVC and a Windows
+SDK; install only tools whose terms you are eligible to use. To run the native
+development window without producing an installer:
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm desktop:dev
+```
+
+This opens the native development window; it does not install PDFrig. Keep the
+terminal open, save/export work before closing, and press Ctrl+C to stop it.
+If Windows blocks a build helper, stop: do not disable Application Control,
+rename/move executables, change policies or substitute toolchains to evade it.
+Use the browser preview until an approved developer/reference host is available.
+
+Native save creates a new file and refuses overwriting an existing file. The
+shell shares the same feature limits and local OCR assets. Native installed-app
+offline OCR still requires reference-machine verification before release.
 
 ### Internal installer testing
 
