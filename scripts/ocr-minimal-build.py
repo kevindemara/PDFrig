@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 import tarfile
-from ocr_candidate_bindings import patch_bindings, patch_input_apis, selftest_source
+from ocr_candidate_bindings import patch_bindings, patch_input_apis, patch_renderer_apis, selftest_source
 from ocr_candidate_recode import patch_recodebeam, test_backport
 from ocr_candidate_p6 import patch_baseapi, test_preflight
 
@@ -85,6 +85,7 @@ glue_path = core / 'javascript/src/glue.cpp'
 glue = glue_path.read_text()
 glue, denied_bindings = patch_bindings(glue)
 glue, denied_image_bindings = patch_input_apis(glue)
+glue, denied_renderer_bindings = patch_renderer_apis(glue)
 for unavailable in ['self->ClearAdaptiveClassifier();',
                     'return self->GetOsdText(page_number);',
                     'return self->DetectOS(osr);', 'self->print_scores();']:
@@ -142,6 +143,7 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'leptonicaPrivateLayouts': False,
           'deniedRawOwnershipBindings': denied_bindings,
           'deniedAlternateImageBindings': denied_image_bindings,
+          'deniedRendererBindings': denied_renderer_bindings,
           'publicApiSelftestCycles': 100,
           'disabledCodecMacros': disabled,
           'linkedApplicationArchives': sorted(Path(archive).name for archive in archives),

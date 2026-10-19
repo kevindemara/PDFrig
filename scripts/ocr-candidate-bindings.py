@@ -53,6 +53,34 @@ INPUT_APIS = {
         'return self->ProcessPage(pix, page_index, filename, retry_config, timeout_millisec, renderer);'),
 }
 
+# PDF composition is owned by PDFrig, not by the OCR engine's optional renderer.
+RENDERER_APIS = {
+    'TessPDFRenderer_3': ('TessPDFRenderer*', 'const char* outputbase, const char* datadir, bool textonly',
+                          'return new TessPDFRenderer(outputbase, datadir, textonly);'),
+    'BeginDocument_1': ('bool', 'TessPDFRenderer* self, const char* title', 'return self->BeginDocument(title);'),
+    'AddImage_1': ('bool', 'TessPDFRenderer* self, TessBaseAPI* api', 'return self->AddImage(api);'),
+    'EndDocument_0': ('bool', 'TessPDFRenderer* self', 'return self->EndDocument();'),
+    'happy_0': ('bool', 'TessPDFRenderer* self', 'return self->happy();'),
+    'file_extension_0': ('const char*', 'TessPDFRenderer* self', 'return self->file_extension();'),
+    'title_0': ('const char*', 'TessPDFRenderer* self', 'return self->title();'),
+    'imagenum_0': ('int', 'TessPDFRenderer* self', 'return self->imagenum();'),
+    '__destroy___0': ('void', 'TessPDFRenderer* self', 'delete self;'),
+}
+
+
+def patch_renderer_apis(glue):
+    prefix = 'emscripten_bind_TessPDFRenderer_'
+    inventory = re.findall(r'EMSCRIPTEN_KEEPALIVE (' + prefix + r'\w+)\(', glue)
+    if sorted(inventory) != sorted(prefix + name for name in RENDERER_APIS):
+        raise RuntimeError('OCR_CANDIDATE_RENDERER_API_DRIFT')
+    for name, (result, parameters, body) in RENDERER_APIS.items():
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_RENDERER_API_DRIFT')
+        glue = glue.replace(original, original.replace(body,
+            'abort(); /* PDFrig research: native PDF renderer is not supported. */'))
+    return glue, [prefix + name for name in RENDERER_APIS]
+
 
 def patch_input_apis(glue):
     """Keep ABI names but refuse before dereferencing self or any other pointer."""

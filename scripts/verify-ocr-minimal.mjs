@@ -56,7 +56,7 @@ assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'
 assert.equal(receipt.leptonicaPrivateLayouts, false);
 assert.equal(
   receipt.modifiedGlueSha256,
-  'db5ddd68c93cb99b13ae5c87942bd500cd2f0d52685fe2f1778d4d8f5f700488',
+  '8c4685a014b3647975e64a47765e258e1453fd4b7463e41e7d703fff4af619ec',
 );
 assert.equal(receipt.publicApiSelftestCycles, 100);
 assert.equal(receipt.deniedRawOwnershipBindings.length, 25);
@@ -85,6 +85,24 @@ for (const name of imageBindings) {
   );
 }
 const native = await factory({ printErr: () => undefined });
+const rendererBindings = [
+  'TessPDFRenderer_3',
+  'BeginDocument_1',
+  'AddImage_1',
+  'EndDocument_0',
+  'happy_0',
+  'file_extension_0',
+  'title_0',
+  'imagenum_0',
+  '__destroy___0',
+].map((name) => `emscripten_bind_TessPDFRenderer_${name}`);
+assert.deepEqual(receipt.deniedRendererBindings, rendererBindings);
+for (const name of rendererBindings) {
+  const isolated = await factory({ printErr: () => undefined });
+  const pointer = isolated._malloc(128);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(() => isolated[`_${name}`](pointer, pointer, 1), WebAssembly.RuntimeError);
+}
 assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
 // Exercise the real WASM worker entry point, not only the standalone preflight.
 // Layout-only init avoids model parsing in these format-boundary tests.
@@ -160,6 +178,7 @@ const assets = new Map([
     path.join(root, 'packages/pdf-engine/dist/local-ocr-worker-client.js'),
   ],
   ['/engine/local-ocr-pixels.js', path.join(root, 'packages/pdf-engine/dist/local-ocr-pixels.js')],
+  ['/engine/local-ocr-models.js', path.join(root, 'packages/pdf-engine/dist/local-ocr-models.js')],
   ...['worker.min.js', 'eng.traineddata', 'fra.traineddata'].map((file) => [
     `/ocr/${file}`,
     path.join(root, 'apps/web/public/ocr', file),
@@ -280,6 +299,7 @@ try {
     publicApiSelftestCycles: 100,
     deniedRawOwnershipBindingsTested: receipt.deniedRawOwnershipBindings.length,
     deniedAlternateImageBindingsTested: imageBindings.length,
+    deniedRendererBindingsTested: rendererBindings.length,
     legacyApiTrapsTested: legacyBindings.length,
     recodeNodeOwnershipTests: receipt.recodeNodeOwnershipTests,
     nativeP6PreflightTests: receipt.nativeP6PreflightTests,

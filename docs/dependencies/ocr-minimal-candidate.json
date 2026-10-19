@@ -47,17 +47,17 @@
     "full candidate source/licence/attribution and exact-native vulnerability review beyond the narrowly tested RecodeNode ownership backport",
     "complete review of remaining TessBaseAPI/raw pointer and model/PNM parser surface beyond the narrowed getters and canonical worker-entry preflight",
     "SIMD/relaxed-SIMD or reviewed baseline-only performance and platform policy",
-    "broader English/French recognition, scan-preserving export and reference browser/WebView2 regressions",
+    "broader recognition/accuracy benchmarks, reference browser diversity and installed WebView2 regressions beyond synthetic Chromium scan exports",
     "clean reference Windows installer testing on an approved host; no security bypass",
     "approved reproducible artifact delivery/build-from-source integration; existing application OCR remains unchanged"
   ],
   "evidence": {
     "date": "2026-10-19",
     "variant": "baseline-lstm",
-    "sha256": "fb311fc921cafb24ae606efe45fea027eea037ab3ae8074ab50590b26215d899",
-    "bytes": 2448827,
+    "sha256": "a415a652fc3bc1ead743a8e20b7e69b9e417c6d1b9d293eb5aead78fac4ebe22",
+    "bytes": 2408943,
     "repeatedArtifactMatch": true,
-    "reproductionScope": "Two independent fresh source-tree builds of this alternate-ingestion-hardened revision produced identical artifacts and receipts under the pinned image. Both passed six alternate-ingestion traps, existing native preflight sanitizers, RecodeNode controls/ownership sanitizers, public API tests, 1072 actual WASM image refusals and English/French browser smoke. Cross-host reproducibility is not certified.",
+    "reproductionScope": "Two independent fresh source-tree builds of this renderer-disabled revision produced identical artifacts and receipts under the pinned image. Both passed nine renderer traps, six alternate-ingestion traps, existing native preflight sanitizers, RecodeNode controls/ownership sanitizers, public API tests, 1072 actual WASM image refusals and English/French browser smoke. Cross-host reproducibility is not certified.",
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
@@ -65,7 +65,7 @@
     "browserPageErrors": 0,
     "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
     "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
-    "modifiedGlueSha256": "db5ddd68c93cb99b13ae5c87942bd500cd2f0d52685fe2f1778d4d8f5f700488",
+    "modifiedGlueSha256": "8c4685a014b3647975e64a47765e258e1453fd4b7463e41e7d703fff4af619ec",
     "modifiedRecodebeamSha256": "785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43",
     "modifiedBaseapiSha256": "dbe5d76fb88a318fdf2ea329727c3e65b200ff19919252df929e2f630bd03d84",
     "nativeP6PreflightSha256": "9915881dbe155a95006f24554fe3835cd66edcba70e1a696967a1fc88ca4560a",
@@ -83,6 +83,20 @@
     "publicApiSelftestCycles": 100,
     "deniedRawOwnershipBindingsTested": 25,
     "deniedAlternateImageBindingsTested": 6,
+    "deniedRendererBindingsTested": 9,
+    "scanExportVerification": {
+      "suite": "tests/browser/ocr-scans.spec.ts",
+      "syntheticCases": 4,
+      "languages": ["eng", "fra"],
+      "layouts": ["portrait", "landscape-crop"],
+      "exactIndependentRenderEqualityDpi": [96, 144],
+      "boxes": ["MediaBox", "CropBox"],
+      "untouchedSecondPageVerified": true,
+      "frenchAccentExtractionVerified": true,
+      "sameSizeCorruptModelRefusedBeforeNativeInitialization": true,
+      "candidateInterceptionAsserted": true,
+      "scope": "Five Chromium browser tests against this baseline candidate via test-only request interception; no application assets replaced. Synthetic RGB paper/coloured graphics only. Not SIMD, accuracy benchmarking, browser diversity or installed WebView2 clearance."
+    },
     "legacyApiTrapsTested": 4,
     "disabledCodecMacros": [
       "HAVE_LIBGIF",
@@ -102,7 +116,7 @@
       "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
       "The RecodeNode nontrivial memcpy was replaced by a hash-bound upstream member-wise assignment with a self-assignment guard. Targeted ownership sanitizer tests pass; other old-engine code and legacy move-like copy semantics are not cleared.",
-      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate raw-buffer, Pix-pointer and file/page-processing exports now abort before argument access. Other pointer/renderer APIs and the model parser are not cleared by these narrow checks.",
+      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate image and nine optional PDF-renderer exports abort before argument access. Remaining TessBaseAPI pointer APIs and the model parser are not cleared by these narrow checks.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
     ]
@@ -112,7 +126,23 @@
     "completeNativeVulnerabilityClearance": false,
     "scope": "Research artifact only; application runtime is unchanged. Public getter and owned-object self-tests do not establish arbitrary pointer safety or general binding compatibility.",
     "leptonica": "Removed pix_internal.h coupling. Seventeen scalar getters use public APIs and reject null pointers; 25 raw-array, reference-count/internal-capacity and ownership-ambiguous destroy accessors abort. The current worker uses TessBaseAPI JSON text results, not those Leptonica wrappers. The synthetic self-test owns all six object types locally and releases them through their matching public destroy functions for 100 cycles.",
-    "patchContractTests": "Seven Python unittest cases execute before the isolated build. They check the public Leptonica patch and the exact six alternate-ingestion signatures/bodies, preserve the guarded worker entry, and reject missing/duplicate/new overloads, changed calls and repeated application. Native verifier checks valid getters, 25 ownership traps and six alternate-input traps; English/French worker smoke uses the same candidate.",
+    "patchContractTests": "Nine Python unittest cases execute before the isolated build. They check the public Leptonica patch, six exact alternate-ingestion signatures/bodies and nine exact renderer signatures/bodies, preserve the guarded worker entry, and reject missing/duplicate/new overloads, changed calls and repeated application. Native verifier checks valid getters, 25 ownership traps, six alternate-input traps and nine renderer traps; English/French worker smoke uses the same candidate.",
+    "optionalPdfRenderer": {
+      "deniedBindings": [
+        "TessPDFRenderer_3",
+        "BeginDocument_1",
+        "AddImage_1",
+        "EndDocument_0",
+        "happy_0",
+        "file_extension_0",
+        "title_0",
+        "imagenum_0",
+        "__destroy___0"
+      ],
+      "finding": "The generated API exposed an unused native PDF renderer with file/model-path arguments, borrowed strings and ownership-sensitive deletion. PDFrig requests text/blocks only and composes invisible text using its PDF engine, not this renderer. All nine exact renderer bindings now abort before allocation, argument/self access or deletion. ABI names remain for unchanged generated JS.",
+      "verification": "Patch drift tests cover signatures, bodies, inventory and repeated application. Each actual WASM export traps in a fresh instance with allocated in-bounds storage; ordinary worker recognition and independent scan/export comparisons still pass.",
+      "scope": "Research-only API reduction, not arbitrary pointer or all-engine security clearance. Native renderer APIs remain present in the unchanged application core."
+    },
     "alternateImageIngestion": {
       "deniedBindings": [
         "SetInputImage_1",
@@ -144,7 +174,7 @@
     },
     "remaining": [
       "Old Tesseract fork advisories and source delta review; model and PNM decoding coverage beyond the targeted canonical-input preflight mutations.",
-      "Other TessBaseAPI pointer ownership, optional renderers and exported functionality outside the current worker path.",
+      "Other TessBaseAPI pointer ownership and exported functionality outside the current worker path; nine optional renderer bindings are now disabled in the research artifact only.",
       "Final candidate notices, binary/source delivery, SIMD/baseline performance policy and WebView2/export regressions."
     ]
   }

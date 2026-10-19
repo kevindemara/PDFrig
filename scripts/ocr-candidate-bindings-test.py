@@ -1,6 +1,7 @@
 """Dependency-free patch contract checks, run before the isolated research build."""
 import unittest
-from ocr_candidate_bindings import FIELDS, INPUT_APIS, patch_bindings, patch_input_apis
+from ocr_candidate_bindings import (FIELDS, INPUT_APIS, RENDERER_APIS, patch_bindings,
+                                    patch_input_apis, patch_renderer_apis)
 
 
 def fixture():
@@ -82,6 +83,32 @@ class ImageApiContract(unittest.TestCase):
     def test_no_second_application(self):
         with self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_IMAGE_API_DRIFT'):
             patch_input_apis(patch_input_apis(image_fixture())[0])
+
+
+def renderer_fixture():
+    return '\n\n'.join(f'{result} EMSCRIPTEN_KEEPALIVE emscripten_bind_TessPDFRenderer_{name}'
+                       f'({parameters}) {{\n  {body}\n}}'
+                       for name, (result, parameters, body) in RENDERER_APIS.items())
+
+
+class RendererContract(unittest.TestCase):
+    def test_all_nine_symbols_refuse_before_allocation_or_pointer_access(self):
+        patched, denied = patch_renderer_apis(renderer_fixture())
+        self.assertEqual(len(denied), 9)
+        self.assertEqual(patched.count('abort();'), 9)
+        self.assertNotIn('self->', patched)
+        self.assertNotIn('new TessPDFRenderer', patched)
+        self.assertNotIn('delete self', patched)
+
+    def test_drift_new_missing_duplicate_and_reapplication_refused(self):
+        source = renderer_fixture()
+        for altered in [source.replace('self->happy();', 'changed;'),
+                        source.replace('const char* title', 'char* title'),
+                        source[source.index('\n\n') + 2:], source + source,
+                        source + '\nvoid EMSCRIPTEN_KEEPALIVE emscripten_bind_TessPDFRenderer_New_0() {\n}\n',
+                        patch_renderer_apis(source)[0]]:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_RENDERER_API_DRIFT'):
+                patch_renderer_apis(altered)
 
 
 if __name__ == '__main__':
