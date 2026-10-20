@@ -961,6 +961,7 @@ export const UtilityWorkbench = ({
             <button
               aria-current={active === utility.id ? 'page' : undefined}
               className="utility-rail__item"
+              data-feature-ids={utility.matrix}
               disabled={!hydrated || !enabledFeatures[utility.id]}
               key={utility.id}
               onClick={() => selectUtility(utility.id)}
@@ -969,7 +970,6 @@ export const UtilityWorkbench = ({
               <span className="utility-rail__number">{String(index + 1).padStart(2, '0')}</span>
               <span>
                 <strong>{utility.label}</strong>
-                <small>{utility.matrix}</small>
                 {!enabledFeatures[utility.id] ? <small>Temporarily unavailable</small> : null}
               </span>
             </button>
@@ -979,7 +979,7 @@ export const UtilityWorkbench = ({
         <fieldset className="utility-bench" aria-labelledby="utility-title" disabled={!hydrated}>
           <header className="utility-bench__heading">
             <div>
-              <p className="eyebrow">{activeUtility.matrix}</p>
+              <p className="eyebrow">PDF tools</p>
               <h2 id="utility-title">{activeUtility.label}</h2>
               <p>{activeUtility.description}</p>
             </div>
@@ -990,9 +990,9 @@ export const UtilityWorkbench = ({
           </header>
 
           <div className="job-ruler" aria-label="Processing path">
-            <span>Immutable input</span>
+            <span>Original unchanged</span>
             <span aria-hidden="true">→</span>
-            <strong>Local worker</strong>
+            <strong>Process on this device</strong>
             <span aria-hidden="true">→</span>
             <span>New export</span>
           </div>
@@ -1936,8 +1936,8 @@ export const UtilityWorkbench = ({
               <span>File, page, image, and pixel limits apply.</span>
             </li>
             <li>
-              <strong>Independent output</strong>
-              <span>Exports are suitable for qpdf and PDF reader verification.</span>
+              <strong>Review your copy</strong>
+              <span>Open the exported PDF in your preferred reader to check the result.</span>
             </li>
           </ol>
           <div className="beta-note">

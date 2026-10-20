@@ -97,6 +97,22 @@ test('developer credit stays compact, keyboard-accessible and separate from the 
   await expect(page).toHaveURL(/\/workspace$/u);
 });
 
+test('local utility labels describe actions without exposing developer feature codes', async ({
+  page,
+}) => {
+  await page.goto('/tools');
+  const compress = page.getByRole('button', { name: /Compress/u }).first();
+  await expect(compress).toBeEnabled();
+  await expect(compress).toHaveAttribute('data-feature-ids', 'OPT-001');
+  await expect(compress).not.toContainText('OPT-001');
+  await expect(page.getByText('Process on this device', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Office conversion is not available in this version.', { exact: false }),
+  ).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('Paid beta');
+  await expect(page.locator('body')).not.toContainText('qpdf');
+});
+
 test('account control room exercises job progress, retention preference, and deletion UI', async ({
   page,
 }) => {

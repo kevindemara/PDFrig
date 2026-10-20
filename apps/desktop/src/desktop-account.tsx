@@ -194,7 +194,7 @@ export const DesktopAccountControl = ({
       setAvailableUpdate(update);
       setUpdateStatus(
         update === null
-          ? 'This build is up to date.'
+          ? 'This version is up to date.'
           : `PDFrig ${update.version} is ready to install.`,
       );
     } catch {

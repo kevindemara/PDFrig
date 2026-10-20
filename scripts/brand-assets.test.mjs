@@ -134,7 +134,7 @@ test('internal installer orchestration stays separate from public distribution a
 
 test('branded private installer uses PDFrig labels without enabling production distribution', () => {
   const profile = internalWindowsProfile(['--private-test']);
-  assert.equal(profile.version, '0.1.0-alpha.20261019.3');
+  assert.equal(profile.version, '0.1.0-alpha.20261019.4');
   assert.equal(profile.identifier, 'com.pdfmason.desktop.privatetest');
   const config = applyInternalWindowsProfile(
     { bundle: {}, plugins: { updater: { active: false } } },
@@ -153,4 +153,20 @@ test('branded private installer uses PDFrig labels without enabling production d
   assert.equal(internalWindowsProfile(['--installer-qa']).productName, 'PDFrig Installer QA');
   assert.throws(() => internalWindowsProfile(['--installer-qa', '--private-test']));
   assert.throws(() => internalWindowsProfile(['--public-release']));
+});
+
+test('Windows-facing tools retain feature IDs in code, not developer setup notes in the UI', async () => {
+  const account = (await read('apps/desktop/src/desktop-account.tsx')).toString();
+  assert.doesNotMatch(
+    account,
+    /Add the public Supabase URL|publishable key described|this internal build|This local build/u,
+  );
+  const tools = (await read('packages/ui/src/utility-workbench.tsx')).toString();
+  assert.match(tools, /data-feature-ids=\{utility\.matrix\}/u);
+  assert.doesNotMatch(tools, />\{(?:utility|activeUtility)\.matrix\}</u);
+  assert.doesNotMatch(tools, /Paid beta|qpdf and PDF reader verification|sandbox evidence/u);
+  const workspace = (await read('packages/ui/src/workspace-shell.tsx')).toString();
+  assert.doesNotMatch(workspace, />ANNO-\d{3}|>REDACT-\d{3}|release kill switch/u);
+  assert.match(workspace, /data-feature-id="ANNO-006"/u);
+  assert.match(workspace, /data-feature-id="ANNO-007"/u);
 });

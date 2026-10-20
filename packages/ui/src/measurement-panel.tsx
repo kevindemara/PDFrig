@@ -86,7 +86,9 @@ export const MeasurementPanel = ({
   const calibration = measurement.calibration;
   return (
     <section aria-labelledby="measurement-title" className="measurement-panel">
-      <span className="panel-kicker">ANNO-008 · Session guide</span>
+      <span className="panel-kicker" data-feature-id="ANNO-008">
+        Session guide
+      </span>
       <h3 id="measurement-title">Measure this page</h3>
       <p>
         Drag A–B on the page or enter coordinates. Calibrate a known reference first, then move A–B

@@ -85,8 +85,7 @@ describe.each(['Web', 'Windows'] as const)(
         if (change === 'mode')
           fireEvent.click(test.ui.getByRole('button', { name: 'Unlock a copy' }));
         if (change === 'file') test.select();
-        if (change === 'tool')
-          fireEvent.click(test.ui.getByRole('button', { name: /Compress OPT-001/u }));
+        if (change === 'tool') fireEvent.click(test.ui.getByRole('button', { name: /Compress/u }));
         if (change === 'teardown') test.unmount();
         expect(job.worker.terminate).toHaveBeenCalled();
         if (change === 'mode' || change === 'file') {

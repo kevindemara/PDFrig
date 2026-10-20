@@ -829,7 +829,9 @@ const StampDialog = ({ onClose, onError, onPlace, pageId }: StampDialogProps) =>
       >
         <div className="dialog-heading">
           <div>
-            <span className="panel-kicker">ANNO-006 · On this device</span>
+            <span className="panel-kicker" data-feature-id="ANNO-006">
+              On this device
+            </span>
             <h2 id="stamp-title">Place a stamp</h2>
           </div>
           <button aria-label="Close stamp dialog" onClick={onClose} ref={closeRef} type="button">
@@ -1319,7 +1321,9 @@ const RedactionDialog = ({ loading, markCount, onApply, onClose }: RedactionDial
       >
         <div className="dialog-heading">
           <div>
-            <span className="panel-kicker">REDACT-001 · Local beta</span>
+            <span className="panel-kicker" data-feature-id="REDACT-001">
+              Local beta
+            </span>
             <h2 id="redaction-title">
               Permanently remove {markCount} marked area{markCount === 1 ? '' : 's'}?
             </h2>
@@ -1542,7 +1546,9 @@ const CommentReviewLedger = ({
     <section className="review-ledger" aria-labelledby="review-ledger-title">
       <div className="review-ledger__heading">
         <div>
-          <span className="panel-kicker">ANNO-007 · Local review</span>
+          <span className="panel-kicker" data-feature-id="ANNO-007">
+            Local review
+          </span>
           <h3 id="review-ledger-title">Review ledger</h3>
         </div>
         <div className="review-ledger__tally" aria-label={`${openCount} open comments`}>
@@ -3411,7 +3417,7 @@ export const WorkspaceShell = ({
                       <li>Invalidates signatures and rasterizes vector artwork.</li>
                       <li>Your original file stays unchanged.</li>
                     </ul>
-                    {!redactionEnabled && <p>This beta is disabled by the release kill switch.</p>}
+                    {!redactionEnabled && <p>Redaction is not available in this version.</p>}
                     {redactionEnabled && !redactionDocumentEligible && (
                       <p>
                         Start from one unmodified, unencrypted PDF with no more than 25 pages. XFA
