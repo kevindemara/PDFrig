@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "sourceCommit": "3ae6d3a289c8b7599c766e23d55e36be4290bc08",
+  "scope": "Developer footer credit and PDFrig-only visible Windows labels; no PDF engine, OCR, billing, security policy or public-release approval changes",
+  "publicReleaseApproved": false,
+  "command": "pnpm desktop:internal-build --private-test",
+  "version": "0.1.0-alpha.20261019.4",
+  "identifier": "com.pdfmason.desktop.privatetest",
+  "buildDirectory": "apps/desktop/src-tauri/target/private-test-20261019-pdfrig",
+  "installerFilename": "PDFrig_0.1.0-alpha.20261019.4_x64-setup.exe",
+  "installerBytes": 16349434,
+  "installerSha256": "b423123866ab318f9dfcf866e6261f356d1c5d79c1d4281566f33e6bdb38ef1c",
+  "authenticode": "NotSigned",
+  "updaterTestSignature": "verified; tamper, truncation and wrong-key inputs rejected; this is not an Authenticode publisher identity",
+  "ephemeralPrivateKeyCleanupConfirmed": true,
+  "securitySettingsChangedByThisWork": false,
+  "installedAppTested": false,
+  "published": false,
+  "observedBuildMetadata": {
+    "installerProductName": "PDFrig",
+    "installerFileDescription": "PDFrig",
+    "applicationProductName": "PDFrig",
+    "applicationFileDescription": "PDFrig",
+    "applicationCompanyName": "PDFrig",
+    "configuredWindowTitle": "PDFrig",
+    "generatedShortcutName": "PDFrig.lnk",
+    "shortcutEvidence": "Generated NSIS script uses PRODUCTNAME PDFrig for Start menu and desktop shortcuts; installed shortcuts/taskbar were not observed",
+    "installMode": "currentUser",
+    "pdfFileAssociations": []
+  },
+  "developerCredit": {
+    "label": "Developed by Kevin DeMara",
+    "url": "https://github.com/kevindemara",
+    "placement": "Application status footer only; no document content or export changes",
+    "browser": "New tab with noopener noreferrer; compact keyboard-accessible layout verified at 1280, 760 and 390 pixels",
+    "windows": "One no-argument allowlisted command uses the existing windows-sys dependency and ShellExecuteW open with a fixed HTTPS profile URL; no renderer URL, path, verb, parameters, working directory or elevation input",
+    "apiReference": "https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecutew",
+    "verifiedBoundary": "UI callback, adapter command, native fixed URL/verb and safe failure paths tested; live default-browser launch from the installed app remains untested"
+  },
+  "checks": {
+    "pnpmCheck": "passed after visible-copy cleanup; unchanged tasks may use local Turbo cache",
+    "uiComponentTests": 316,
+    "targetedBrowserTests": 3,
+    "nativeUnitTests": 15,
+    "signatureVerifierTests": 3,
+    "rustFormatAndClippyWarningsDenied": "passed",
+    "preview": "Existing local workspace responded HTTP 200 and contained the developer credit and profile URL",
+    "generatedInstallerScript": "PDFrig labels, current-user install, icon paths and both required notice resource paths verified"
+  },
+  "notices": {
+    "declaredBuildInputCount": 571,
+    "unresolvedUpstreamTextGaps": 28,
+    "bundled": ["licenses/THIRD_PARTY_NOTICES.txt", "licenses/UPSTREAM-LICENSE-TEXTS.txt"],
+    "distributionClearance": false
+  },
+  "remainingGates": [
+    "Install and smoke-test this exact artifact; previous owner text-edit/export success is recorded separately in windows-export-review.json",
+    "Confirm installed shortcuts, taskbar/high-DPI icons and fixed developer profile opening; clean-machine install/upgrade/uninstall and offline OCR remain unverified",
+    "Complete source/distribution licensing, native OCR security review and final artifact notice/SBOM review before any public distribution"
+  ]
+}

@@ -192,6 +192,33 @@ test('Windows export repair records local build success without claiming install
   assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
 });
 
+test('branded private build records artifact identity without claiming Windows or license clearance', async () => {
+  const review = JSON.parse(
+    await readFile(
+      new URL('../docs/operations/windows-branded-build.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const { internalWindowsProfile } = await import('./internal-windows-profile.mjs');
+  const profile = internalWindowsProfile(['--private-test']);
+  assert.equal(review.version, profile.version);
+  assert.equal(review.identifier, profile.identifier);
+  assert.equal(review.buildDirectory.split('/').at(-1), profile.buildId);
+  assert.equal(review.publicReleaseApproved, false);
+  assert.equal(review.installedAppTested, false);
+  assert.equal(review.published, false);
+  assert.equal(review.authenticode, 'NotSigned');
+  assert.equal(review.securitySettingsChangedByThisWork, false);
+  assert.equal(review.ephemeralPrivateKeyCleanupConfirmed, true);
+  assert.equal(review.notices.distributionClearance, false);
+  assert.equal(review.developerCredit.url, 'https://github.com/kevindemara');
+  assert.equal(review.observedBuildMetadata.generatedShortcutName, 'PDFrig.lnk');
+  assert.match(review.sourceCommit, /^[a-f0-9]{40}$/u);
+  assert.match(review.installerSha256, /^[a-f0-9]{64}$/u);
+  assert.equal(review.installerFilename, `PDFrig_${profile.version}_x64-setup.exe`);
+  assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
+});
+
 test('notice review accounts for every remaining group without treating texts as legal clearance', async () => {
   const load = async (file) =>
     JSON.parse(await readFile(new URL(`../docs/${file}`, import.meta.url), 'utf8'));

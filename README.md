@@ -237,6 +237,10 @@ private alpha, not public-release approval. It retains required third-party noti
 uses a separate private-test identifier, makes no PDF association changes and has
 no production updater. The footer credits [Kevin DeMara](https://github.com/kevindemara);
 this is an application link, never text added to your exported documents.
+The latest local artifact's exact version, checksum, branding checks and remaining
+installation tests are in the [private Windows build record](docs/operations/windows-branded-build.json).
+This record is not a download or public release; the installer remains an ignored
+local build artifact unless separately approved and uploaded.
 
 ### Install the finished Windows app
 
