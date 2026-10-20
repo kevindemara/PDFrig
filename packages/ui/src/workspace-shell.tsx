@@ -97,6 +97,7 @@ import { PdfTextLayer } from './pdf-text-layer.js';
 import { fitPageScale } from './page-fit.js';
 import { ScriptSignaturePreview } from './script-signature-preview.js';
 import { confirmWorkspaceNavigation, hasUnsavedWorkspaceWork } from './workspace-navigation.js';
+import { useWorkspaceConfirmation } from './workspace-confirmation.js';
 
 export interface WorkspaceShellProps {
   readonly accountControl?: ReactNode;
@@ -1668,6 +1669,7 @@ export const WorkspaceShell = ({
   toolsHref = '/tools',
   surface,
 }: WorkspaceShellProps) => {
+  const { requestConfirmation, confirmation } = useWorkspaceConfirmation();
   const hydrated = useSyncExternalStore(
     subscribeToWorkspaceHydration,
     workspaceClientReady,
@@ -2244,18 +2246,18 @@ export const WorkspaceShell = ({
     }
   };
 
-  const canLeaveWorkspace = (): boolean =>
+  const canLeaveWorkspace = (): Promise<boolean> =>
     confirmWorkspaceNavigation(
       hasUnsavedWorkspaceWork(sessionRef.current?.snapshot(), redactionMarks.length),
-      (message) => globalThis.confirm(message),
+      requestConfirmation,
     );
 
-  const canReplaceWorkspace = (): boolean =>
+  const canReplaceWorkspace = async (): Promise<boolean> =>
     !(
       hasUnsavedWorkspaceWork(sessionRef.current?.snapshot(), redactionMarks.length) &&
-      !globalThis.confirm(
+      !(await requestConfirmation(
         'Starting another PDF clears working changes, removal marks, and session-only measurement guides. Your original file is unchanged. Continue?',
-      )
+      ))
     );
 
   const readSelectedPdf = async ({
@@ -2271,7 +2273,7 @@ export const WorkspaceShell = ({
       setError(describeError(new Error('NATIVE_FILE_CHANGED')));
       return;
     }
-    if (!canReplaceWorkspace()) return;
+    if (!(await canReplaceWorkspace())) return;
     await openPrimaryBytes(bytes, selectedName);
   };
 
@@ -2284,7 +2286,7 @@ export const WorkspaceShell = ({
       setError('That PDF exceeds the 50 MB local workspace limit.');
       return;
     }
-    if (!canReplaceWorkspace()) return;
+    if (!(await canReplaceWorkspace())) return;
     await openPrimaryBytes(new Uint8Array(await file.arrayBuffer()), file.name);
   };
 
@@ -3112,7 +3114,10 @@ export const WorkspaceShell = ({
           className="brand-link"
           href={marketingHref}
           onClick={(event) => {
-            if (!canLeaveWorkspace()) event.preventDefault();
+            event.preventDefault();
+            void canLeaveWorkspace().then((allowed) => {
+              if (allowed) globalThis.location.assign(marketingHref);
+            });
           }}
         >
           <BrandLockup compact />
@@ -3149,7 +3154,9 @@ export const WorkspaceShell = ({
           className="button button--secondary topbar-all-tools"
           disabled={!hydrated || loading}
           onClick={() => {
-            if (canLeaveWorkspace()) globalThis.location.assign(toolsHref);
+            void canLeaveWorkspace().then((allowed) => {
+              if (allowed) globalThis.location.assign(toolsHref);
+            });
           }}
           type="button"
         >
@@ -5035,6 +5042,7 @@ export const WorkspaceShell = ({
           <small>Cloud processing always requires a fresh online authorization.</small>
         </section>
       )}
+      {confirmation}
       {pendingPdfInsert !== null && (
         <PdfInsertReviewDialog
           afterPageNumber={pendingPdfInsert.afterPageNumber}

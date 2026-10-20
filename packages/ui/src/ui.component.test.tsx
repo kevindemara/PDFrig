@@ -25,7 +25,7 @@ describe('shared application shell', () => {
     ['Windows', '#tools'],
   ] as const)(
     'VIEW-001 exposes All tools on %s and uses its host-local route',
-    (surface, toolsHref) => {
+    async (surface, toolsHref) => {
       const assign = vi.spyOn(globalThis.location, 'assign').mockImplementation(() => undefined);
       const confirm = vi.fn().mockReturnValue(false);
       vi.stubGlobal('confirm', confirm);
@@ -34,7 +34,7 @@ describe('shared application shell', () => {
         const tools = screen.getByRole('button', { name: /^All tools$/u });
         expect(tools).toBeEnabled();
         fireEvent.click(tools);
-        expect(assign).toHaveBeenCalledExactlyOnceWith(toolsHref);
+        await waitFor(() => expect(assign).toHaveBeenCalledExactlyOnceWith(toolsHref));
         expect(confirm).not.toHaveBeenCalled();
       } finally {
         assign.mockRestore();

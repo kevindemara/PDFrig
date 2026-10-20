@@ -182,13 +182,13 @@ test('VIEW-001 VIEW-004 tool icons retain labels, keyboard selection and capabil
   expect(accessibility.violations).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath('pdfrig-tools-desktop.png') });
 
-  page.once('dialog', async (dialog) => {
-    expect(dialog.message()).toContain('Starting another PDF clears working changes');
-    await dialog.accept();
-  });
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/embedded-javascript.pdf'));
+  await expect(page.getByRole('alertdialog')).toContainText(
+    'Starting another PDF clears working changes',
+  );
+  await page.getByRole('button', { name: 'Discard and continue', exact: true }).click();
   await expect(text).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Review export' })).toBeDisabled();
 });
