@@ -263,7 +263,6 @@ test('private installer download matches the build snapshot without granting pub
     JSON.parse(await readFile(new URL(`../docs/operations/${file}`, import.meta.url), 'utf8'));
   const release = await load('windows-private-release.json');
   const build = await load('windows-branded-build.json');
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
   assert.equal(release.repository, 'kevindemara/PDFrig');
   assert.equal(release.repositoryPrivateAtUploadAndVerification, true);
   assert.equal(release.publicReleaseApproved, false);
@@ -282,10 +281,97 @@ test('private installer download matches the build snapshot without granting pub
     release.downloadUrl,
     `https://github.com/${release.repository}/releases/download/${release.tag}/PDFrig-setup.exe`,
   );
-  assert.ok(readme.includes(release.downloadUrl));
-  assert.ok(readme.includes(release.releaseUrl));
   assert.ok(release.assets.includes('SHA256SUMS.txt'));
   assert.ok(release.assets.includes('windows-branded-build.json'));
+  assert.ok(release.assets.every((name) => !name.endsWith('.key')));
+});
+
+test('VIEW-001 All tools installer binds the corrected profile and installed smoke evidence without clearing release gates', async () => {
+  const build = JSON.parse(
+    await readFile(
+      new URL('../docs/operations/windows-all-tools-build.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const { internalWindowsProfile } = await import('./internal-windows-profile.mjs');
+  const profile = internalWindowsProfile(['--private-test']);
+  assert.equal(build.version, profile.version);
+  assert.equal(build.identifier, profile.identifier);
+  assert.equal(build.buildDirectory.split('/').at(-1), profile.buildId);
+  assert.equal(build.publicReleaseApproved, false);
+  assert.equal(build.published, false);
+  assert.equal(build.installedAppTested, true);
+  assert.equal(build.authenticode, 'NotSigned');
+  assert.equal(build.securitySettingsChangedByThisWork, false);
+  assert.equal(build.billingChangedByThisWork, false);
+  assert.equal(build.ephemeralPrivateKeyCleanupConfirmed, true);
+  assert.equal(build.notices.distributionClearance, false);
+  assert.equal(build.notices.unresolvedUpstreamTextGaps, 28);
+  assert.equal(build.rejectedPredecessor.uploaded, false);
+  assert.equal(build.installerFilename, 'PDFrig-setup.exe');
+  assert.equal(build.originalBuildFilename, `PDFrig_${profile.version}_x64-setup.exe`);
+  assert.match(build.sourceCommit, /^[a-f0-9]{40}$/u);
+  assert.match(build.installerSha256, /^[a-f0-9]{64}$/u);
+  assert.equal(build.installedSmokeTest.installerExitCode, 0);
+  for (const check of [
+    'allToolsVisible',
+    'unsavedConfirmationShown',
+    'cancelPreservesFieldAndUndo',
+    'explicitDiscardOpensTools',
+    'successfulExportClearsEditWarning',
+    'openEditorReturnsToWorkspace',
+    'canonicalFieldAndWidgetValuesAgree',
+    'widgetAppearanceNonempty',
+    'bookmarksAndTagsPresent',
+    'outsideEditedFieldPixelsUnchanged',
+    'secondPagePixelsUnchanged',
+    'sourceFileUnchanged',
+  ]) {
+    assert.equal(build.installedSmokeTest[check], true, check);
+  }
+  assert.ok(build.remainingGates.some((gate) => gate.includes('licensing')));
+  assert.ok(build.remainingGates.some((gate) => gate.includes('uninstall')));
+});
+
+test('VIEW-001 current Windows download matches the verified All tools artifact and README', async () => {
+  const load = async (name) =>
+    JSON.parse(await readFile(new URL(`../docs/operations/${name}`, import.meta.url), 'utf8'));
+  const build = await load('windows-all-tools-build.json');
+  const release = await load('windows-all-tools-release.json');
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  assert.equal(release.repository, 'kevindemara/PDFrig');
+  assert.equal(release.repositoryPrivateAtUploadAndVerification, true);
+  assert.equal(release.publicReleaseApproved, false);
+  assert.equal(release.draft, false);
+  assert.equal(release.prerelease, true);
+  assert.equal(release.authenticode, 'NotSigned');
+  assert.equal(release.installedAppTested, true);
+  assert.equal(release.version, build.version);
+  assert.equal(release.assetName, build.installerFilename);
+  assert.equal(release.assetBytes, build.installerBytes);
+  assert.equal(release.assetSha256, build.installerSha256);
+  assert.equal(release.executableSourceCommit, build.sourceCommit);
+  assert.equal(release.releaseTargetCommit, build.sourceCommit);
+  assert.equal(release.githubAssetDigest, `sha256:${build.installerSha256}`);
+  for (const key of [
+    'downloadedArtifactHashVerified',
+    'uploadedChecksumListingVerified',
+    'downloadedCompanionHashesVerified',
+    'downloadedInstallerSignatureVerifiedWithNegativeCases',
+    'publishedTagTargetVerified',
+  ])
+    assert.equal(release[key], true, key);
+  assert.equal(
+    release.downloadUrl,
+    `https://github.com/${release.repository}/releases/download/${release.tag}/PDFrig-setup.exe`,
+  );
+  assert.ok(readme.includes(release.downloadUrl));
+  assert.ok(readme.includes(release.releaseUrl));
+  assert.ok(readme.includes(release.version));
+  assert.ok(readme.includes('docs/operations/windows-all-tools-build.json'));
+  assert.ok(readme.includes('docs/operations/windows-all-tools-release.json'));
+  assert.ok(release.assets.includes('windows-all-tools-build.json'));
+  assert.ok(release.assets.includes('SHA256SUMS.txt'));
   assert.ok(release.assets.every((name) => !name.endsWith('.key')));
 });
 

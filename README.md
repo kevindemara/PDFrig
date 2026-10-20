@@ -92,16 +92,20 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261019-4/PDFrig-setup.exe)
-— Windows x64, version `0.1.0-alpha.20261019.4`.
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261019-6/PDFrig-setup.exe)
+— Windows x64, version `0.1.0-alpha.20261019.6`.
 
-The [test release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261019-4)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261019-6)
 includes the installer, `SHA256SUMS.txt`, notices and the build record. While the
 repository is private, sign in to GitHub with repository access to download it.
 
 This is an **unsigned alpha release**.
+This installer passed a same-machine upgrade, All tools navigation with Cancel and
+Discard confirmation, and a synthetic form export checked independently for field
+values and unchanged surrounding pixels.
 A successful installation and use on a second Windows PC has been reported, but
-this is not comprehensive installer, offline OCR or upgrade/uninstall testing.
+that was an earlier alpha. This is not comprehensive installer, offline OCR or
+upgrade/uninstall testing.
 Windows compliance is not certified. Outstanding licensing and security reviews
 are described below.
 
@@ -128,8 +132,8 @@ certificate is required for this test build. If installation is blocked, use the
 local browser version instead.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [build evidence](docs/operations/windows-branded-build.json)
-and [download verification](docs/operations/windows-private-release.json) for exact
+the tracked source files. See the [build evidence](docs/operations/windows-all-tools-build.json)
+and [download verification](docs/operations/windows-all-tools-release.json) for exact
 artifact hashes and test limits. These are historical build/test records, not
 security certification or a complete license review.
 
