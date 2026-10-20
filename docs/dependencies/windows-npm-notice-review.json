@@ -14,6 +14,18 @@
     "externalPosting": "Previously approved follow-ups were refused by the GitHub integration with HTTP 403. Drafts and existing threads are retained below. No retry, duplicate issue or alternate-auth workaround was attempted.",
     "licenseOrDistributionApproval": false
   },
+  "dependencyUseReview": {
+    "date": "2026-10-19",
+    "commands": [
+      "pnpm why --recursive fontkit dfa brotli @napi-rs/canvas-win32-x64-msvc",
+      "node scripts/verify-windows-npm-notices.mjs --registry"
+    ],
+    "publishedAndInstalledPayloadsMatched": 4,
+    "signaturePath": "packages/pdf-engine/src/signature-font.ts dynamically imports fontkit 2.0.4 to parse the fixed bundled Dancing Script asset, lay out glyph paths and embed the unmodified font. dfa 1.2.0 and brotli 1.3.3 are its transitive dependencies. They cannot be treated as absent, or removed without preserving signature preview/export fidelity and reviewing a replacement.",
+    "optionalNodeCanvas": "The native canvas package is an optional Node-side PDF.js dependency, not an intentional browser/WebView import. This dependency-graph observation is not proof of absence from a specific installer and does not clear native Skia/ICU notices.",
+    "upstreamRecheck": "Read-only checks of fontkit PR 300 and dfa issue 7 still found no authoritative version-bound complete grant. An open unmerged proposed licence and a request for maintainer approval are not treated as accepted terms. No new issue/comment was posted and no posting-permission block was bypassed.",
+    "effectOfProjectLicenseChange": "An open-source licence for PDFrig's own code does not supply missing third-party grants, copyrights, build provenance or data notices. All four gaps stay open."
+  },
   "packages": [
     {
       "name": "@napi-rs/canvas-win32-x64-msvc",
