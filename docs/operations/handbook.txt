@@ -1,6 +1,13 @@
 PDFrig operational handbook
 ===========================
 
+Scope: legacy managed-service architecture, not the local browser/Windows setup.
+The local PDF tools are free for personal and business use and require no account,
+subscription, payment details or billing provider. Payment-related procedures below
+describe retained legacy server code; they are not enabled service offerings or
+instructions to configure payments for the local app. Removing that code is a
+separate change. Keep its authorization/webhook safeguards while it remains present.
+
 Development guidance only. Public staging, legal, security and release approvals remain required.
 Sections below retain the existing operational controls; this consolidation does not approve release.
 

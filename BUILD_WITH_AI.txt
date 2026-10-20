@@ -1,7 +1,8 @@
 PDFrig: optional AI-assisted Windows source build
 
-Ordinary users should install a reviewed Windows setup.exe from this repository's
-Releases, once one is published. No supported public installer is available yet.
+Ordinary users can run the recommended browser version using README.md or download
+PDFrig-setup.exe from this repository's Releases. The Windows release is an unsigned
+alpha; a checksum or updater test signature is not a Windows publisher certification.
 The source ZIP and build script are NOT a finished app. A source build requires
 developer tools, disk space, Internet access for initial downloads, and a Windows
 x64 machine authorized for development. An AI assistant cannot guarantee success

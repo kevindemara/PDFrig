@@ -4,8 +4,12 @@ import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('VIEW-001 release README links resolve and do not claim unfinished editor capabilities', async () => {
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
-  assert.ok(readme.includes('development preview, not a public release'));
+  const readme = (await readFile(new URL('../README.md', import.meta.url), 'utf8')).replace(
+    /\s+/gu,
+    ' ',
+  );
+  assert.ok(readme.includes('Public alpha release'));
+  assert.doesNotMatch(readme, /development preview|not a public release/iu);
   assert.ok(readme.includes('Text → OCR this page'));
   assert.ok(readme.includes('Edit existing text'));
   assert.ok(readme.includes('printable ASCII only'));
@@ -42,7 +46,7 @@ test('VIEW-001 screenshot integrity and safe fixed-corpus provenance are retaine
 
 test('Windows setup instructions distinguish development, future installer and unverified compliance', async () => {
   const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
-  const readme = await load('README.md');
+  const readme = (await load('README.md')).replace(/\s+/gu, ' ');
   const scripts = JSON.parse(await load('package.json')).scripts;
   const qa = JSON.parse(await load('docs/operations/windows-installer-qa.json'));
   for (const command of ['web:dev', 'desktop:dev', 'desktop:notices', 'desktop:internal-build']) {
@@ -53,11 +57,13 @@ test('Windows setup instructions distinguish development, future installer and u
   assert.ok(readme.includes('x86_64-pc-windows-msvc'));
   assert.ok(readme.includes('it does not install PDFrig'));
   assert.ok(readme.includes('Windows compliance is not certified'));
-  assert.ok(readme.includes('owner reports a successful installed-app text edit and export'));
+  assert.ok(
+    readme.includes('successful installation and use on a second Windows PC has been reported'),
+  );
   assert.ok(readme.includes('Windows **Installed apps**'));
   assert.ok(readme.includes('No credentials or paid services are needed'));
   assert.ok(readme.includes('do not disable Application Control'));
-  assert.ok(readme.includes('Self-hosting a production service is **not yet'));
+  assert.ok(readme.includes('**not yet a supported one-command setup**'));
   assert.equal(qa.publicReleaseApproved, false);
   assert.equal(qa.installerProduced, false);
   assert.equal(qa.installedAppTested, false);
@@ -65,7 +71,8 @@ test('Windows setup instructions distinguish development, future installer and u
 });
 
 test('Windows download routes put finished-app installation before optional source builds', async () => {
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const rawReadme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const readme = rawReadme.replace(/\s+/gu, ' ');
   const installHeading = '### Install the finished Windows app';
   const buildHeading = '### Build from source';
   const installStart = readme.indexOf(installHeading);
@@ -73,28 +80,60 @@ test('Windows download routes put finished-app installation before optional sour
   assert.ok(installStart >= 0 && buildStart > installStart);
   assert.ok(readme.includes('](#install-the-finished-windows-app)'));
   assert.ok(readme.includes('](#build-from-source)'));
-  assert.ok(readme.includes('[BUILD_WITH_AI.txt](BUILD_WITH_AI.txt)'));
+  assert.ok(readme.includes('](BUILD_WITH_AI.txt)'));
   const installation = readme.slice(installStart, buildStart);
   assert.match(installation, /https:\/\/github\.com\/kevindemara\/PDFrig\/releases/u);
-  assert.ok(installation.includes('no supported public installer is published yet'));
+  assert.ok(installation.includes('unsigned alpha release'));
   assert.ok(installation.includes('Source code (zip)'));
   assert.ok(installation.includes('Source code (tar.gz)'));
-  assert.match(installation, /not need Node\.js, pnpm, Rust, C\+\+ Build\s+Tools/u);
+  assert.match(installation, /not need Node\.js, pnpm, Rust, C\+\+ Build Tools/u);
   assert.ok(installation.includes('no Windows installer EXE is included'));
   assert.ok(installation.includes('Stop if installation or execution is blocked'));
   assert.doesNotMatch(installation, /^pnpm |^cargo /mu);
   const source = readme.slice(buildStart, readme.indexOf('### Internal installer testing'));
   assert.ok(source.includes('source ZIPs lack Git metadata'));
-  assert.ok(source.includes('internal QA'));
+  assert.ok(source.includes('internal QA installer'));
   assert.ok(source.includes('pnpm desktop:dev'));
   assert.ok(source.includes('it does not install PDFrig'));
   assert.ok(source.includes('Purpose of BUILD_WITH_AI.txt'));
   assert.ok(source.includes('not an executable, automatic installer or AI feature'));
   assert.ok(source.includes('Users downloading a finished installer do not need this file'));
   assert.ok(source.includes('exact source commit and archive checksum'));
-  assert.ok(source.includes('do not change its checkout'));
-  assert.ok(source.includes('GitHub Release asset, not a source commit'));
-  assert.ok(source.includes('A successful build alone is not public-release approval'));
+  assert.match(source, /do not change its checkout/iu);
+  assert.ok(readme.includes('A successful build alone is not public-release approval'));
+  assert.ok(readme.indexOf('## Quick start') < readme.indexOf('## Windows'));
+  assert.ok(
+    readme.indexOf('pnpm web:dev') < readme.indexOf('### Install the finished Windows app'),
+  );
+  assert.ok(readme.includes('Free for personal and business use.'));
+  assert.doesNotMatch(readme, /The owner(?:'|’)?s|\bStripe\b/iu);
+  assert.ok(readme.includes('legacy managed-service, account and billing code'));
+  assert.ok(
+    rawReadme.includes('```powershell\n' + 'git clone https://github.com/kevindemara/PDFrig.git'),
+  );
+});
+
+test('publication audit keeps privacy findings separate from source-license and release approval', async () => {
+  const audit = JSON.parse(
+    await readFile(new URL('../docs/operations/publication-audit.json', import.meta.url), 'utf8'),
+  );
+  assert.equal(audit.publicReleaseApproved, false);
+  assert.equal(audit.repositoryVisibilityChanged, false);
+  assert.equal(audit.reachableHistoryAtBaseline.historyRewritten, false);
+  assert.equal(audit.reachableHistoryAtBaseline.nonNoreplyAuthorAddresses, 0);
+  assert.deepEqual(audit.reachableHistoryAtBaseline.sensitiveContentFindings, {});
+  assert.equal(audit.releaseAttachments.obsoleteReleaseRemovedWithUserApproval, true);
+  assert.equal(audit.releaseAttachments.obsoleteGitTagPreserved, true);
+  assert.equal(audit.releaseAttachments.retainedInstaller, 'PDFrig-setup.exe');
+  assert.equal(audit.releaseAttachments.installerInternalsPrivacyCertified, false);
+  assert.equal(audit.screenshots.customerDocumentsIncluded, false);
+  assert.ok(
+    audit.remainingPublicationGates.some((gate) =>
+      gate.includes('formal source-available license'),
+    ),
+  );
+  assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('28')));
+  assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('native OCR')));
 });
 
 test('tool-neutral build prompt tracks pinned tools, real commands and review records', async () => {
@@ -149,7 +188,7 @@ test('tool-neutral build prompt tracks pinned tools, real commands and review re
 test('AI build instructions retain approval gates instead of treating a build as release clearance', async () => {
   const guide = await readFile(new URL('../BUILD_WITH_AI.txt', import.meta.url), 'utf8');
   for (const boundary of [
-    'No supported public installer is available yet',
+    'Windows release is an unsigned\nalpha',
     'This file grants no license',
     'ask before installing or changing tools',
     'check $LASTEXITCODE immediately',

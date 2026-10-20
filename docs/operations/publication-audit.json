@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "baselineCommit": "fde94d2cd4956343649f270cd53b2481d9fbff37",
+  "purpose": "Pre-publication privacy, repository-necessity and README review; not security/legal or public-release clearance",
+  "repositoryVisibilityChanged": false,
+  "publicReleaseApproved": false,
+  "releaseWording": "Public alpha release, at the publisher's request; outstanding license/security reviews are disclosed rather than represented as complete",
+  "repositoryDescriptionUpdated": true,
+  "releaseNotesUpdatedWithoutChangingInstallerBytes": true,
+  "verification": {
+    "pnpmCheck": "passed; unchanged tasks may use the local Turbo cache",
+    "isolatedBrowserNoticeTests": 2,
+    "readmeLinksAndSetupOrder": "passed; browser instructions precede the Windows download and source-build instructions",
+    "screenshotHashesAndProvenance": "passed after refreshed captures",
+    "billingConfigurationChanged": false
+  },
+  "baselineTrackedFiles": 648,
+  "currentTree": {
+    "hygiene": "passed; root README is the only tracked Markdown file; approved assets match provenance hashes",
+    "sensitiveTextScan": "passed; no configured key/token/JWT/private-Windows-path patterns found",
+    "expandedPersonalReferenceScan": "no owner private-email, customer-document reference or personal Unix-path patterns found",
+    "approvedBinaryAssets": 79,
+    "retained": "Source, tests, lockfiles, synthetic fixtures, approved branding/screenshots, required upstream license texts and security/provenance evidence are necessary; no unrelated personal files were identified",
+    "excluded": "Local environment files, credentials, signing keys, installers, toolchains, research downloads, logs and generated caches remain ignored rather than committed",
+    "legacyBackend": "Account/managed-service/billing code remains present and is documented as legacy, not required for local use; this review does not remove its integrations or weaken authorization"
+  },
+  "reachableHistoryAtBaseline": {
+    "objects": 1339,
+    "textBlobsScanned": 827,
+    "binaryBlobsClassified": 74,
+    "unscannedTextBlobs": 0,
+    "pathFindings": {},
+    "sensitiveContentFindings": {},
+    "nonNoreplyAuthorAddresses": 0,
+    "binaryAssetsAbsentFromReviewedBaselineTree": 0,
+    "historyRewritten": false
+  },
+  "fixtureMetadata": {
+    "pdfFiles": 42,
+    "encryptedPdfMetadataNotInspected": 1,
+    "officeFiles": 4,
+    "pngIcoJpegFiles": 31,
+    "personalMetadataPatternFindings": [],
+    "scope": "Read-only PDF/Office/image metadata inspection plus exact synthetic/approved asset provenance; not exhaustive hidden-content detection"
+  },
+  "screenshots": {
+    "capture": "Two isolated Chromium document-notice tests passed; screenshots refreshed from synthetic tagged-bookmarks.pdf and local utilities",
+    "customerDocumentsIncluded": false,
+    "supersededScreenshotsAlsoVisuallyReviewed": true,
+    "reason": "Remove stale Paid beta/engineering labels from the README illustrations"
+  },
+  "releaseAttachments": {
+    "textAttachmentsInspectedAcrossBothReleases": 15,
+    "sensitivePatternFindings": [],
+    "obsoleteRelease": "private-test-20261019-1",
+    "obsoleteReleaseRemovedWithUserApproval": true,
+    "obsoleteAssetsRemoved": 10,
+    "obsoleteGitTagPreserved": true,
+    "recovery": "All obsolete assets, including the checksum-verified installer, retained only in an ignored local audit directory; recoverable by explicit re-upload, not included in Git",
+    "retainedRelease": "private-test-20261019-4",
+    "retainedInstaller": "PDFrig-setup.exe",
+    "retainedInstallerSha256": "b423123866ab318f9dfcf866e6261f356d1c5d79c1d4281566f33e6bdb38ef1c",
+    "installerInternalsPrivacyCertified": false
+  },
+  "windowsFollowup": {
+    "userReported": "Installation and use on another Windows PC worked",
+    "independentlyObserved": false,
+    "comprehensiveInstallerQa": false
+  },
+  "remainingPublicationGates": [
+    "Finalize the project's formal source-available license; free personal/business use does not establish complete redistribution terms or an open-source license",
+    "Resolve 28 conservative declared-input notice gaps, including four prospective Windows npm inputs, and complete exact-artifact notice/SBOM review",
+    "Complete the native OCR parser/model/API security review and broader independent Windows/assistive-technology tests",
+    "Review all remaining GitHub Releases before visibility changes; repository publication also exposes release assets"
+  ],
+  "limitations": "Pattern-based scans and fixture provenance do not prove absence of all private information. Binary installer internals, encrypted fixture metadata, unreachable Git objects, remote caches/forks, GitHub issue/PR attachments and repository settings are not certified. Required third-party author names/emails in license notices are intentionally retained."
+}
