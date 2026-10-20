@@ -11,8 +11,9 @@ or paid service is needed for the local PDF tools. Start with the browser versio
 below; the Windows installer is an alternative if you prefer a desktop app.
 
 **Public alpha release.** Text editing and OCR have
-document-specific limits. Project licensing, third-party notices and native OCR
-security review are not complete; see [License](#license) and [release work](#roadmap-and-launch).
+document-specific limits. PDFrig's own code is MIT-licensed. Third-party notice
+and native OCR security reviews are not complete; see [License](#license) and
+[release work](#roadmap-and-launch).
 
 [Browser setup](#quick-start) · [Windows download](#install-the-finished-windows-app) ·
 [Features](#what-works-today) · [Self-hosting](#self-hosting) · [Build from source](#build-from-source)
@@ -334,7 +335,7 @@ coordination. See the [publication audit](docs/operations/publication-audit.json
 - Broaden OCR language/accuracy coverage and complete native parser/model review.
 - Finish the standalone local/self-hosted production configuration and remove
   obsolete managed-service surfaces.
-- Finalize project license terms and third-party notices/SBOMs. The conservative
+- Complete third-party notices/SBOMs. The conservative
   dependency review still has **28 notice-text gaps**, including **four prospective
   Windows npm inputs**; a passing policy check does not clear those gaps.
 - Complete independent Windows installation, upgrade/uninstall, offline OCR,
@@ -347,18 +348,21 @@ Public distribution approval remains separate from local test success.
 
 **PDFrig is free for personal and business use.**
 
-The formal **source-available** license is still being finalized. There is no
-approved project `LICENSE` file yet, and package manifests still say `UNLICENSED`.
-Redistribution or selling copies has not been authorized. This is a
-source-available project, not a release under an approved open-source license.
-The public alpha designation does not establish complete source or redistribution terms.
+PDFrig's original code and documentation are open source under the
+[MIT License](LICENSE). You may use, modify, redistribute and sell copies,
+including for commercial use, provided you retain the copyright and license
+notice. The software is provided without warranty.
 
 Third-party components retain their own licenses and rights. Review the
 [third-party notices](docs/dependencies/THIRD_PARTY_NOTICES.txt),
 [local OCR native notices](docs/dependencies/LOCAL_OCR_NOTICES.txt),
 [local OCR JavaScript notices](docs/dependencies/LOCAL_OCR_JS_NOTICES.txt) and
 [remaining notice gaps](docs/dependencies/desktop-notice-review.json).
-Project restrictions cannot override third-party rights. Brand assets and
-trademarks are separate from source-code licensing.
+Separately licensed material, including the CC0 test fixtures and the OFL-licensed
+Dancing Script font, keeps its existing terms. MIT does not clear missing
+dependency notices or native security reviews, and it is not approval of the
+existing Windows binaries for public distribution. Installer-specific licenses,
+notices and verification remain part of each release's build records.
+No trademark rights are granted by the source-code license.
 
 Developed by [Kevin DeMara](https://github.com/kevindemara).

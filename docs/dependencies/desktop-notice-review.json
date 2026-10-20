@@ -84,7 +84,7 @@
   ],
   "additionalDistributionGates": [
     "Final installed-artifact SBOM, bundled asset/native/data notices, licence compatibility and legal review.",
-    "Project own-source licence approval remains UNLICENSED; this record grants no application redistribution permission.",
+    "PDFrig's own original code/documentation is now MIT-licensed with user approval. This does not supply missing third-party grants/notices or approve distribution of the existing Windows binaries.",
     "Exact native OCR WASM dependency security clearance or refreshed minimal reproducible runtime.",
     "Windows build and clean-machine installation/upgrade/uninstall/shortcuts/icons/offline OCR verification on an approved host; no App Control workaround.",
     "Standalone production/self-hosting mode remains unfinished; development fake-provider mode must never be exposed publicly."

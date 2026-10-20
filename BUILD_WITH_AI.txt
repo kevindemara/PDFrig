@@ -6,7 +6,9 @@ alpha; a checksum or updater test signature is not a Windows publisher certifica
 The source ZIP and build script are NOT a finished app. A source build requires
 developer tools, disk space, Internet access for initial downloads, and a Windows
 x64 machine authorized for development. An AI assistant cannot guarantee success
-or override licensing, permissions or device security. This file grants no license.
+or override licensing, permissions or device security. PDFrig's own source is
+MIT-licensed; read LICENSE and retain all applicable third-party notices. This
+prompt does not grant rights to third-party material or waive release gates.
 
 HOW TO USE
 

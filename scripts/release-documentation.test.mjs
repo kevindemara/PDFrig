@@ -1,7 +1,41 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
+
+test('approved MIT terms cover current first-party manifests without relicensing upstreams', async () => {
+  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+  const license = (await load('LICENSE')).replaceAll('\r\n', '\n');
+  assert.equal(
+    createHash('sha256').update(license).digest('hex'),
+    '8a753bd1af90dbf9a7756f5e73d372ebac08ec070b7d0033e053336babdc9eb4',
+  );
+  const manifests = ['package.json'];
+  for (const base of ['apps', 'packages'])
+    for (const entry of await readdir(new URL(`../${base}/`, import.meta.url), {
+      withFileTypes: true,
+    }))
+      if (entry.isDirectory()) manifests.push(`${base}/${entry.name}/package.json`);
+  assert.equal(manifests.length, 12);
+  for (const file of manifests) {
+    const manifest = JSON.parse(await load(file));
+    assert.equal(manifest.license, 'MIT', file);
+    assert.equal(manifest.private, true, file); // Not authorization to publish packages.
+  }
+  assert.match(await load('apps/desktop/src-tauri/Cargo.toml'), /^license = "MIT"$/mu);
+  const notices = await load('scripts/prepare-desktop-notices.mjs');
+  assert.ok(
+    notices.includes(
+      "copyFile(path.join(root, 'LICENSE'), path.join(output, 'PDFrig-LICENSE.txt'))",
+    ),
+  );
+  assert.ok(
+    (await load('scripts/build-internal-windows.mjs')).includes("'licenses/PDFrig-LICENSE.txt'"),
+  );
+  const review = JSON.parse(await load('docs/dependencies/desktop-notice-review.json'));
+  assert.equal(review.publicReleaseApproved, false);
+  assert.equal(review.remainingTextGaps, 28);
+});
 
 test('VIEW-001 release README links resolve and do not claim unfinished editor capabilities', async () => {
   const readme = (await readFile(new URL('../README.md', import.meta.url), 'utf8')).replace(
@@ -16,8 +50,12 @@ test('VIEW-001 release README links resolve and do not claim unfinished editor c
   assert.ok(readme.includes('not visibly editable'));
   assert.ok(readme.includes('Code → Download ZIP is source code'));
   assert.ok(readme.includes('No paid code-signing certificate'));
-  assert.ok(readme.includes('source-available'));
-  assert.ok(readme.includes('UNLICENSED'));
+  assert.ok(readme.includes('[MIT License](LICENSE)'));
+  assert.ok(readme.includes('use, modify, redistribute and sell copies'));
+  assert.doesNotMatch(
+    readme,
+    /source-available|UNLICENSED|selling copies has not been authorized/iu,
+  );
   for (const match of readme.matchAll(/\]\(([^)]+)\)/gu)) {
     const target = match[1].split('#')[0];
     if (target === '' || /^https?:\/\//u.test(target)) continue;
@@ -127,11 +165,12 @@ test('publication audit keeps privacy findings separate from source-license and 
   assert.equal(audit.releaseAttachments.retainedInstaller, 'PDFrig-setup.exe');
   assert.equal(audit.releaseAttachments.installerInternalsPrivacyCertified, false);
   assert.equal(audit.screenshots.customerDocumentsIncluded, false);
-  assert.ok(
-    audit.remainingPublicationGates.some((gate) =>
-      gate.includes('formal source-available license'),
-    ),
-  );
+  assert.equal(audit.sourceLicenseFollowup.userApproved, true);
+  assert.equal(audit.sourceLicenseFollowup.license, 'MIT');
+  assert.equal(audit.sourceLicenseFollowup.redistributionAndCommercialResalePermitted, true);
+  assert.equal(audit.sourceLicenseFollowup.historicalBuildRecordsRetainOriginalStatus, true);
+  assert.equal(audit.sourceLicenseFollowup.installerRebuiltForLicenseChange, false);
+  assert.equal(audit.sourceLicenseFollowup.thirdPartyNoticesClearedByProjectLicense, false);
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('28')));
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('native OCR')));
 });
@@ -189,7 +228,7 @@ test('AI build instructions retain approval gates instead of treating a build as
   const guide = await readFile(new URL('../BUILD_WITH_AI.txt', import.meta.url), 'utf8');
   for (const boundary of [
     'Windows release is an unsigned\nalpha',
-    'This file grants no license',
+    'prompt does not grant rights to third-party material or waive release gates',
     'ask before installing or changing tools',
     'check $LASTEXITCODE immediately',
     'propose a\nminimal repair for my approval',

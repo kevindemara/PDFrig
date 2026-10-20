@@ -68,8 +68,22 @@
     "independentlyObserved": false,
     "comprehensiveInstallerQa": false
   },
+  "sourceLicenseFollowup": {
+    "date": "2026-10-19",
+    "userApproved": true,
+    "license": "MIT",
+    "licenseFile": "LICENSE",
+    "scope": "PDFrig's own original code and documentation; separately licensed fixtures, fonts and third-party components retain their terms",
+    "priorStatusAtBaseline": "No approved project LICENSE; source-available intent with UNLICENSED manifests and proposed restrictions on redistribution/resale",
+    "redistributionAndCommercialResalePermitted": true,
+    "licenseAndCopyrightNoticeMustBeRetained": true,
+    "currentNpmAndCargoManifestsUpdated": true,
+    "historicalBuildRecordsRetainOriginalStatus": true,
+    "installerRebuiltForLicenseChange": false,
+    "thirdPartyNoticesClearedByProjectLicense": false,
+    "publicDistributionApproved": false
+  },
   "remainingPublicationGates": [
-    "Finalize the project's formal source-available license; free personal/business use does not establish complete redistribution terms or an open-source license",
     "Resolve 28 conservative declared-input notice gaps, including four prospective Windows npm inputs, and complete exact-artifact notice/SBOM review",
     "Complete the native OCR parser/model/API security review and broader independent Windows/assistive-technology tests",
     "Review all remaining GitHub Releases before visibility changes; repository publication also exposes release assets"

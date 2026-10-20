@@ -1,6 +1,6 @@
 // Dependency metadata/notice audit; no compilation, signer, installer or network.
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -119,6 +119,8 @@ export async function prepareDesktopNotices({
   ])
     await writeFile(path.join(output, filename), JSON.stringify(value, null, 2) + '\n');
   await writeFile(path.join(output, 'UPSTREAM-LICENSE-TEXTS.txt'), result.text);
+  // First-party permission is separate from the unresolved upstream inventory.
+  await copyFile(path.join(root, 'LICENSE'), path.join(output, 'PDFrig-LICENSE.txt'));
   return { ...result, declaredInputCount: packages.length };
 }
 

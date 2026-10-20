@@ -92,6 +92,7 @@ try {
   // Conservative build-input inventory; not an independently reviewed release SBOM.
   const notices = await prepareDesktopNotices({ root, pnpmCli, output, productName, version });
   config.bundle.resources = {
+    [path.join(output, 'PDFrig-LICENSE.txt')]: 'licenses/PDFrig-LICENSE.txt',
     [path.join(output, 'THIRD_PARTY_NOTICES.txt')]: 'licenses/THIRD_PARTY_NOTICES.txt',
     [path.join(output, 'UPSTREAM-LICENSE-TEXTS.txt')]: 'licenses/UPSTREAM-LICENSE-TEXTS.txt',
   };

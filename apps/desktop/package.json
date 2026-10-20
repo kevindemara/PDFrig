@@ -2,6 +2,7 @@
   "name": "@pdfmason/desktop",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "node ../../scripts/prepare-local-ocr-assets.mjs && tsc -p tsconfig.json && vite build",

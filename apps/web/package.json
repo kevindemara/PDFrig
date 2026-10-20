@@ -2,6 +2,7 @@
   "name": "@pdfmason/web",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "build": "node ../../scripts/prepare-local-ocr-assets.mjs && next build",
     "dev": "node ../../scripts/prepare-local-ocr-assets.mjs && next dev --hostname 127.0.0.1",
