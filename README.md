@@ -1,6 +1,6 @@
 <img src="docs/brand/pdfrig-logo.png" alt="PDFrig" width="240" />
 
-# PDFrig — Build better PDFs
+# PDFrig - Build better PDFs
 
 A local-first PDF editor for viewing, editing supported text, organizing pages,
 adding annotations, filling forms and making searchable copies of scanned PDFs.
@@ -21,7 +21,7 @@ reviews are still in progress; this is not a security-certified release. See
 
 ## Quick start
 
-### Browser version — recommended
+### Browser version - recommended
 
 Run PDFrig locally and open it in your browser. This is the recommended way to
 try the app; there is no public hosted editor at present.
@@ -49,7 +49,7 @@ asset integrity checks to work around a failed download.
 ### Set up with an AI assistant
 
 Prefer to have a coding assistant handle setup? Open
-[**SETUP_WITH_AI.txt — AI Builder prompt**](SETUP_WITH_AI.txt)
+[**SETUP_WITH_AI.txt - AI Builder prompt**](SETUP_WITH_AI.txt)
 ([plain text](https://raw.githubusercontent.com/kevindemara/PDFrig/main/SETUP_WITH_AI.txt)),
 copy the section between **BEGIN SETUP PROMPT** and **END SETUP PROMPT**, and paste
 it into Codex or another coding assistant with local file and terminal access.
@@ -111,7 +111,7 @@ environment-variable names retain the original PDFMason name for compatibility.
 ### Install the finished Windows app
 
 [**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/PDFrig-setup.exe)
-— Windows x64, version `0.1.0-alpha.20261020.2`.
+- Windows x64, version `0.1.0-alpha.20261020.2`.
 
 The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2)
 includes the finished installer,
