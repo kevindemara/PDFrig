@@ -227,7 +227,7 @@ Choose the download that matches your goal:
 
 | Goal                             | Download or command                                                 | Developer tools needed?                       |
 | -------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| Use the finished Windows app     | Reviewed `setup.exe` asset from Releases, once published            | No                                            |
+| Try the Windows app              | Private `PDFrig-setup.exe` test asset linked below                  | No                                            |
 | Run or modify the source         | Git clone recommended; source ZIP is not an installer               | Yes                                           |
 | Build an internal test installer | `pnpm desktop:internal-build --installer-qa` in a prepared checkout | Yes; this is a build script, not an installer |
 
@@ -237,17 +237,24 @@ private alpha, not public-release approval. It retains required third-party noti
 uses a separate private-test identifier, makes no PDF association changes and has
 no production updater. The footer credits [Kevin DeMara](https://github.com/kevindemara);
 this is an application link, never text added to your exported documents.
-The latest local artifact's exact version, checksum, branding checks and remaining
+The artifact's exact version, checksum, branding checks and remaining
 installation tests are in the [private Windows build record](docs/operations/windows-branded-build.json).
-This record is not a download or public release; the installer remains an ignored
-local build artifact unless separately approved and uploaded.
+That is a build-time snapshot. The later owner-authorized upload and downloaded-byte
+verification are recorded in the [private release record](docs/operations/windows-private-release.json).
+The installer is a private Release asset, not part of the tracked source tree or a public release.
 
 ### Install the finished Windows app
 
 **For ordinary users: install the finished app; do not build it yourself.**
 There is no supported public download yet: **no supported public installer is published yet**. The steps
-below describe the intended path after a reviewed installer is available, not
-evidence that installation or Windows compatibility has already been verified.
+below apply to the private test installer and the intended later public installation path;
+they are not evidence that installation or Windows compatibility has been verified.
+
+**Private testing:** [Download PDFrig-setup.exe](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261019-4/PDFrig-setup.exe)
+(version `0.1.0-alpha.20261019.4`; sign in with repository access). The
+[test release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261019-4)
+also includes `SHA256SUMS.txt`. This unsigned alpha is for private testing only,
+not redistribution or a supported public release.
 
 1. Open this repository's [Releases](https://github.com/kevindemara/PDFrig/releases).
    Access requires repository permission while it remains private.

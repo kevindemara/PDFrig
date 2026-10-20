@@ -220,6 +220,37 @@ test('branded private build records artifact identity without claiming Windows o
   assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
 });
 
+test('private installer download matches the build snapshot without granting public release approval', async () => {
+  const load = async (file) =>
+    JSON.parse(await readFile(new URL(`../docs/operations/${file}`, import.meta.url), 'utf8'));
+  const release = await load('windows-private-release.json');
+  const build = await load('windows-branded-build.json');
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  assert.equal(release.repository, 'kevindemara/PDFrig');
+  assert.equal(release.repositoryPrivateAtUploadAndVerification, true);
+  assert.equal(release.publicReleaseApproved, false);
+  assert.equal(release.prerelease, true);
+  assert.equal(release.draft, false);
+  assert.equal(release.installedAppTested, false);
+  assert.equal(release.authenticode, 'NotSigned');
+  assert.equal(release.downloadedArtifactHashVerified, true);
+  assert.equal(release.uploadedChecksumListingVerified, true);
+  assert.equal(release.assetName, build.installerFilename);
+  assert.equal(release.assetBytes, build.installerBytes);
+  assert.equal(release.assetSha256, build.installerSha256);
+  assert.equal(release.executableSourceCommit, build.sourceCommit);
+  assert.equal(release.version, build.version);
+  assert.equal(
+    release.downloadUrl,
+    `https://github.com/${release.repository}/releases/download/${release.tag}/PDFrig-setup.exe`,
+  );
+  assert.ok(readme.includes(release.downloadUrl));
+  assert.ok(readme.includes(release.releaseUrl));
+  assert.ok(release.assets.includes('SHA256SUMS.txt'));
+  assert.ok(release.assets.includes('windows-branded-build.json'));
+  assert.ok(release.assets.every((name) => !name.endsWith('.key')));
+});
+
 test('notice review accounts for every remaining group without treating texts as legal clearance', async () => {
   const load = async (file) =>
     JSON.parse(await readFile(new URL(`../docs/${file}`, import.meta.url), 'utf8'));
