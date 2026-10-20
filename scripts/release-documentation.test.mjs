@@ -150,7 +150,7 @@ test('Windows download routes put finished-app installation before optional sour
   );
 });
 
-test('public-facing installer instructions use the exact published asset, checksum and visibility caveat', async () => {
+test('public-facing installer instructions use the exact published asset, checksum and anonymous access evidence', async () => {
   const readme = (await readFile(new URL('../README.md', import.meta.url), 'utf8')).replace(
     /\s+/gu,
     ' ',
@@ -170,14 +170,91 @@ test('public-facing installer instructions use the exact published asset, checks
   assert.ok(windows.includes(release.version));
   assert.ok(windows.includes(release.downloadUrl.replace('PDFrig-setup.exe', 'SHA256SUMS.txt')));
   assert.ok(windows.includes('You do not need to build the app.'));
-  assert.ok(
-    windows.includes('Anonymous download access cannot be verified until the repository is public'),
-  );
-  assert.ok(windows.includes('not a draft'));
+  assert.ok(windows.includes('No GitHub sign-in is required'));
+  assert.doesNotMatch(windows, /repository may still be private|cannot be verified until/iu);
   assert.ok(windows.includes('unsigned alpha release'));
   assert.equal(release.draft, false);
   assert.equal(release.prerelease, true);
   assert.doesNotMatch(windows, /releases\/latest\/download/u);
+  const access = JSON.parse(
+    await readFile(
+      new URL('../docs/operations/public-access-verification.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  assert.equal(access.visibility, 'public');
+  assert.equal(access.visibilityChangedByThisCheck, false);
+  assert.equal(access.authenticationUsed, false);
+  assert.equal(access.cookiesUsed, false);
+  for (const key of ['repositoryPageStatus', 'readmeStatus', 'logoStatus'])
+    assert.equal(access[key], 200);
+  assert.equal(access.installer.status, 200);
+  assert.equal(access.installer.releaseDraft, false);
+  assert.equal(access.installer.url, release.downloadUrl);
+  assert.equal(access.installer.bytes, release.assetBytes);
+  assert.equal(access.installer.sha256, release.assetSha256);
+  assert.equal(access.installer.checksumListingMatched, true);
+  assert.equal(access.securityOrBillingSettingsChanged, false);
+  const images = JSON.parse(
+    await readFile(new URL('../docs/screenshots/manifest.json', import.meta.url), 'utf8'),
+  ).images;
+  assert.deepEqual(
+    access.screenshots.map((image) => ({
+      filename: image.path.split('/').at(-1),
+      sha256: image.sha256,
+    })),
+    images.map((image) => ({ filename: image.filename, sha256: image.sha256 })),
+  );
+  assert.ok(access.screenshots.every((image) => image.status === 200));
+});
+
+test('AI Builder setup prompt defaults to browser setup with real commands and scoped permissions', async () => {
+  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+  const guide = (await load('SETUP_WITH_AI.txt')).replace(/\r\n/gu, '\n');
+  const normalized = guide.replace(/\s+/gu, ' ');
+  const readme = await load('README.md');
+  const pkg = JSON.parse(await load('package.json'));
+  const web = JSON.parse(await load('apps/web/package.json'));
+  assert.ok(normalized.includes(`Node ${(await load('.nvmrc')).trim()}`));
+  assert.ok(normalized.includes(`pnpm ${pkg.packageManager.replace('pnpm@', '')}`));
+  assert.ok(guide.includes('BEGIN SETUP PROMPT\n'));
+  assert.ok(guide.endsWith('END SETUP PROMPT\n'));
+  assert.ok(normalized.includes('Default to the recommended browser version'));
+  assert.ok(
+    normalized.includes('Carry out the permitted setup steps instead of only describing commands'),
+  );
+  assert.ok(normalized.includes('Before installing or building, check for an active server'));
+  const commands = [...guide.matchAll(/^ {2}(pnpm .+)$/gmu)].map((match) => match[1]);
+  assert.deepEqual(commands, [
+    'pnpm install --frozen-lockfile',
+    'pnpm build:packages',
+    'pnpm --filter @pdfmason/web build',
+    'pnpm web:dev',
+  ]);
+  assert.ok(pkg.scripts['build:packages']);
+  assert.ok(pkg.scripts['web:dev']);
+  assert.ok(web.scripts.build);
+  assert.ok(web.scripts.dev.includes('--hostname 127.0.0.1'));
+  for (const boundary of [
+    'ask before installing or changing tools',
+    'check $LASTEXITCODE immediately',
+    'Do not kill an unrelated process',
+    'Do not use 0.0.0.0, tunnels or public hosting',
+    'NOT TESTED',
+    'ONLY if I explicitly request it',
+    'Stop at Windows Application Control',
+    'No purchases, billing changes',
+    'Do not commit installers, build caches, credentials',
+    'Ask when new authority is required',
+  ])
+    assert.ok(normalized.includes(boundary), boundary);
+  assert.ok(readme.includes('](SETUP_WITH_AI.txt)'));
+  assert.ok(
+    readme.includes('https://raw.githubusercontent.com/kevindemara/PDFrig/main/SETUP_WITH_AI.txt'),
+  );
+  assert.ok(readme.indexOf('SETUP_WITH_AI.txt') < readme.indexOf('### Open, edit and export'));
+  assert.ok(guide.includes('BUILD_WITH_AI.txt'));
+  assert.doesNotMatch(guide, /--no-verify|--dangerously|--skip|ExecutionPolicy Bypass/iu);
 });
 
 test('publication audit keeps privacy findings separate from source-license and release approval', async () => {

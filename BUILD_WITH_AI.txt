@@ -13,8 +13,8 @@ prompt does not grant rights to third-party material or waive release gates.
 HOW TO USE
 
 1. Prefer a clean Git clone of https://github.com/kevindemara/PDFrig.git in an
-   unused directory. Repository access is required while it is private. Sign in
-   normally; never paste access tokens into a chat. If Git is not installed, ask
+   unused directory. This repository is public; no GitHub sign-in is required.
+   Never paste access tokens into a chat. If Git is not installed, ask
    the assistant to inspect prerequisites and propose official free installers.
 2. Open the checkout folder in any coding assistant with local file/terminal
    access. A chat-only assistant can guide you but cannot build on your PC itself.

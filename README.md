@@ -16,7 +16,8 @@ reviews are still in progress; this is not a security-certified release. See
 [important limitations](#important-limitations) and [License](#license).
 
 [Browser setup](#quick-start) · [Windows download](#install-the-finished-windows-app) ·
-[Features](#what-works-today) · [Self-hosting](#self-hosting) · [Build from source](#build-from-source)
+[AI-assisted setup](#set-up-with-an-ai-assistant) · [Features](#what-works-today) ·
+[Self-hosting](#self-hosting) · [Build from source](#build-from-source)
 
 ## Quick start
 
@@ -44,6 +45,22 @@ No credentials or paid services are needed. Initial installation requires intern
 access for dependencies and verified English/French OCR models. After preparation,
 local OCR uses bundled assets, not a runtime CDN or document upload. Never disable
 asset integrity checks to work around a failed download.
+
+### Set up with an AI assistant
+
+Prefer to have a coding assistant handle setup? Open
+[**SETUP_WITH_AI.txt — AI Builder prompt**](SETUP_WITH_AI.txt)
+([plain text](https://raw.githubusercontent.com/kevindemara/PDFrig/main/SETUP_WITH_AI.txt)),
+copy the section between **BEGIN SETUP PROMPT** and **END SETUP PROMPT**, and paste
+it into Codex or another coding assistant with local file and terminal access.
+
+The prompt asks it to inspect your machine, install locked dependencies, build
+the browser app, start a loopback-only server and verify the editor. It defaults
+to the browser version; Windows installer source builds are a separate option.
+You review prerequisite installations and any changes requiring permission.
+A chat-only AI cannot run commands on your PC, and no assistant can guarantee
+setup success or override device security. PDFrig requires no AI API key;
+your chosen assistant's own usage terms are separate.
 
 ### Open, edit and export
 
@@ -132,10 +149,10 @@ verifies download integrity, not a trusted publisher. No paid code-signing
 certificate is required for this test build. If installation is blocked, use the
 local browser version instead.
 
-If GitHub shows **404 / Not Found**, the repository may still be private; downloads
-then require signing in with repository access. The linked release is published,
-not a draft. Anonymous download access cannot be verified until the repository
-is public.
+The repository and linked release are public. **No GitHub sign-in is required**
+to view the README/screenshots or download the installer and checksum file.
+If a direct download fails, open the linked release page and select its asset;
+do not bypass browser or Windows security warnings.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
 the tracked source files. See the [build evidence](docs/operations/windows-save-race-build.json)
@@ -182,6 +199,7 @@ helps a coding assistant inspect prerequisites, run locked tests, build an inter
 QA installer and report its checksum. It is not an executable, automatic installer
 or AI feature in PDFrig. Users downloading a finished installer do not need this file.
 Building with an assistant does not remove licensing, security or testing obligations.
+For ordinary browser setup instead, use [SETUP_WITH_AI.txt](SETUP_WITH_AI.txt).
 
 ### Internal installer testing
 

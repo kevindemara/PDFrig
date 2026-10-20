@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "repository": "kevindemara/PDFrig",
+  "visibility": "public",
+  "visibilityChangedByThisCheck": false,
+  "authenticationUsed": false,
+  "cookiesUsed": false,
+  "method": "Fresh HTTPS GET requests with only User-Agent and Accept headers, credentials omitted and explicit HTTPS GitHub-host redirects. No gh authentication, browser profile, access token or cookie jar used for these checks.",
+  "repositoryPageStatus": 200,
+  "readmeStatus": 200,
+  "logoStatus": 200,
+  "screenshots": [
+    {
+      "path": "docs/screenshots/workspace.png",
+      "status": 200,
+      "sha256": "0e01d12dfd9e60fac38bc051cfdedc5ea3de8a5208aa0692b9555e16e2513299"
+    },
+    {
+      "path": "docs/screenshots/local-tools.png",
+      "status": 200,
+      "sha256": "84fc61a195ce918d81b87384f8020d1db6cd0e1ad6b18fb11b42c0f1024f8820"
+    }
+  ],
+  "screenshotPngSignaturesAndManifestHashesMatched": true,
+  "installer": {
+    "url": "https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/PDFrig-setup.exe",
+    "releaseDraft": false,
+    "status": 200,
+    "redirects": 1,
+    "bytes": 15990280,
+    "sha256": "da0b73340607098bc4f470ed2bb61381fa1df731587f57a3ac0e6839c655aa95",
+    "checksumFileStatus": 200,
+    "checksumListingMatched": true
+  },
+  "scope": "Point-in-time anonymous HTTP access and byte-integrity verification, not a native OCR security review, Windows trust/SmartScreen approval, dependency licence clearance or public-distribution certification. URLs may change availability later.",
+  "securityOrBillingSettingsChanged": false
+}
