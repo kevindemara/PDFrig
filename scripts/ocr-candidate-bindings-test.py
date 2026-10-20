@@ -2,7 +2,8 @@
 import unittest
 from ocr_candidate_bindings import (FIELDS, INPUT_APIS, RENDERER_APIS, MODEL_APIS,
                                     GUARDED_INIT, GUARDED_INIT3, patch_bindings, patch_input_apis,
-                                    patch_renderer_apis, patch_model_apis)
+                                    patch_renderer_apis, patch_model_apis, OUTPUT_APIS,
+                                    RETAINED_OUTPUT_APIS, patch_output_apis)
 
 
 def fixture():
@@ -138,6 +139,44 @@ class ModelApiContract(unittest.TestCase):
                         patch_model_apis(source)[0]]:
             with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_MODEL_API_DRIFT'):
                 patch_model_apis(altered)
+
+
+def output_fixture():
+    return '\n\n'.join(f'{result} EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_{name}'
+                       f'({parameters}) {{\n  {body}\n}}'
+                       for name, (result, parameters, body) in
+                       {**OUTPUT_APIS, **RETAINED_OUTPUT_APIS}.items())
+
+
+class OutputApiContract(unittest.TestCase):
+    def test_eleven_raw_outputs_refused_and_worker_outputs_retained(self):
+        patched, denied = patch_output_apis(output_fixture())
+        self.assertEqual(len(denied), 11)
+        self.assertEqual(len(set(denied)), 11)
+        self.assertEqual(patched.count('abort();'), 11)
+        self.assertEqual(patched.count('self->'), 4)
+        for _, _, body in RETAINED_OUTPUT_APIS.values():
+            self.assertIn(body, patched)
+
+    def test_each_body_signature_and_missing_symbol_refused(self):
+        source = output_fixture()
+        for name, (result, parameters, body) in {**OUTPUT_APIS, **RETAINED_OUTPUT_APIS}.items():
+            for altered in [source.replace(body, 'changed;', 1),
+                            source.replace(f'{name}({parameters})', f'{name}(Other* self)', 1),
+                            source.replace(f'{result} EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_{name}',
+                                           'removed', 1)]:
+                with self.subTest(name=name), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_OUTPUT_API_DRIFT'):
+                    patch_output_apis(altered)
+
+    def test_new_overloads_duplicates_and_reapplication_refused(self):
+        source = output_fixture()
+        for altered in [source + source, patch_output_apis(source)[0],
+                        source + '\nPix* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_GetNew_0() {\n}\n',
+                        source + '\nPixa* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_GetNew_0() {\n}\n',
+                        source + '\nMutableIterator* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_GetNew_0() {\n}\n',
+                        source + '\nPageIterator* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_AnalyseLayout_2() {\n}\n']:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_OUTPUT_API_DRIFT'):
+                patch_output_apis(altered)
 
 
 if __name__ == '__main__':

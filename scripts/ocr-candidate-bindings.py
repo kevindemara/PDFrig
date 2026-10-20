@@ -82,6 +82,58 @@ GUARDED_INIT3 = ('int EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_Init_3'
                  '(TessBaseAPI* self, const char* datapath, const char* language, OcrEngineMode oem) {\n'
                  '  return self->Init(datapath, language, oem);\n}')
 
+# The worker uses JSON/UTF8 results, not native component/image ownership.
+# Retain AnalyseLayout: the worker's layout-only path does call it.
+OUTPUT_APIS = {
+    'GetInputImage_0': ('Pix*', 'TessBaseAPI* self', 'return self->GetInputImage();'),
+    'GetThresholdedImage_0': ('Pix*', 'TessBaseAPI* self', 'return self->GetThresholdedImage();'),
+    'GetRegions_1': ('Boxa*', 'TessBaseAPI* self, PixaPtr* pixa', 'return self->GetRegions(pixa);'),
+    'GetTextlines_2': ('Boxa*', 'TessBaseAPI* self, PixaPtr* raw_image, LongStarPtr* raw_padding',
+                       'return self->GetTextlines(raw_image, raw_padding);'),
+    'GetTextlines_5': ('Boxa*', 'TessBaseAPI* self, const bool raw_image, const int raw_padding, '
+                       'PixaPtr* pixa, LongStarPtr* blockids, LongStarPtr* paraids',
+                       'return self->GetTextlines(raw_image, raw_padding, pixa, blockids, paraids);'),
+    'GetStrips_2': ('Boxa*', 'TessBaseAPI* self, PixaPtr* pixa, LongStarPtr* blockids',
+                    'return self->GetStrips(pixa, blockids);'),
+    'GetWords_1': ('Boxa*', 'TessBaseAPI* self, PixaPtr* pixa', 'return self->GetWords(pixa);'),
+    'GetConnectedComponents_1': ('Boxa*', 'TessBaseAPI* self, PixaPtr* cc',
+                                 'return self->GetConnectedComponents(cc);'),
+    'GetComponentImages_4': ('Boxa*', 'TessBaseAPI* self, const PageIteratorLevel level, '
+                             'const bool text_only, PixaPtr* raw_image, LongStarPtr* raw_padding',
+                             'return self->GetComponentImages(level, text_only, raw_image, raw_padding);'),
+    'GetComponentImages_7': ('Boxa*', 'TessBaseAPI* self, const PageIteratorLevel level, '
+                             'const bool text_only, const bool raw_image, const int raw_padding, '
+                             'PixaPtr* pixa, LongStarPtr* blockids, LongStarPtr* paraids',
+                             'return self->GetComponentImages(level, text_only, raw_image, raw_padding, pixa, blockids, paraids);'),
+    'GetIterator_0': ('ResultIterator*', 'TessBaseAPI* self', 'return self->GetIterator();'),
+}
+RETAINED_OUTPUT_APIS = {
+    'AnalyseLayout_0': ('PageIterator*', 'TessBaseAPI* self', 'return self->AnalyseLayout();'),
+    'AnalyseLayout_1': ('PageIterator*', 'TessBaseAPI* self, bool merge_similar_words',
+                        'return self->AnalyseLayout(merge_similar_words);'),
+    'GetUTF8Text_0': ('char*', 'TessBaseAPI* self', 'return self->GetUTF8Text();'),
+    'GetJSONText_1': ('char*', 'TessBaseAPI* self, int page_number', 'return self->GetJSONText(page_number);'),
+}
+
+
+def patch_output_apis(glue):
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    # Include retained PageIterator and other opaque result types so new raw
+    # component/image/iterator overloads cannot escape this reviewed inventory.
+    inventory = re.findall(r'(?:Pix|Pixa|Box|Boxa|Pta|PixColormap|ResultIterator|MutableIterator|PageIterator)\* EMSCRIPTEN_KEEPALIVE (' +
+                           prefix + r'\w+)\(', glue)
+    expected = [prefix + name for name in OUTPUT_APIS] + [prefix + 'AnalyseLayout_0', prefix + 'AnalyseLayout_1']
+    if sorted(inventory) != sorted(expected):
+        raise RuntimeError('OCR_CANDIDATE_OUTPUT_API_DRIFT')
+    for name, (result, parameters, body) in {**OUTPUT_APIS, **RETAINED_OUTPUT_APIS}.items():
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_OUTPUT_API_DRIFT')
+        if name in OUTPUT_APIS:
+            glue = glue.replace(original, original.replace(body,
+                'abort(); /* PDFrig research: raw component/image output is not supported. */'))
+    return glue, [prefix + name for name in OUTPUT_APIS]
+
 
 def patch_model_apis(glue):
     prefix = 'emscripten_bind_TessBaseAPI_'

@@ -58,7 +58,8 @@
     "record": "ocr-minimal-candidate.json",
     "additionalDeniedRendererBindings": 9,
     "additionalDeniedModelBindings": 3,
-    "scope": "Exact optional native PDF-renderer signatures/bodies and three unused model/config entry points abort in the research candidate before argument access. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The current worker requires Init3/4, not Init2 or standalone config reads. No research core is installed into the app."
+    "additionalDeniedRawOutputBindings": 11,
+    "scope": "Exact optional native PDF-renderer signatures/bodies, three unused model/config entries and eleven raw component/image/iterator output getters abort in the research candidate before argument access. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The worker requires Init3/4, AnalyseLayout and JSON/UTF8 text, which remain unchanged. No research core is installed into the app; retained pointer/string ownership and native result allocation still need review."
   },
   "verification": {
     "unitSuites": [
@@ -67,7 +68,10 @@
       "local-ocr-result.test.ts"
     ],
     "browserSuite": "tests/browser/ocr-scans.spec.ts",
-    "runtimesTested": ["pinned application core", "renderer-disabled baseline research candidate"],
+    "runtimesTested": [
+      "pinned application core",
+      "raw-output-restricted baseline research candidate"
+    ],
     "syntheticScanCasesPerRuntime": 4,
     "languages": ["eng", "fra"],
     "layouts": ["portrait", "landscape-crop"],
@@ -86,6 +90,6 @@
     "Exact native fork/API ownership and traineddata/LSTM/PNM parser review and broader native sanitizer/fuzz coverage.",
     "Final candidate source-to-binary integration, notices/security approval and baseline/SIMD performance/platform policy; candidate is not adopted.",
     "Recognition/alignment benchmarks and browser diversity beyond the synthetic Chromium cases; reference Windows WebView2/offline installer testing on an approved host.",
-    "Project licence decision, remaining Windows dependency notice gaps and exact final artifact clearance. No billing or Windows security changes are authorized by this review."
+    "Remaining Windows dependency notice gaps and exact final artifact clearance. The user-approved MIT licence for PDFrig's own code does not clear third-party obligations. No billing or Windows security changes are authorized by this review."
   ]
 }

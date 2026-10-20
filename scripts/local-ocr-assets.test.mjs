@@ -23,6 +23,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.deniedAlternateImageBindingsTested, 6);
   assert.equal(pins.evidence.deniedRendererBindingsTested, 9);
   assert.equal(pins.evidence.deniedModelBindingsTested, 3);
+  assert.equal(pins.evidence.deniedRawOutputBindingsTested, 11);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.equal(
@@ -74,6 +75,7 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('patch_input_apis(glue)'));
   assert.ok(build.includes('patch_renderer_apis(glue)'));
   assert.ok(build.includes('patch_model_apis(glue)'));
+  assert.ok(build.includes('patch_output_apis(glue)'));
   assert.ok(build.includes('patch_model_loader(model_path.read_bytes())'));
   assert.ok(build.includes("'deniedAlternateImageBindings': denied_image_bindings"));
   assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
@@ -87,6 +89,17 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(bindings.includes('OCR_CANDIDATE_IMAGE_API_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_RENDERER_API_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_MODEL_API_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_OUTPUT_API_DRIFT'));
+  const dump = await readFile(path.join(wrapper, 'src/worker-script/utils/dump.js'), 'utf8');
+  const workerEntry = await readFile(path.join(wrapper, 'src/worker-script/index.js'), 'utf8');
+  assert.ok(workerEntry.includes('api.AnalyseLayout()'));
+  assert.ok(dump.includes('api.GetJSONText()'));
+  assert.ok(dump.includes('api.GetUTF8Text()'));
+  // Fail review if the pinned worker starts relying on a newly refused export.
+  for (const name of pins.apiSecurityReview.rawComponentOutputs.deniedBindings) {
+    const method = name.replace(/_\d+$/u, '');
+    assert.ok(!dump.includes(`api.${method}(`) && !workerEntry.includes(`api.${method}(`));
+  }
 });
 
 test('OCR-001 native model directory is hash-bound, bounded and independently exercised', async () => {

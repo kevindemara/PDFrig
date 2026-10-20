@@ -58,7 +58,7 @@ assert.equal(coreBytes.length, pins.evidence.bytes);
 assert.equal(receipt.leptonicaPrivateLayouts, false);
 assert.equal(
   receipt.modifiedGlueSha256,
-  'a1b80dfa129a2d0a703a7f031bcc781ddd52e3e33e140ae52e909086edd49eac',
+  'ff43f4d087fa32864cf6eef8aef86bc0c4b0dba7b68566be024aec904a360906',
 );
 assert.equal(
   receipt.modifiedModelLoaderSha256,
@@ -132,6 +132,31 @@ for (const name of modelBindings) {
   for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
   assert.throws(
     () => isolated[`_${name}`](ownedApi.ptr, pointer, pointer, 1),
+    WebAssembly.RuntimeError,
+  );
+}
+const outputBindings = [
+  'GetInputImage_0',
+  'GetThresholdedImage_0',
+  'GetRegions_1',
+  'GetTextlines_2',
+  'GetTextlines_5',
+  'GetStrips_2',
+  'GetWords_1',
+  'GetConnectedComponents_1',
+  'GetComponentImages_4',
+  'GetComponentImages_7',
+  'GetIterator_0',
+].map((name) => `emscripten_bind_TessBaseAPI_${name}`);
+assert.deepEqual(receipt.deniedRawOutputBindings, outputBindings);
+for (const name of outputBindings) {
+  const isolated = await factory({ printErr: () => undefined });
+  const ownedApi = new isolated.TessBaseAPI();
+  const pointer = isolated._malloc(128);
+  assert.ok(ownedApi.ptr > 0 && pointer > 0);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(
+    () => isolated[`_${name}`](ownedApi.ptr, pointer, pointer, pointer, pointer, pointer, pointer),
     WebAssembly.RuntimeError,
   );
 }
@@ -212,8 +237,8 @@ try {
     return api.SetImageFile(exif, angle);
   };
   assert.equal(setImage(valid), 0);
-  assert.equal(api.GetInputImage().get_w(), 3);
-  assert.equal(api.GetInputImage().get_h(), 2);
+  // Raw Pix output is deliberately unavailable. Successful admission is checked
+  // here; actual recognition and bounding boxes are checked through worker JSON.
   const reject = (bytes, exif = 1, angle = 0) => {
     assert.equal(setImage(bytes, exif, angle), 1);
     rejectedImages++;
@@ -394,6 +419,7 @@ try {
     deniedAlternateImageBindingsTested: imageBindings.length,
     deniedRendererBindingsTested: rendererBindings.length,
     deniedModelBindingsTested: modelBindings.length,
+    deniedRawOutputBindingsTested: outputBindings.length,
     nativeModelPreflightTests: receipt.nativeModelPreflightTests,
     actualModelDirectoryCases: modelDirectoryCases,
     pinnedModelDirectoriesAdmitted: 2,

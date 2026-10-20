@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 import tarfile
-from ocr_candidate_bindings import patch_bindings, patch_input_apis, patch_renderer_apis, patch_model_apis, selftest_source
+from ocr_candidate_bindings import patch_bindings, patch_input_apis, patch_renderer_apis, patch_model_apis, patch_output_apis, selftest_source
 from ocr_candidate_recode import patch_recodebeam, test_backport
 from ocr_candidate_p6 import patch_baseapi, test_preflight
 from ocr_candidate_model import patch_model_loader, test_model_directory
@@ -92,6 +92,7 @@ glue, denied_bindings = patch_bindings(glue)
 glue, denied_image_bindings = patch_input_apis(glue)
 glue, denied_renderer_bindings = patch_renderer_apis(glue)
 glue, denied_model_bindings = patch_model_apis(glue)
+glue, denied_output_bindings = patch_output_apis(glue)
 for unavailable in ['self->ClearAdaptiveClassifier();',
                     'return self->GetOsdText(page_number);',
                     'return self->DetectOS(osr);', 'self->print_scores();']:
@@ -154,6 +155,7 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'deniedAlternateImageBindings': denied_image_bindings,
           'deniedRendererBindings': denied_renderer_bindings,
           'deniedModelBindings': denied_model_bindings,
+          'deniedRawOutputBindings': denied_output_bindings,
           'publicApiSelftestCycles': 100,
           'disabledCodecMacros': disabled,
           'linkedApplicationArchives': sorted(Path(archive).name for archive in archives),
