@@ -949,7 +949,7 @@ button:disabled {
   display: grid;
   align-items: center;
   gap: 1rem;
-  grid-template-columns: 210px minmax(160px, 1fr) auto auto auto auto auto;
+  grid-template-columns: 180px minmax(120px, 1fr) auto auto auto auto auto auto;
   border-bottom: 1px solid var(--border-default);
   padding: 0 1rem;
   background: #ffffff;
@@ -957,11 +957,16 @@ button:disabled {
 
 .document-status {
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   justify-self: center;
   text-align: center;
 }
 
 .document-status strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.82rem;
 }
 
@@ -1794,10 +1799,12 @@ button:disabled {
   font-size: 0.76rem;
 }
 
-.topbar-print {
+.topbar-print,
+.topbar-all-tools {
   min-height: 38px;
   padding: 0.55rem 0.8rem;
   font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .panel-empty-copy--spaced {
@@ -4314,7 +4321,7 @@ button:disabled {
   }
 
   .app-topbar {
-    grid-template-columns: 180px 1fr auto auto auto auto;
+    grid-template-columns: 150px minmax(100px, 1fr) auto auto auto auto auto;
   }
 
   .history-actions {
@@ -4398,8 +4405,19 @@ button:disabled {
   }
 
   .app-topbar {
-    grid-template-columns: 1fr auto auto auto;
-    padding: 0 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  .app-topbar > .brand-link {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .app-topbar .brand-lockup__image {
+    width: 110px;
   }
 
   .document-status,
@@ -4556,7 +4574,8 @@ button:disabled {
 
 @media (max-width: 520px) {
   .topbar-print,
-  .topbar-export {
+  .topbar-export,
+  .topbar-all-tools {
     padding-inline: 0.55rem;
     font-size: 0.68rem;
   }

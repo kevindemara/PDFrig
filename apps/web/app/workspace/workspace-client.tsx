@@ -36,5 +36,6 @@ export const WorkspaceClient = () => (
     redactionEnabled={config.utilityFeatures.redaction}
     stampsEnabled={config.utilityFeatures.stamps}
     surface="Web"
+    toolsHref="/tools"
   />
 );

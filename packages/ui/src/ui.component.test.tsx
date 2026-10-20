@@ -20,6 +20,29 @@ import {
 } from './index.js';
 
 describe('shared application shell', () => {
+  it.each([
+    ['Web', '/tools'],
+    ['Windows', '#tools'],
+  ] as const)(
+    'VIEW-001 exposes All tools on %s and uses its host-local route',
+    (surface, toolsHref) => {
+      const assign = vi.spyOn(globalThis.location, 'assign').mockImplementation(() => undefined);
+      const confirm = vi.fn().mockReturnValue(false);
+      vi.stubGlobal('confirm', confirm);
+      try {
+        render(<WorkspaceShell surface={surface} toolsHref={toolsHref} />);
+        const tools = screen.getByRole('button', { name: /^All tools$/u });
+        expect(tools).toBeEnabled();
+        fireEvent.click(tools);
+        expect(assign).toHaveBeenCalledExactlyOnceWith(toolsHref);
+        expect(confirm).not.toHaveBeenCalled();
+      } finally {
+        assign.mockRestore();
+        vi.unstubAllGlobals();
+      }
+    },
+  );
+
   it('shows a developer GitHub credit separately from document status', () => {
     render(<WorkspaceShell surface="Web" />);
     const footer = screen.getByRole('contentinfo');
@@ -60,6 +83,10 @@ describe('shared application shell', () => {
       expect(input.disabled).toBe(true);
     const open = container.querySelector<HTMLButtonElement>('button[title="Open PDF"]');
     expect(open?.disabled).toBe(true);
+    expect(
+      [...container.querySelectorAll('button')].find((button) => button.textContent === 'All tools')
+        ?.disabled,
+    ).toBe(true);
     const view = render(<WorkspaceShell surface="Web" />);
     expect(view.getByLabelText('Open PDF')).toBeEnabled();
     expect(view.getByRole('button', { name: 'Choose a PDF' })).toBeEnabled();

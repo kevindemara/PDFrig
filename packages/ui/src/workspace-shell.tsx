@@ -96,6 +96,7 @@ import { TextOverlay } from './text-overlay.js';
 import { PdfTextLayer } from './pdf-text-layer.js';
 import { fitPageScale } from './page-fit.js';
 import { ScriptSignaturePreview } from './script-signature-preview.js';
+import { confirmWorkspaceNavigation, hasUnsavedWorkspaceWork } from './workspace-navigation.js';
 
 export interface WorkspaceShellProps {
   readonly accountControl?: ReactNode;
@@ -108,6 +109,7 @@ export interface WorkspaceShellProps {
   readonly printAdapter?: PrintAdapter;
   readonly redactionEnabled?: boolean;
   readonly stampsEnabled?: boolean;
+  readonly toolsHref?: string;
   readonly surface: 'Web' | 'Windows';
 }
 
@@ -1663,6 +1665,7 @@ export const WorkspaceShell = ({
   printAdapter,
   redactionEnabled = false,
   stampsEnabled = false,
+  toolsHref = '/tools',
   surface,
 }: WorkspaceShellProps) => {
   const hydrated = useSyncExternalStore(
@@ -2241,11 +2244,15 @@ export const WorkspaceShell = ({
     }
   };
 
+  const canLeaveWorkspace = (): boolean =>
+    confirmWorkspaceNavigation(
+      hasUnsavedWorkspaceWork(sessionRef.current?.snapshot(), redactionMarks.length),
+      (message) => globalThis.confirm(message),
+    );
+
   const canReplaceWorkspace = (): boolean =>
     !(
-      (sessionRef.current?.snapshot().exported === false ||
-        redactionMarks.length > 0 ||
-        (sessionRef.current?.snapshot().state.measurements.length ?? 0) > 0) &&
+      hasUnsavedWorkspaceWork(sessionRef.current?.snapshot(), redactionMarks.length) &&
       !globalThis.confirm(
         'Starting another PDF clears working changes, removal marks, and session-only measurement guides. Your original file is unchanged. Continue?',
       )
@@ -3100,7 +3107,14 @@ export const WorkspaceShell = ({
       onDrop={hydrated && desktopAccess === 'ready' ? onDrop : undefined}
     >
       <header className="app-topbar">
-        <a aria-label="Back to PDFrig home" className="brand-link" href={marketingHref}>
+        <a
+          aria-label="Back to PDFrig home"
+          className="brand-link"
+          href={marketingHref}
+          onClick={(event) => {
+            if (!canLeaveWorkspace()) event.preventDefault();
+          }}
+        >
           <BrandLockup compact />
         </a>
         <div className="document-status" aria-label="Document status">
@@ -3131,6 +3145,16 @@ export const WorkspaceShell = ({
             Redo
           </button>
         </div>
+        <button
+          className="button button--secondary topbar-all-tools"
+          disabled={!hydrated || loading}
+          onClick={() => {
+            if (canLeaveWorkspace()) globalThis.location.assign(toolsHref);
+          }}
+          type="button"
+        >
+          All tools
+        </button>
         <span className="foundation-badge">{surface} · Local workspace</span>
         {accountControl}
         <button

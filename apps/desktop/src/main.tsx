@@ -85,6 +85,7 @@ const DesktopRoot = () => {
       redactionEnabled={import.meta.env.VITE_PDFMASON_REDACTION_ENABLED === 'true'}
       stampsEnabled={import.meta.env.DEV || import.meta.env.VITE_PDFMASON_STAMPS_ENABLED === 'true'}
       surface="Windows"
+      toolsHref="#tools"
     />
   );
 };

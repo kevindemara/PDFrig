@@ -60,6 +60,13 @@ asset integrity checks to work around a failed download.
 text. Dismissing a notice does not grant permissions or bypass export checks.
 Unsaved work is session-only, so export before closing the tab or restarting.
 
+Choose **All tools** in the editor's top bar to open the utilities screen in either
+the browser or Windows app. If you have unexported edits, unapplied redaction marks
+or session-only measurement guides, a confirmation appears before switching.
+Choose **Cancel** to stay and export first, or **OK** to leave and discard that
+session work. The logo shortcut uses the same warning; original and previously
+exported PDFs are not changed.
+
 ### Troubleshooting
 
 - **Port already in use:** stop your own previous server, or choose another
