@@ -93,20 +93,22 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-1/PDFrig-setup.exe)
-— Windows x64, version `0.1.0-alpha.20261020.1`.
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/PDFrig-setup.exe)
+— Windows x64, version `0.1.0-alpha.20261020.2`.
 
-The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-1)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2)
 includes the installer, `SHA256SUMS.txt`, notices and the build record. While the
 repository is private, sign in to GitHub with repository access to download it.
 
 This is an **unsigned alpha release**.
 This installer passed a same-machine upgrade, script signature preview/drag/resize,
-native Save As, and local English OCR with reviewed apply. Independent readers
+native Save As (including cancellation and a new Unicode filename), and local English OCR with reviewed apply. Independent readers
 verified signature text and its unchanged embedded font. The scanned-page export
 is searchable and renders byte-for-byte identically to the original at 144 DPI.
 Its exact payload contains none of the four previously flagged Windows npm inputs.
 This is not clean-machine, offline OCR, uninstall or general security certification.
+It fixes a rare competing-writer overwrite race in the previous Windows build;
+use this replacement instead of `0.1.0-alpha.20261020.1`.
 Windows compliance is not certified. Outstanding licensing and security reviews
 are described below.
 A successful installation and use on a second Windows PC has been reported for
@@ -135,10 +137,13 @@ certificate is required for this test build. If installation is blocked, use the
 local browser version instead.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [build evidence](docs/operations/windows-license-audit-build.json)
-and [download verification](docs/operations/windows-license-audit-release.json) for exact
+the tracked source files. See the [build evidence](docs/operations/windows-save-race-build.json)
+and [download verification](docs/operations/windows-save-race-release.json) for exact
 artifact hashes and test limits. These are historical build/test records, not
 security certification or a complete license review.
+Earlier [build](docs/operations/windows-license-audit-build.json) and
+[download](docs/operations/windows-license-audit-release.json) records are retained for audit history,
+not as recommendations to install an older build.
 For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
 ### Upgrade and uninstall

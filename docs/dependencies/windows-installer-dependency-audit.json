@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reviewDate": "2026-10-20",
   "publicReleaseApproved": false,
-  "scope": "Hash-specific inspections of old v6 and replacement v20261020.1 installers; not a universal PE detector, native-source attestation, full security review or licence grant.",
+  "scope": "Hash-specific inspections of old v6 and replacements v20261020.1/v20261020.2; not a universal PE detector, native-source attestation, full security review or licence grant.",
   "inspection": {
     "tool": "7-Zip 26.04 standalone Linux audit tool, not shipped with PDFrig",
     "archiveSha256": "fc0327ba27e89bd086cf426dff17d77de582953cdbbc10a6576540a06853ffcd",
@@ -882,6 +882,425 @@
         "mitLicenseBundled": true,
         "licensesCleared": false,
         "scope": "Three dependencies eliminated and optional Canvas absent from this exact payload and asset table; no missing licence grant invented. Full conservative graph retains 24 other-platform and one excluded optional npm notice gap. Native OCR/WebView2/platform/security approval remains separate.",
+        "htmlTransformation": "All 27 non-HTML embedded assets match the exact build output byte-for-byte. index.html has the expected Tauri parse/reserialization changes (doctype/whitespace/empty attributes); title, scripts, stylesheet and root element are unchanged. No extra remote URL or script was added."
+      }
+    },
+    {
+      "id": "private-test-20261020-2",
+      "installer": {
+        "bytes": 15990280,
+        "sha256": "da0b73340607098bc4f470ed2bb61381fa1df731587f57a3ac0e6839c655aa95",
+        "sourceCommit": "0f49fc67a645f412280787ae65881b1aaf0bc516"
+      },
+      "payload": [
+        {
+          "path": "$PLUGINSDIR/modern-wizard.bmp",
+          "bytes": 26494,
+          "sha256": "3ad2dc318056d0a2024af1804ea741146cfc18cc404649a44610cbf8b2056cf2"
+        },
+        {
+          "path": "$PLUGINSDIR/nsDialogs.dll",
+          "bytes": 9728,
+          "sha256": "b1350f487692057c8ffde75dcc55287a52a3272240d4d4912f24464b27551fc0"
+        },
+        {
+          "path": "$PLUGINSDIR/NSISdl.dll",
+          "bytes": 15360,
+          "sha256": "ddf40229dd9d6b268902d8dea88c8a04aacf1af218dd29f6dcd35babc54ac08d"
+        },
+        {
+          "path": "$PLUGINSDIR/nsis_tauri_utils.dll",
+          "bytes": 34304,
+          "sha256": "5ba143b5db4a87d32d6e7802e033330aae56cbceabe0d1e3ba41948385ad4709"
+        },
+        {
+          "path": "$PLUGINSDIR/StartMenu.dll",
+          "bytes": 7680,
+          "sha256": "fe330320459637d8dd2b5d84d07925c38ec264152ffd3b1760a4d44d76536caa"
+        },
+        {
+          "path": "$PLUGINSDIR/System.dll",
+          "bytes": 12288,
+          "sha256": "8b4c47c4cf5e76ec57dd5a050d5acd832a0d532ee875d7b44f6cdaf68f90d37c"
+        },
+        {
+          "path": "licenses/PDFrig-LICENSE.txt",
+          "bytes": 1069,
+          "sha256": "8a753bd1af90dbf9a7756f5e73d372ebac08ec070b7d0033e053336babdc9eb4"
+        },
+        {
+          "path": "licenses/THIRD_PARTY_NOTICES.txt",
+          "bytes": 10033,
+          "sha256": "a0941827a0d0d85a83ea25b0f75a2b15cbf4e27315ffc674ba295bf2b61d324f"
+        },
+        {
+          "path": "licenses/UPSTREAM-LICENSE-TEXTS.txt",
+          "bytes": 4401368,
+          "sha256": "a4ff672aea8506de5a695039a31bdd7aad48a376505e2cab0937dc3a2d1d673b"
+        },
+        {
+          "path": "pdfmason-desktop.exe",
+          "bytes": 25672192,
+          "sha256": "e550a334401b48edf20d7cd579a859ebd179dc1d840b5532c1a8a9417c67d92d"
+        },
+        {
+          "path": "uninstall.exe",
+          "bytes": 70508,
+          "sha256": "8272f3d3f40d462a61bcd5992d1fc0f671b6991639b8fea618f5fe685ee61060"
+        }
+      ],
+      "executable": {
+        "bytes": 25672192,
+        "sha256": "e550a334401b48edf20d7cd579a859ebd179dc1d840b5532c1a8a9417c67d92d",
+        "tableOffset": 22097648,
+        "assets": [
+          {
+            "path": "/assets/signature-font-facts-BcHyuGIz.js",
+            "bytes": 512376,
+            "sha256": "00b1226a218ab5b3512571c7446b5ee757c58597e641ded6630a14df4e7c238a",
+            "encodedBytes": 95835,
+            "encodedSha256": "e083ede37704716215462e17bd74335bbe264fad494d484c4e54daa45069236f"
+          },
+          {
+            "path": "/ocr/worker.min.js.LICENSE.txt",
+            "bytes": 466,
+            "sha256": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac",
+            "encodedBytes": 258,
+            "encodedSha256": "63c5299a75b992d9b746bf7364d366d108094fb0bd9b7a1646d67aeb76d631db"
+          },
+          {
+            "path": "/brand/pdfrig-logo.png",
+            "bytes": 463307,
+            "sha256": "d9b2ca9c129620bf356678cba7fe8ec8760ca1d2a5e88c093e63508c41c8d7d7",
+            "encodedBytes": 363752,
+            "encodedSha256": "419786fb958ec0a6b147b6132901747adf18d59e078b7c62e0544dc388f670cb"
+          },
+          {
+            "path": "/ocr/eng.traineddata",
+            "bytes": 4113088,
+            "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+            "encodedBytes": 1807173,
+            "encodedSha256": "22395498a9a95e2d95289d1d6a056c2fd3f6d32dd2eec7748c29624518b00721"
+          },
+          {
+            "path": "/ocr/fra.traineddata",
+            "bytes": 1130365,
+            "sha256": "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca",
+            "encodedBytes": 576739,
+            "encodedSha256": "a8490695bda4f5c75cdbf582304d2f1a6d99a8f32aa4309e4109a9b8ebf91aa7"
+          },
+          {
+            "path": "/assets/index-C19TgRbt.css",
+            "bytes": 91884,
+            "sha256": "cf77f6b2f838015259d4837f21b34b72ba50335e103f0cdf5823cb6c4896fac4",
+            "encodedBytes": 15973,
+            "encodedSha256": "4825a3c5439c3ac8006bca00bce460b97bdb79dda3ad90efe3c0b69f08f966da"
+          },
+          {
+            "path": "/assets/pdf.worker-CpBb7p4E.js",
+            "bytes": 2972614,
+            "sha256": "add48f15dada951ae252594539541e7100584bb65d7ef4d8cde32eb715b9606c",
+            "encodedBytes": 854532,
+            "encodedSha256": "27f6c1fca1d31071bdeab20bb123f41fe23ac77066109a343c7cab2aedfe0b74"
+          },
+          {
+            "path": "/assets/webpack-B4oZCOtW.js",
+            "bytes": 427490,
+            "sha256": "8a4bcd5d577ca0cdc3f18371a6e246ac0dce2657345150ea0fcf91e42efa3812",
+            "encodedBytes": 113446,
+            "encodedSha256": "2b92ff6f67d8dadde913ff06f389c188dd6ed73fba205b757684f8a4b8a37709"
+          },
+          {
+            "path": "/assets/pdf.worker-QU1oq46D.js.map",
+            "bytes": 3550150,
+            "sha256": "47771e211edb05e411d1c3be3a83509f145cbf3df9e184db8e816f4861c53a1f",
+            "encodedBytes": 638059,
+            "encodedSha256": "cefaf0c335166bb2078caf01c3ce974ed94c02abd9590cab628695405e874dd6"
+          },
+          {
+            "path": "/ocr/NOTICES.txt",
+            "bytes": 78343,
+            "sha256": "1f11bcd02a5e7d6e7fffd7a273b3626d1fae8c3a116d97addd202cdf5c9a7b8a",
+            "encodedBytes": 11149,
+            "encodedSha256": "0aab30ef9e45ee2e8effc87b23098f2d44f176124cf0dff5a22d16c040b8f707"
+          },
+          {
+            "path": "/ocr/tesseract-core-relaxedsimd-lstm.wasm.js",
+            "bytes": 3905767,
+            "sha256": "861a536cf9ef8e63cb644d57bab39c388f37f7d6b6f60024b741c5f6b39a59b3",
+            "encodedBytes": 1276362,
+            "encodedSha256": "0d40155732bb74fd9276c11d2ae59ae1827caa8fff3668a568fca800a5824522"
+          },
+          {
+            "path": "/assets/signature-font-facts-BcHyuGIz.js.map",
+            "bytes": 544617,
+            "sha256": "d5c796cb7796d6231af9a59f4c3f60665994ce290664369d93d33eda5212dc24",
+            "encodedBytes": 99510,
+            "encodedSha256": "df3d0ef4dc956e635d2b304b9234bc8ee092488d9057c6d4d6aa9ae4f57cb2be"
+          },
+          {
+            "path": "/index.html",
+            "bytes": 571,
+            "sha256": "5486ab662d7d0a125ce407f2df6637e9423b4aa254e006677d4be6a0d956d883",
+            "encodedBytes": 247,
+            "encodedSha256": "ee90768d50998d01e43179c8214e51e47f4dc6fbbd7ab6f8cf30b8244604af00"
+          },
+          {
+            "path": "/assets/local-text-worker-Nzf20vg6.js",
+            "bytes": 618308,
+            "sha256": "1025d9db082f590c2b11132998bd4d3deb3853255f1f87cd8bbe4c0e98a9b3ae",
+            "encodedBytes": 231663,
+            "encodedSha256": "f43bebb44843fe78a202f62b62a5dd66f7e275234702d75631d2375bd797fb71"
+          },
+          {
+            "path": "/assets/signature-font-data-CdGJGuXZ.js.map",
+            "bytes": 178729,
+            "sha256": "6e45e3e1a2b595bd33df37bee766bf1fef3073343e0bef3ae03cde7d88c2f43d",
+            "encodedBytes": 86345,
+            "encodedSha256": "b53707bf60292ec82a522942f2889ee519f4681d712f51ff3aae1001fedf4ea7"
+          },
+          {
+            "path": "/assets/local-text-worker-Nzf20vg6.js.map",
+            "bytes": 2283525,
+            "sha256": "edf183f6c63041d0f0462def7510c62773b809c7dcd62760094a86f5925fd9ac",
+            "encodedBytes": 498141,
+            "encodedSha256": "2ea83ae66c62e85b7fb45e1791c68a9492bb8a37c0748c6d92a96e73b87ec550"
+          },
+          {
+            "path": "/assets/signature-font-data-CdGJGuXZ.js",
+            "bytes": 178283,
+            "sha256": "0b35c6804e5e89f93112cf17ce7796bb3130ec376fc89580f4f351273544438c",
+            "encodedBytes": 86012,
+            "encodedSha256": "5ac864434606dc64bb78cc5221e5d827153560c7dc0a9426cb55444c9ec92e63"
+          },
+          {
+            "path": "/assets/index-CvslhA-O.js.map",
+            "bytes": 5416067,
+            "sha256": "b73b240e46cd77ca42b17c16df821faaa4fc7c1f860f6dff3702c4ec3142f74c",
+            "encodedBytes": 965803,
+            "encodedSha256": "fc2441569ee45d4ef64daf4cde73e06b28c5c9a524064aed6989d4e919b7ef3e"
+          },
+          {
+            "path": "/ocr/tesseract-core-simd-lstm.wasm.js",
+            "bytes": 3899472,
+            "sha256": "c58b46a4c796c0b8afccf77591d5b875b6896b45d402bbce8caa6f5362447b38",
+            "encodedBytes": 1275280,
+            "encodedSha256": "6f9e072f2990c9be25938405655d7b8620a3c68dabfcd2dace1fb482fdfaf57c"
+          },
+          {
+            "path": "/third-party/DancingScript-OFL.txt",
+            "bytes": 4443,
+            "sha256": "6f090277c00af96651ce6dbcc38ff1591047a3bffef486e80b6a32e8276a8201",
+            "encodedBytes": 1797,
+            "encodedSha256": "ce9e6168ff54957e35b688bf1ecffd60d2657d72563b7ac9a05cbf973f91e63d"
+          },
+          {
+            "path": "/assets/webpack-B4oZCOtW.js.map",
+            "bytes": 1380319,
+            "sha256": "75cda658a6a0f7c36cba5cd49ff873680918ded87b16ef21ed1b499e316b8302",
+            "encodedBytes": 264678,
+            "encodedSha256": "f11b457f2a8ca0a4e03589cdc1b3f234e24266e647ed15dfb948c4a37f119862"
+          },
+          {
+            "path": "/assets/pdf.worker-CpBb7p4E.js.map",
+            "bytes": 8119233,
+            "sha256": "6ad39f500130c8113800f7d965f5a418ec0d44bdb0a47e330e09ca776458c0a5",
+            "encodedBytes": 1598078,
+            "encodedSha256": "5f7434a58d9d48bd3daaf4c80b90adefde90eb2db6de1bcec34971c2e6716f07"
+          },
+          {
+            "path": "/assets/pdf.worker-QU1oq46D.js",
+            "bytes": 1186962,
+            "sha256": "997de81529231f9d9775b1b85f0060c8fe469179ec470b3a7f142a288260597a",
+            "encodedBytes": 335048,
+            "encodedSha256": "439f87f76912eec60f452d228301817655cca1b5e7a53786275ec227b5786476"
+          },
+          {
+            "path": "/ocr/worker.min.js",
+            "bytes": 111307,
+            "sha256": "576b7df7e3393e137e51849357c9adb53fe7ac1bb69bfa06cf3d61520f182c6d",
+            "encodedBytes": 29975,
+            "encodedSha256": "641f8f5fc763b300c9a5d296600aad59059e26f6a5309ad3c960ef887261e7b9"
+          },
+          {
+            "path": "/brand/pdfrig-mark.svg",
+            "bytes": 364,
+            "sha256": "c383ebe22c32619f169d12ac1facf8625a0f079a99d003018ebb518190c4c732",
+            "encodedBytes": 244,
+            "encodedSha256": "5c25dc96715b88f4396b2f7373ee2b1581c3a19475022d8f290307ec0322c6e5"
+          },
+          {
+            "path": "/favicon.ico",
+            "bytes": 5488,
+            "sha256": "cad5ed296fcaaf0e98a5f61bc1d4bf97462977aae36edfd32df44afae86feda8",
+            "encodedBytes": 4498,
+            "encodedSha256": "55cf67f2a14e1045e2d6355c9ecf24fd7c0064557cc2fa13cbe97a7e8a649dc5"
+          },
+          {
+            "path": "/assets/index-CvslhA-O.js",
+            "bytes": 1401863,
+            "sha256": "240703946a23a77704e68bedb519de30bb742ffbf79a0d378133a0bdb0aa6cf6",
+            "encodedBytes": 422574,
+            "encodedSha256": "e9fb1a12fc1234f623eba8be48ccb46c42582bdb935e80becc6ed390fdcb45b5"
+          },
+          {
+            "path": "/ocr/tesseract-core-lstm.wasm.js",
+            "bytes": 3896484,
+            "sha256": "eef5f8b2f8e20e150680b20adaec4a60babafee3adbe8a94583c81fee46e8680",
+            "encodedBytes": 1274028,
+            "encodedSha256": "d50937cde9bfa2f98c24dac5c8725a5627e750ca7c305d615d13c87e3af7ea17"
+          }
+        ]
+      },
+      "packageFootprints": [],
+      "buildAssetComparisons": [
+        {
+          "path": "/assets/signature-font-facts-BcHyuGIz.js",
+          "buildAssetBytes": 512376,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/worker.min.js.LICENSE.txt",
+          "buildAssetBytes": 466,
+          "sha256Matched": true
+        },
+        {
+          "path": "/brand/pdfrig-logo.png",
+          "buildAssetBytes": 463307,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/eng.traineddata",
+          "buildAssetBytes": 4113088,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/fra.traineddata",
+          "buildAssetBytes": 1130365,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/index-C19TgRbt.css",
+          "buildAssetBytes": 91884,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/pdf.worker-CpBb7p4E.js",
+          "buildAssetBytes": 2972614,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/webpack-B4oZCOtW.js",
+          "buildAssetBytes": 427490,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/pdf.worker-QU1oq46D.js.map",
+          "buildAssetBytes": 3550150,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/NOTICES.txt",
+          "buildAssetBytes": 78343,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/tesseract-core-relaxedsimd-lstm.wasm.js",
+          "buildAssetBytes": 3905767,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/signature-font-facts-BcHyuGIz.js.map",
+          "buildAssetBytes": 544617,
+          "sha256Matched": true
+        },
+        {
+          "path": "/index.html",
+          "buildAssetBytes": 593,
+          "sha256Matched": false
+        },
+        {
+          "path": "/assets/local-text-worker-Nzf20vg6.js",
+          "buildAssetBytes": 618308,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/signature-font-data-CdGJGuXZ.js.map",
+          "buildAssetBytes": 178729,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/local-text-worker-Nzf20vg6.js.map",
+          "buildAssetBytes": 2283525,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/signature-font-data-CdGJGuXZ.js",
+          "buildAssetBytes": 178283,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/index-CvslhA-O.js.map",
+          "buildAssetBytes": 5416067,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/tesseract-core-simd-lstm.wasm.js",
+          "buildAssetBytes": 3899472,
+          "sha256Matched": true
+        },
+        {
+          "path": "/third-party/DancingScript-OFL.txt",
+          "buildAssetBytes": 4443,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/webpack-B4oZCOtW.js.map",
+          "buildAssetBytes": 1380319,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/pdf.worker-CpBb7p4E.js.map",
+          "buildAssetBytes": 8119233,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/pdf.worker-QU1oq46D.js",
+          "buildAssetBytes": 1186962,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/worker.min.js",
+          "buildAssetBytes": 111307,
+          "sha256Matched": true
+        },
+        {
+          "path": "/brand/pdfrig-mark.svg",
+          "buildAssetBytes": 364,
+          "sha256Matched": true
+        },
+        {
+          "path": "/favicon.ico",
+          "buildAssetBytes": 5488,
+          "sha256Matched": true
+        },
+        {
+          "path": "/assets/index-CvslhA-O.js",
+          "buildAssetBytes": 1401863,
+          "sha256Matched": true
+        },
+        {
+          "path": "/ocr/tesseract-core-lstm.wasm.js",
+          "buildAssetBytes": 3896484,
+          "sha256Matched": true
+        }
+      ],
+      "findings": {
+        "fontkitDfaBrotliPresent": false,
+        "nativeCanvasAndIcuDataAbsent": true,
+        "mitLicenseBundled": true,
+        "licensesCleared": false,
+        "scope": "Same removed-dependency and optional Canvas absence verified for this exact no-replace-save replacement. Native OCR core is unchanged; no complete security or distribution approval.",
         "htmlTransformation": "All 27 non-HTML embedded assets match the exact build output byte-for-byte. index.html has the expected Tauri parse/reserialization changes (doctype/whitespace/empty attributes); title, scripts, stylesheet and root element are unchanged. No extra remote URL or script was added."
       }
     }

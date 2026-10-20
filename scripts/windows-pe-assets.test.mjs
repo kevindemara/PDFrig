@@ -181,9 +181,8 @@ test('replacement installer evidence binds exclusions, MIT notice, tested binary
   assert.ok(release.assets.includes('PDFrig-LICENSE.txt'));
   assert.ok(release.assets.every((name) => !name.endsWith('.key')));
   const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
-  assert.ok(readme.includes(release.downloadUrl));
-  assert.ok(readme.includes(release.releaseUrl));
-  assert.ok(readme.includes(release.version));
+  // Historical evidence remains linked, but the README recommends the newer
+  // no-replace-save installer rather than this superseded download.
   assert.ok(readme.includes('docs/operations/windows-license-audit-build.json'));
   assert.ok(readme.includes('docs/operations/windows-license-audit-release.json'));
   assert.ok(readme.includes('docs/operations/windows-release-checklist.txt'));
@@ -195,4 +194,73 @@ test('replacement installer evidence binds exclusions, MIT notice, tested binary
   assert.equal(cleanup.gitHistoryRewritten, false);
   assert.equal(cleanup.backupTrackedInGit, false);
   assert.equal(cleanup.remainingRelease, release.tag);
+});
+
+test('no-replace-save installer, installed checks and current download stay hash-bound', async () => {
+  const load = async (name) =>
+    JSON.parse(await readFile(new URL(`../docs/operations/${name}`, import.meta.url), 'utf8'));
+  const build = await load('windows-save-race-build.json');
+  const release = await load('windows-save-race-release.json');
+  const review = await load('windows-save-race-review.json');
+  const audit = JSON.parse(
+    await readFile(
+      new URL('../docs/dependencies/windows-installer-dependency-audit.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const artifact = audit.artifacts.find((item) => item.id === release.tag);
+  assert.ok(artifact);
+  assert.equal(artifact.installer.sha256, build.installerSha256);
+  assert.equal(artifact.installer.bytes, build.installerBytes);
+  assert.equal(artifact.installer.sourceCommit, build.sourceCommit);
+  assert.equal(artifact.executable.sha256, build.installedBinarySha256);
+  assert.equal(artifact.payload.length, 11);
+  assert.equal(artifact.executable.assets.length, 28);
+  assert.deepEqual(artifact.packageFootprints, []);
+  assert.equal(artifact.findings.licensesCleared, false);
+  assert.equal(artifact.buildAssetComparisons.filter((item) => item.sha256Matched).length, 27);
+  assert.equal(build.checks.nativeUnitTests, 20);
+  assert.equal(build.installedSmokeTest.saveAsCancellationRetainsEdits, true);
+  assert.equal(build.installedSmokeTest.nativeSaveAsNewUnicodeFilenamePassed, true);
+  assert.equal(build.installedSmokeTest.ocrExport144DpiPngByteIdenticalToOriginal, true);
+  assert.equal(
+    build.installedSmokeTest.signatureExportSearchableAndOriginalFontStreamHashMatched,
+    true,
+  );
+  assert.equal(build.installedSmokeTest.allToolsUnsavedWarningAndCancelRetainEdit, true);
+  assert.equal(build.installedSmokeTest.allToolsAfterSuccessfulExportPassed, true);
+  assert.equal(review.verification.installedApp.installerSha256, build.installerSha256);
+  assert.equal(release.assetSha256, build.installerSha256);
+  assert.equal(release.assetBytes, build.installerBytes);
+  assert.equal(release.executableSourceCommit, build.sourceCommit);
+  assert.equal(release.releaseTargetCommit, build.sourceCommit);
+  assert.equal(release.githubAssetDigest, `sha256:${build.installerSha256}`);
+  for (const key of [
+    'repositoryPrivateAtUploadAndVerification',
+    'downloadedArtifactHashVerified',
+    'uploadedChecksumListingVerified',
+    'downloadedCompanionHashesVerified',
+    'downloadedInstallerSignatureVerifiedWithNegativeCases',
+    'publishedTagTargetVerified',
+    'installedAppTested',
+  ])
+    assert.equal(release[key], true, key);
+  assert.equal(release.draft, false);
+  assert.equal(release.prerelease, true);
+  assert.equal(release.authenticode, 'NotSigned');
+  for (const record of [build, release, review]) {
+    assert.equal(record.publicReleaseApproved, false);
+    assert.equal(record.securityPolicyChanges, false);
+    assert.equal(record.billingChanges, false);
+  }
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  for (const value of [
+    release.downloadUrl,
+    release.releaseUrl,
+    release.version,
+    'docs/operations/windows-save-race-build.json',
+    'docs/operations/windows-save-race-release.json',
+  ])
+    assert.ok(readme.includes(value), value);
+  assert.ok(release.assets.every((name) => !name.endsWith('.key')));
 });

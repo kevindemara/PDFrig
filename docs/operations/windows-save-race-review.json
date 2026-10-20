@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "date": "2026-10-20",
-  "status": "source-tests-passed-installer-verification-pending",
+  "status": "source-and-installed-app-checks-passed-private-candidate",
   "publicReleaseApproved": false,
   "implementation": "apps/desktop/src-tauri/src/native_files.rs",
   "finding": "A destination-exists check followed by Windows std::fs::rename left a time-of-check/time-of-use race: a competing writer could create the destination after the check and be overwritten by rename. Source-level correctness/security finding, not a CVE or known user-file incident.",
@@ -22,7 +22,15 @@
       "incomplete and changed-length transfers refuse publication",
       "Unicode and extended-length Windows paths save and reopen"
     ],
-    "limits": "Same-host native filesystem tests, not all network/removable filesystem or clean reference-host certification. Rebuilt installed-app Save As and cancellation checks are pending."
+    "installedApp": {
+      "version": "0.1.0-alpha.20261020.2",
+      "installerSha256": "da0b73340607098bc4f470ed2bb61381fa1df731587f57a3ac0e6839c655aa95",
+      "newUnicodeFilenameSavePassed": true,
+      "saveAsCancellationRetainsEdits": true,
+      "ocrAndSignatureExportsIndependentlyVerified": true,
+      "details": "windows-save-race-build.json"
+    },
+    "limits": "Same-host native filesystem and installed WebView2 tests, not all network/removable filesystems, clean-machine, disconnected-network or complete security certification. The overwrite race itself is covered deterministically by native collision/concurrent-finalizer tests."
   },
   "dependencyChange": "Enable Win32_Storage_FileSystem on existing pinned windows-sys 0.61.2; no new crate, version, filesystem permission or paid service.",
   "securityPolicyChanges": false,

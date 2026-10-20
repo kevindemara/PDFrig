@@ -6,10 +6,11 @@ account/environment. The current developer-host test is not a substitute.
 Do not buy a certificate, change billing, disable antivirus/Application Control,
 or bypass a Windows/browser trust block. Record a block and stop that test.
 
-Candidate: 0.1.0-alpha.20261020.1
+Candidate: 0.1.0-alpha.20261020.2
 Installer: PDFrig-setup.exe
-SHA-256: d52ef610c95343f2c606bc2537cd7c5a1574fe77c8d7ce856c92508f3a309846
-Download: https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-1
+SHA-256: da0b73340607098bc4f470ed2bb61381fa1df731587f57a3ac0e6839c655aa95
+Download: https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2
+Includes the no-replace native save fix; do not use the older .1 installer.
 
 1. Download the EXE and SHA256SUMS.txt while signed in with private repo access.
    Run Get-FileHash .\PDFrig-setup.exe -Algorithm SHA256 and compare the hash.
