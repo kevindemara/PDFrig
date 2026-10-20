@@ -4,6 +4,25 @@ import { describe, expect, it } from 'vitest';
 import { createWindowsPlatformAdapter } from './platform.js';
 
 describe('Windows platform adapter', () => {
+  it('opens only the native fixed developer profile, without renderer URL arguments', async () => {
+    const calls: unknown[] = [];
+    const adapter = createWindowsPlatformAdapter(
+      <T>(command: string, arguments_?: unknown): Promise<T> => {
+        calls.push({ command, arguments_ });
+        return Promise.resolve(undefined as T);
+      },
+    );
+    await adapter.openDeveloperProfile?.();
+    expect(calls).toEqual([{ command: 'open_developer_profile', arguments_: undefined }]);
+  });
+
+  it('does not expose native profile-opening error details', async () => {
+    const adapter = createWindowsPlatformAdapter(() =>
+      Promise.reject(new Error('sensitive diagnostics')),
+    );
+    await expect(adapter.openDeveloperProfile?.()).rejects.toThrow('NATIVE_PROFILE_OPEN_FAILED');
+  });
+
   it('opens a user-selected PDF in bounded raw-byte chunks', async () => {
     const calls: { readonly arguments_: unknown; readonly command: string }[] = [];
     const bytes = new Uint8Array(1024 * 1024 + 5);

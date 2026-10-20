@@ -11,6 +11,14 @@ const rustMain = await readFile('apps/desktop/src-tauri/src/main.rs', 'utf8');
 const nativeFiles = await readFile('apps/desktop/src-tauri/src/native_files.rs', 'utf8');
 const secureSession = await readFile('apps/desktop/src-tauri/src/secure_session.rs', 'utf8');
 const updates = await readFile('apps/desktop/src-tauri/src/updates.rs', 'utf8');
+const developerProfile = await readFile('apps/desktop/src-tauri/src/developer_profile.rs', 'utf8');
+assert.match(developerProfile, /const PROFILE_URL: &str = "https:\/\/github\.com\/kevindemara"/u);
+assert.match(developerProfile, /pub fn open_developer_profile\(\)/u);
+assert.match(
+  developerProfile,
+  /ShellExecuteW\(null_mut\(\), verb\.as_ptr\(\), url\.as_ptr\(\), null\(\), null\(\), 1\)/u,
+);
+assert.doesNotMatch(developerProfile, /(?:std::process|Command::|runas|println!|eprintln!|dbg!)/u);
 
 const nativeFileCommands = [
   'choose_pdf',
@@ -34,7 +42,12 @@ const secureSessionCommands = [
   'clear_secure_entitlement',
 ];
 const updateCommands = ['check_for_update', 'install_available_update'];
-const reviewedCommands = [...nativeFileCommands, ...secureSessionCommands, ...updateCommands];
+const reviewedCommands = [
+  ...nativeFileCommands,
+  ...secureSessionCommands,
+  ...updateCommands,
+  'open_developer_profile',
+];
 const reviewedPermissions = reviewedCommands.map(
   (command) => `allow-${command.replaceAll('_', '-')}`,
 );
@@ -52,7 +65,7 @@ const generatedPermissions = await Promise.all(
 assert.deepEqual(
   capability.permissions,
   capabilityPermissions,
-  'The Windows alpha may grant only the reviewed native file, session, and update commands.',
+  'The Windows alpha may grant only the reviewed file, session, update and fixed-profile commands.',
 );
 assert.deepEqual(
   capability.platforms,
@@ -140,7 +153,9 @@ assert.deepEqual(manifestCommands, reviewedCommands, 'AppManifest command ACL dr
 const handlerMatch = /generate_handler!\[([\s\S]*?)\]/u.exec(rustMain);
 assert.notEqual(handlerMatch, null, 'The reviewed commands must have one invoke handler.');
 const handlerCommands = [
-  ...(handlerMatch?.[1] ?? '').matchAll(/(?:native_files|secure_session|updates)::([a-z_]+)/gu),
+  ...(handlerMatch?.[1] ?? '').matchAll(
+    /(?:native_files|secure_session|updates|developer_profile)::([a-z_]+)/gu,
+  ),
 ].map((match) => match[1]);
 assert.deepEqual(handlerCommands, reviewedCommands, 'Runtime command registration drifted.');
 
@@ -208,5 +223,5 @@ assert.doesNotMatch(
 );
 
 process.stdout.write(
-  'Tauri Windows alpha surface is allowlisted: bounded PDF/comment-report/recent/launch and DPAPI session commands plus content-free event listening, no remote/plugin filesystem access.\n',
+  'Tauri Windows alpha surface is allowlisted: bounded PDF/comment-report/recent/launch, DPAPI session, update and fixed developer-profile commands plus content-free event listening; no arbitrary URL or remote/plugin filesystem access.\n',
 );

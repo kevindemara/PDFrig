@@ -1941,11 +1941,11 @@ export const UtilityWorkbench = ({
             </li>
           </ol>
           <div className="beta-note">
-            <span>Paid beta · CONV-002–004</span>
+            <span>Not available</span>
             <strong>Office to PDF</strong>
             <p>
-              Dedicated cloud worker is disabled by default while font-fidelity and sandbox evidence
-              is reviewed.
+              Office conversion is not available in this version. You can still create PDFs from
+              supported images and plain text.
             </p>
           </div>
         </aside>

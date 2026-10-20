@@ -217,8 +217,10 @@ remains in the [historical Windows QA record](docs/operations/windows-installer-
 An older private test prerelease exists, but its installed-app export failed.
 The transport MIME mismatch is now repaired in source; current evidence and the
 QA installer build are recorded in the [export-fix review](docs/operations/windows-export-review.json).
-**No rebuilt installer with this export fix has been install-tested. Windows compliance is not certified.**
-Installed export, clean-machine installation, upgrade/uninstall, offline OCR,
+The owner reports a successful installed-app text edit and export with the repaired
+build. This is a limited smoke test, not independent or comprehensive installer QA.
+**Windows compliance is not certified.**
+Broader installed export, clean-machine installation, upgrade/uninstall, offline OCR,
 notices and release review remain open. Old installers do not verify new source.
 
 Choose the download that matches your goal:
@@ -228,6 +230,13 @@ Choose the download that matches your goal:
 | Use the finished Windows app     | Reviewed `setup.exe` asset from Releases, once published            | No                                            |
 | Run or modify the source         | Git clone recommended; source ZIP is not an installer               | Yes                                           |
 | Build an internal test installer | `pnpm desktop:internal-build --installer-qa` in a prepared checkout | Yes; this is a build script, not an installer |
+
+For a private test installer with the ordinary **PDFrig** app, shortcut and installer
+labels, use `pnpm desktop:internal-build --private-test`. This is still an unsigned
+private alpha, not public-release approval. It retains required third-party notices,
+uses a separate private-test identifier, makes no PDF association changes and has
+no production updater. The footer credits [Kevin DeMara](https://github.com/kevindemara);
+this is an application link, never text added to your exported documents.
 
 ### Install the finished Windows app
 

@@ -53,6 +53,12 @@
     "installedAppTested": false,
     "published": false
   },
+  "ownerReportedSmoke": {
+    "date": "2026-10-19",
+    "result": "Owner reports installed-app text edit and export succeeded with the repaired build",
+    "independentlyObserved": false,
+    "scope": "Limited owner report only; not clean-machine install/upgrade/uninstall, native OCR, export edge cases or comprehensive Windows QA"
+  },
   "remainingGates": [
     "installed-app save/export to a new filename, cancellation, refusal of existing destinations, PDF/JSON type separation and independent PDF output comparison",
     "clean Windows install/upgrade/uninstall, taskbar/high-DPI icons, WebView2 and offline OCR verification",

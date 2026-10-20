@@ -66,6 +66,8 @@ export interface PlatformAdapter {
     },
   ): Promise<readonly SelectedFileHandle[]>;
   isOnline(): boolean;
+  /** Opens only the fixed developer GitHub profile, never arbitrary renderer URLs. */
+  readonly openDeveloperProfile?: () => Promise<void>;
   readonly launchFiles?: LaunchFilesAdapter;
   readonly recentFiles?: RecentFilesAdapter;
   saveFile(request: SaveRequest): Promise<'cancelled' | 'saved'>;

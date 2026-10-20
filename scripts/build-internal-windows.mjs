@@ -6,6 +6,10 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { prepareDesktopNotices } from './prepare-desktop-notices.mjs';
+import {
+  applyInternalWindowsProfile,
+  internalWindowsProfile,
+} from './internal-windows-profile.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const pnpmCli = process.env.npm_execpath;
@@ -18,10 +22,8 @@ const cli = path.join(
   path.dirname(desktopRequire.resolve('@tauri-apps/cli/package.json')),
   'tauri.js',
 );
-const qa = process.argv.includes('--installer-qa');
-const version = qa ? '0.1.0-alpha.20261019.2' : '0.1.0-alpha.20261012.1';
-const buildId = qa ? 'installer-qa-20261019-export-fix' : 'internal-pdfrig-20261012';
-const productName = qa ? 'PDFrig Installer QA' : 'PDFrig Internal Test';
+const profile = internalWindowsProfile(process.argv.slice(2));
+const { version, buildId, productName } = profile;
 const output = path.join(root, 'apps/desktop/src-tauri/target', buildId);
 const privateDirectory = path.join(
   root,
@@ -59,9 +61,7 @@ try {
   Object.assign(environment, {
     CARGO_NET_OFFLINE: 'true',
     PDFMASON_ALLOW_UNSIGNED_INTERNAL_ALPHA: 'true',
-    PDFMASON_DESKTOP_IDENTIFIER: qa
-      ? 'com.pdfmason.desktop.installerqa'
-      : 'com.pdfmason.desktop.internal',
+    PDFMASON_DESKTOP_IDENTIFIER: profile.identifier,
     PDFMASON_RELEASE_CHANNEL: 'alpha',
     PDFMASON_RELEASE_VERSION: version,
     PDFMASON_UPDATER_ENDPOINT:
@@ -83,26 +83,7 @@ try {
     stdio: 'inherit',
   });
   const config = JSON.parse(await readFile(environment.PDFMASON_RELEASE_CONFIG_OUTPUT, 'utf8'));
-  config.productName = 'PDFrig Internal Test';
-  if (qa) config.productName = productName;
-  config.app = {
-    windows: [
-      {
-        label: 'main',
-        title: 'PDFrig — Internal testing',
-        width: 1280,
-        height: 820,
-        minWidth: 760,
-        minHeight: 600,
-        dragDropEnabled: false,
-        resizable: true,
-      },
-    ],
-  };
-  config.bundle.fileAssociations = [];
-  if (qa) config.app.windows[0].title = 'PDFrig — Installer QA';
-  config.bundle.longDescription =
-    'PDFrig internal test build. Not approved for public distribution.';
+  applyInternalWindowsProfile(config, profile);
   await copyFile(
     path.join(root, 'docs/dependencies/THIRD_PARTY_NOTICES.txt'),
     path.join(output, 'THIRD_PARTY_NOTICES.txt'),

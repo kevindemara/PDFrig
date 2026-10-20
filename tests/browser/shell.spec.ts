@@ -71,6 +71,32 @@ test('marketing entry and workspace shell are truthful and reachable', async ({ 
   await expect(page.getByText('On this device', { exact: true })).toBeVisible();
 });
 
+test('developer credit stays compact, keyboard-accessible and separate from the PDF workspace', async ({
+  page,
+}) => {
+  await page.goto('/workspace');
+  const footer = page.locator('.status-bar');
+  const credit = footer.getByRole('link', { name: 'Kevin DeMara on GitHub' });
+  await expect(credit).toHaveAttribute('href', 'https://github.com/kevindemara');
+  await expect(credit).toHaveAttribute('target', '_blank');
+  await expect(credit).toHaveAttribute('rel', 'noopener noreferrer');
+  for (const width of [1280, 760, 390]) {
+    await page.setViewportSize({ width, height: 820 });
+    await expect(credit).toBeVisible();
+    await credit.focus();
+    await expect(credit).toBeFocused();
+    const layout = await footer.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { height: rect.height, overflow: element.scrollWidth > element.clientWidth };
+    });
+    expect(layout.height).toBeLessThanOrEqual(40);
+    expect(layout.overflow).toBe(false);
+    await expect(footer.getByText('On this device', { exact: true })).toBeVisible();
+  }
+  // Do not open an external site or transmit any document contents during QA.
+  await expect(page).toHaveURL(/\/workspace$/u);
+});
+
 test('account control room exercises job progress, retention preference, and deletion UI', async ({
   page,
 }) => {

@@ -73,6 +73,7 @@ import {
 } from 'react';
 
 import { BrandLockup } from './brand-lockup.js';
+import { DeveloperCredit } from './developer-credit.js';
 import { FormDataPanel } from './form-data-panel.js';
 import { useDialogFocus } from './dialog-focus.js';
 import { supportedImageMimeType } from './image-input.js';
@@ -4968,14 +4969,15 @@ export const WorkspaceShell = ({
           </div>
 
           <footer className="status-bar">
+            <DeveloperCredit openProfile={platformAdapter?.openDeveloperProfile} />
             <span>
               {pages.length} {pages.length === 1 ? 'page' : 'pages'}
             </span>
-            <span>{Math.round(zoom * 100)}%</span>
+            <span className="status-bar__zoom">{Math.round(zoom * 100)}%</span>
             <span className="status-bar__processing">
               <span aria-hidden="true" className="status-dot status-dot--local" /> On this device
             </span>
-            <span>
+            <span className="status-bar__document-state">
               {allSourcesSafe
                 ? 'Original unchanged'
                 : allSourcesAnnotatable

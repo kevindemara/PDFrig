@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  applyInternalWindowsProfile,
+  internalWindowsProfile,
+} from './internal-windows-profile.mjs';
 
 const root = new URL('../', import.meta.url);
 const read = (relative) => readFile(new URL(relative, root));
@@ -109,9 +113,14 @@ test('native icon application does not change desktop identity, capabilities or 
 
 test('internal installer orchestration stays separate from public distribution and credentials', async () => {
   const build = (await read('scripts/build-internal-windows.mjs')).toString();
-  assert.match(build, /config\.productName = 'PDFrig Internal Test'/u);
-  assert.match(build, /config\.bundle\.fileAssociations = \[\]/u);
-  assert.match(build, /com\.pdfmason\.desktop\.internal/u);
+  assert.match(build, /applyInternalWindowsProfile\(config, profile\)/u);
+  const profile = internalWindowsProfile();
+  assert.equal(profile.productName, 'PDFrig Internal Test');
+  assert.equal(profile.identifier, 'com.pdfmason.desktop.internal');
+  assert.deepEqual(
+    applyInternalWindowsProfile({ bundle: {} }, profile).bundle.fileAssociations,
+    [],
+  );
   assert.match(build, /updates\.example\.invalid\/alpha/u);
   assert.match(build, /PDFMASON_ALLOW_UNSIGNED_INTERNAL_ALPHA: 'true'/u);
   assert.match(build, /VITE_PDFMASON_PERMISSIONS_ENABLED: 'false'/u);
@@ -121,4 +130,27 @@ test('internal installer orchestration stays separate from public distribution a
   assert.match(build, /finally[\s\S]*await unlink\(keyFile\)/u);
   assert.doesNotMatch(build, /console\.(?:log|error)\([^)]*(?:privateKey|environment|error)/u);
   assert.doesNotMatch(build, /Start-Process|['"]\/S['"]|git push|\bupload\b/iu);
+});
+
+test('branded private installer uses PDFrig labels without enabling production distribution', () => {
+  const profile = internalWindowsProfile(['--private-test']);
+  assert.equal(profile.version, '0.1.0-alpha.20261019.3');
+  assert.equal(profile.identifier, 'com.pdfmason.desktop.privatetest');
+  const config = applyInternalWindowsProfile(
+    { bundle: {}, plugins: { updater: { active: false } } },
+    profile,
+  );
+  assert.equal(config.productName, 'PDFrig');
+  assert.equal(config.app.windows[0].title, 'PDFrig');
+  assert.equal(config.app.windows[0].dragDropEnabled, false);
+  assert.equal(config.bundle.publisher, 'PDFrig');
+  assert.deepEqual(config.bundle.fileAssociations, []);
+  assert.doesNotMatch(
+    JSON.stringify(config),
+    /Installer QA|Internal Test|development|Internal testing/u,
+  );
+  assert.equal(config.plugins.updater.active, false);
+  assert.equal(internalWindowsProfile(['--installer-qa']).productName, 'PDFrig Installer QA');
+  assert.throws(() => internalWindowsProfile(['--installer-qa', '--private-test']));
+  assert.throws(() => internalWindowsProfile(['--public-release']));
 });

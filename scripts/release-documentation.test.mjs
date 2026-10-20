@@ -53,7 +53,7 @@ test('Windows setup instructions distinguish development, future installer and u
   assert.ok(readme.includes('x86_64-pc-windows-msvc'));
   assert.ok(readme.includes('it does not install PDFrig'));
   assert.ok(readme.includes('Windows compliance is not certified'));
-  assert.ok(readme.includes('No rebuilt installer with this export fix has been install-tested'));
+  assert.ok(readme.includes('owner reports a successful installed-app text edit and export'));
   assert.ok(readme.includes('Windows **Installed apps**'));
   assert.ok(readme.includes('No credentials or paid services are needed'));
   assert.ok(readme.includes('do not disable Application Control'));
@@ -135,7 +135,12 @@ test('tool-neutral build prompt tracks pinned tools, real commands and review re
   for (const file of [manifest, ...records, 'scripts/build-internal-windows.mjs'])
     await access(new URL(`../${file}`, import.meta.url));
   const helper = await load('scripts/build-internal-windows.mjs');
-  assert.ok(helper.includes("process.argv.includes('--installer-qa')"));
+  assert.ok(helper.includes('internalWindowsProfile(process.argv.slice(2))'));
+  assert.ok(
+    (await load('scripts/internal-windows-profile.mjs')).includes(
+      "args.includes('--installer-qa')",
+    ),
+  );
   assert.ok(body.includes('SHA256SUMS.txt'));
   assert.ok(body.includes('Get-AuthenticodeSignature'));
   assert.ok(body.includes('updater-signature verification'));
@@ -168,7 +173,6 @@ test('AI build instructions retain approval gates instead of treating a build as
 test('Windows export repair records local build success without claiming installed-app or security clearance', async () => {
   const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
   const review = JSON.parse(await load('docs/operations/windows-export-review.json'));
-  const builder = await load('scripts/build-internal-windows.mjs');
   assert.equal(review.publicReleaseApproved, false);
   assert.equal(review.currentHost.securitySettingsChangedByThisWork, false);
   assert.equal(review.currentHost.nativeTestsPassedUnderNormalCurrentPolicy, true);
@@ -180,8 +184,9 @@ test('Windows export repair records local build success without claiming install
   assert.equal(review.qaBuild.ephemeralPrivateKeyCleanupConfirmed, true);
   assert.match(review.fixSourceCommit, /^[a-f0-9]{40}$/u);
   assert.match(review.qaBuild.installerSha256, /^[a-f0-9]{64}$/u);
-  assert.ok(builder.includes(review.qaBuild.version));
-  assert.ok(builder.includes(review.qaBuild.buildDirectory.split('/').at(-1)));
+  const profiles = await load('scripts/internal-windows-profile.mjs');
+  assert.ok(profiles.includes(review.qaBuild.version));
+  assert.ok(profiles.includes(review.qaBuild.buildDirectory.split('/').at(-1)));
   assert.equal(review.tests.pinnedRealTransportRegressionTests, 9);
   assert.ok(review.remainingGates.some((gate) => gate.includes('installed-app')));
   assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));

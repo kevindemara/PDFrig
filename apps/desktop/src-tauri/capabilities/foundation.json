@@ -1,6 +1,6 @@
 {
   "identifier": "foundation",
-  "description": "Windows alpha with reviewed PDF and local comment-report transfer, launch, optional recent-file, and DPAPI-protected account commands.",
+  "description": "Windows alpha with reviewed PDF/comment-report transfer, launch, optional recent-file, DPAPI account commands and a fixed developer-profile link; no arbitrary URL opening.",
   "windows": ["main"],
   "platforms": ["windows"],
   "permissions": [
@@ -23,6 +23,7 @@
     "allow-clear-secure-entitlement",
     "allow-check-for-update",
     "allow-install-available-update",
+    "allow-open-developer-profile",
     "core:event:allow-listen",
     "core:event:allow-unlisten"
   ]

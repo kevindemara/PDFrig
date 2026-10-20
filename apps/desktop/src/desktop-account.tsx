@@ -20,8 +20,8 @@ const entitlementCopy = (
 ): { readonly detail: string; readonly label: string } => {
   if (!configured)
     return {
-      detail: 'This local build has no public entitlement verification key.',
-      label: 'Verification not configured',
+      detail: 'Account verification is unavailable. Contact your workspace administrator.',
+      label: 'Account verification unavailable',
     };
   switch (decision?.status) {
     case 'active':
@@ -199,9 +199,7 @@ export const DesktopAccountControl = ({
       );
     } catch {
       setAvailableUpdate(null);
-      setUpdateStatus(
-        'Updates are not configured for this internal build, or the channel is unavailable.',
-      );
+      setUpdateStatus('Updates are unavailable right now. Your current version has not changed.');
     } finally {
       setUpdating(false);
     }
@@ -261,9 +259,8 @@ export const DesktopAccountControl = ({
             </div>
             {config === null || client === null ? (
               <div className="desktop-account-dialog__note" role="status">
-                Account access is not configured in this local build. Add the public Supabase URL
-                and publishable key described in the local setup guide. Local PDF tools remain
-                available without an account.
+                Local PDF tools are available without an account. Account services are not available
+                in this version.
               </div>
             ) : session === null ? (
               <>
@@ -385,10 +382,12 @@ export const DesktopAccountControl = ({
                 {status}
               </p>
             )}
-            <p className="desktop-account-dialog__privacy">
-              Passwords are sent only to the configured Supabase Auth endpoint and are never written
-              to PDFrig logs or files.
-            </p>
+            {config !== null && client !== null && (
+              <p className="desktop-account-dialog__privacy">
+                Passwords are sent only to the configured Supabase Auth endpoint and are never
+                written to PDFrig logs or files.
+              </p>
+            )}
           </section>
         </div>
       )}

@@ -8,6 +8,7 @@ import { DecorationWorkbench } from './decoration-workbench.js';
 import { DecorationPlacementPanel } from './decoration-placement-panel.js';
 import { reviewDecorationSourcePage } from './decoration-source-review.js';
 import { supportedImageMimeType } from './image-input.js';
+import { DeveloperCredit } from './developer-credit.js';
 
 import {
   AccountDashboard,
@@ -19,6 +20,39 @@ import {
 } from './index.js';
 
 describe('shared application shell', () => {
+  it('shows a developer GitHub credit separately from document status', () => {
+    render(<WorkspaceShell surface="Web" />);
+    const footer = screen.getByRole('contentinfo');
+    const credit = within(footer).getByRole('link', { name: 'Kevin DeMara on GitHub' });
+    expect(credit).toHaveAttribute('href', 'https://github.com/kevindemara');
+    expect(credit).toHaveAttribute('target', '_blank');
+    expect(credit).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(within(footer).getByText('On this device')).toBeVisible();
+    expect(within(footer).getByText('0 pages')).toBeVisible();
+    expect(within(footer).getByText('100%')).toBeVisible();
+  });
+
+  it('opens the fixed developer profile through the Windows adapter without navigating the editor', () => {
+    const openProfile = vi.fn().mockResolvedValue(undefined);
+    render(<DeveloperCredit openProfile={openProfile} />);
+    const cancelled = !fireEvent.click(
+      screen.getByRole('link', { name: 'Kevin DeMara on GitHub' }),
+    );
+    expect(cancelled).toBe(true);
+    expect(openProfile).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('handles native profile-opening failure without leaking diagnostics or changing a document', async () => {
+    const openProfile = vi.fn().mockRejectedValue(new Error('private native details'));
+    render(<DeveloperCredit openProfile={openProfile} />);
+    fireEvent.click(screen.getByRole('link', { name: 'Kevin DeMara on GitHub' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Couldn’t open GitHub.');
+    expect(screen.queryByText('private native details')).not.toBeInTheDocument();
+    openProfile.mockResolvedValueOnce(undefined);
+    fireEvent.click(screen.getByRole('link', { name: 'Kevin DeMara on GitHub' }));
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+  });
+
   it('keeps file entry points disabled in server HTML and enables them after hydration', () => {
     const container = document.createElement('div');
     container.innerHTML = renderToString(<WorkspaceShell surface="Web" />);

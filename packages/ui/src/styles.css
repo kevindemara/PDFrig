@@ -1750,6 +1750,30 @@ button:disabled {
   font-weight: 750;
 }
 
+.status-bar__credit {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  margin-right: auto;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+
+.status-bar__credit a {
+  color: var(--text-primary);
+  text-underline-offset: 0.2em;
+}
+
+.status-bar__credit a:hover {
+  color: var(--brand-accent);
+}
+
+.status-bar__credit a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
 .status-bar .status-dot {
   margin-top: 0;
 }
@@ -4494,8 +4518,9 @@ button:disabled {
     padding: 0 0.75rem;
   }
 
-  .status-bar span:nth-child(2),
-  .status-bar span:last-child {
+  .status-bar__zoom,
+  .status-bar__document-state,
+  .status-bar__credit-label {
     display: none;
   }
 

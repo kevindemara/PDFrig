@@ -20,6 +20,7 @@ fn main() {
             "clear_secure_entitlement",
             "check_for_update",
             "install_available_update",
+            "open_developer_profile",
         ]),
     ))
     .expect("PDFMason Tauri configuration failed to build");

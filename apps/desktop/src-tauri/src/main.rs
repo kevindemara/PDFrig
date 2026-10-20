@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod developer_profile;
 mod native_files;
 mod secure_session;
 mod updates;
@@ -46,6 +47,7 @@ fn main() {
             secure_session::clear_secure_entitlement,
             updates::check_for_update,
             updates::install_available_update,
+            developer_profile::open_developer_profile,
         ])
         .run(tauri::generate_context!())
         .expect("PDFMason desktop shell failed to start");

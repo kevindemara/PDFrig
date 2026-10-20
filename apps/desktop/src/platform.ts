@@ -100,6 +100,13 @@ export const createWindowsPlatformAdapter = (
   },
   isOnline: () => globalThis.navigator.onLine,
   kind: 'windows',
+  openDeveloperProfile: async () => {
+    try {
+      await invokeCommand<null>('open_developer_profile');
+    } catch {
+      throw new Error('NATIVE_PROFILE_OPEN_FAILED');
+    }
+  },
   launchFiles: {
     subscribe: (onLaunchFile) => listenToEvent('pdfmason-launch-file', onLaunchFile),
     take: async (control) => {
