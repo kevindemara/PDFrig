@@ -27,12 +27,10 @@
     "@cantoo/pdf-lib": "catalog:",
     "@pdfmason/contracts": "workspace:*",
     "@pdfmason/editor-core": "workspace:*",
-    "fontkit": "catalog:",
     "pdfjs-dist": "catalog:",
     "tesseract.js": "catalog:"
   },
   "devDependencies": {
-    "@types/fontkit": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

@@ -84,9 +84,17 @@
     "publicDistributionApproved": false
   },
   "remainingPublicationGates": [
-    "Resolve 28 conservative declared-input notice gaps, including four prospective Windows npm inputs, and complete exact-artifact notice/SBOM review",
+    "Resolve the one remaining conservative Windows npm input by exact replacement-artifact inspection; retain the 24 other-platform notice gaps in the full source/build inventory. Complete bundled/native/data notice and security review.",
     "Complete the native OCR parser/model/API security review and broader independent Windows/assistive-technology tests",
     "Review all remaining GitHub Releases before visibility changes; repository publication also exposes release assets"
   ],
-  "limitations": "Pattern-based scans and fixture provenance do not prove absence of all private information. Binary installer internals, encrypted fixture metadata, unreachable Git objects, remote caches/forks, GitHub issue/PR attachments and repository settings are not certified. Required third-party author names/emails in license notices are intentionally retained."
+  "limitations": "Pattern-based scans and fixture provenance do not prove absence of all private information. Binary installer internals, encrypted fixture metadata, unreachable Git objects, remote caches/forks, GitHub issue/PR attachments and repository settings are not certified. Required third-party author names/emails in license notices are intentionally retained.",
+  "currentDependencyReview": {
+    "date": "2026-10-20",
+    "declaredInputCount": 560,
+    "remainingTextGaps": 25,
+    "windowsCandidateGaps": 1,
+    "removedNotCleared": ["fontkit@2.0.4", "dfa@1.2.0", "brotli@1.3.3"],
+    "replacementInstallerVerified": false
+  }
 }

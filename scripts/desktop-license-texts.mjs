@@ -95,7 +95,7 @@ export async function loadDesktopNpmPartialNotices(root) {
     partial.derivedPayloads[0].encoding !== 'brotli-base64-js-literal'
   )
     return fail('PARTIAL_NOTICE_INVALID');
-  const binding = review.packages.find(
+  const binding = [...review.packages, ...review.removedInputs].find(
     (entry) => entry.name === partial.name && entry.version === partial.version,
   );
   if (!binding || binding.noticeComplete !== false || binding.gitHead !== partial.commit)
@@ -212,7 +212,7 @@ export async function loadFontkitDerivedNotice(root) {
     review.allNoticesComplete !== false
   )
     return fail('DERIVATIVE_NOTICE_INVALID');
-  const binding = review.packages.find(
+  const binding = [...review.packages, ...review.removedInputs].find(
     (entry) => entry.name === partial.name && entry.version === partial.version,
   );
   if (!binding || binding.noticeComplete !== false || binding.gitHead !== partial.commit)

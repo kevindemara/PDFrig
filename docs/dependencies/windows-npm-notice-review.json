@@ -1,30 +1,17 @@
 {
   "schemaVersion": 1,
-  "reviewDate": "2026-10-19",
+  "reviewDate": "2026-10-20",
   "publicReleaseApproved": false,
   "allNoticesComplete": false,
-  "scope": "Four active prospective Windows npm gaps, plus historical evidence for the removed tr46 input. Exact archive-to-installed payload binding, not final installer scope, licence certification or native binary source attestation. No package code or native addon is executed by this review.",
+  "scope": "One conservative optional Windows npm gap in the current graph; removed input records and the old installer retain their original unresolved licence findings. Hash-specific installer inspection is separate from declared-input policy and is not legal/security certification.",
   "treeDigest": "Sort relative regular-file paths by code point. SHA-256 of UTF-8 path + NUL + decimal byte length + NUL + lowercase content SHA-256 + LF for every file. Symlinks and special files are rejected.",
   "latestRecheck": {
-    "date": "2026-10-19",
-    "command": "node scripts/verify-windows-npm-notices.mjs --registry",
-    "exactPublishedAndInstalledPayloadsMatched": 4,
-    "remainingWindowsNoticeGaps": 4,
-    "upstreamEvidence": "Fontkit PR 300 remains open and unmerged; the October 18 request for approval is not an authoritative version-bound grant. dfa issue 7 remains open without a full notice. Brotli's pinned manifest still supplies only a MIT label for its project terms, and the canvas parent manifest does not attest the native addon/data build inputs.",
-    "externalPosting": "Previously approved follow-ups were refused by the GitHub integration with HTTP 403. Drafts and existing threads are retained below. No retry, duplicate issue or alternate-auth workaround was attempted.",
-    "licenseOrDistributionApproval": false
-  },
-  "dependencyUseReview": {
-    "date": "2026-10-19",
-    "commands": [
-      "pnpm why --recursive fontkit dfa brotli @napi-rs/canvas-win32-x64-msvc",
-      "node scripts/verify-windows-npm-notices.mjs --registry"
-    ],
-    "publishedAndInstalledPayloadsMatched": 4,
-    "signaturePath": "packages/pdf-engine/src/signature-font.ts dynamically imports fontkit 2.0.4 to parse the fixed bundled Dancing Script asset, lay out glyph paths and embed the unmodified font. dfa 1.2.0 and brotli 1.3.3 are its transitive dependencies. They cannot be treated as absent, or removed without preserving signature preview/export fidelity and reviewing a replacement.",
-    "optionalNodeCanvas": "The native canvas package is an optional Node-side PDF.js dependency, not an intentional browser/WebView import. This dependency-graph observation is not proof of absence from a specific installer and does not clear native Skia/ICU notices.",
-    "upstreamRecheck": "Read-only checks of fontkit PR 300 and dfa issue 7 still found no authoritative version-bound complete grant. An open unmerged proposed licence and a request for maintainer approval are not treated as accepted terms. No new issue/comment was posted and no posting-permission block was bypassed.",
-    "effectOfProjectLicenseChange": "An open-source licence for PDFrig's own code does not supply missing third-party grants, copyrights, build provenance or data notices. All four gaps stay open."
+    "date": "2026-10-20",
+    "command": "node scripts/verify-windows-npm-notices.mjs",
+    "exactInstalledPayloadsMatched": 1,
+    "remainingWindowsNoticeGaps": 1,
+    "licenseOrDistributionApproval": false,
+    "scope": "Fontkit, dfa and brotli eliminated from current source/lock, not licensed retroactively. Native Canvas requires exact replacement-installer absence evidence. Older v6 still contains the three removed packages."
   },
   "packages": [
     {
@@ -48,6 +35,31 @@
         "https://github.com/google/skia/tree/7219df0fb0ff64f26adad448f94e8c001b964e6a"
       ],
       "nextAction": "Establish native artifact build provenance and enabled Skia/ICU/other-library inventory with full terms, or prove absence from the actual final Windows payload. Parent MIT terms alone do not clear the addon/data."
+    }
+  ],
+  "removedInputs": [
+    {
+      "name": "tr46",
+      "removalReason": "Removed Tesseract 7's unused node-fetch fallback using a scoped pnpm override. Both unchanged Node adapters already select global.fetch on the supported Node >=22.13 runtime. The locked node-fetch/whatwg-url/tr46/webidl-conversions chain is absent. Local HTTP image/model English/French recognition passed without cache writes; no source/worker/core bytes were patched.",
+      "licenseCleared": false,
+      "upstreamStatus": "https://github.com/jsdom/tr46/issues/58",
+      "version": "0.0.3",
+      "gitHead": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
+      "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==",
+      "tarball": "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz",
+      "archiveSha256": "164ae1eb32cea353551bbc7f9358dcaae4ffabbe65ec37a92ca464a9570a2a0a",
+      "tree": {
+        "files": 5,
+        "bytes": 268388,
+        "sha256": "9e350a75fbe04de81195554070fefc8ce578ca520c610c0a8f303fcc40b51759"
+      },
+      "manifestSha256": "615087f58ee138fd35c2b414c355b72e36e5919725b8aecc1c34f6a5585b9779",
+      "noticeComplete": false,
+      "finding": "MIT declaration but no full packaged/root source terms. lib/mappingTable.json is generated Unicode mapping data; package metadata alone does not settle the data notice.",
+      "supportingSources": [
+        "https://github.com/Sebmaster/tr46.js/tree/a8009f9ce80ff5dbe71dd71e203afe4e4c878d28"
+      ],
+      "nextAction": "Bind full project terms and the exact Unicode data release/attribution, or remove/replace with tested compatible input handling."
     },
     {
       "name": "brotli",
@@ -67,7 +79,9 @@
       "supportingSources": [
         "https://github.com/devongovett/brotli.js/tree/e36051345f6d27a56e5f39ea70d2f789b8574046"
       ],
-      "nextAction": "Decoder and byte-identical browser-dictionary attribution/terms are retained; resolve wrapper MIT attribution and encoder/encoder-memory source/build provenance before clearing the package."
+      "nextAction": "Decoder and byte-identical browser-dictionary attribution/terms are retained; resolve wrapper MIT attribution and encoder/encoder-memory source/build provenance before clearing the package.",
+      "licenseCleared": false,
+      "removalReason": "Removed Fontkit signature parser and its exclusive dependency subtree. Fixed, hash-bound OFL glyph/metric data preserves the original script font and preview/export fidelity without a replacement runtime parser. See signature-font-review.json. Existing v6 installer still contains this package; new installer audit required."
     },
     {
       "name": "dfa",
@@ -92,7 +106,9 @@
       "supportingSources": [
         "https://github.com/devongovett/dfa/tree/3f5e603e5082caedabefefdf53e8a6ca3111e966"
       ],
-      "nextAction": "Obtain attributable version-bound full upstream terms, or replace/remove the dependency with fidelity and licence checks. The approved follow-up is drafted but posting was refused by the integration; do not duplicate the existing request or bypass that permission block."
+      "nextAction": "Obtain attributable version-bound full upstream terms, or replace/remove the dependency with fidelity and licence checks. The approved follow-up is drafted but posting was refused by the integration; do not duplicate the existing request or bypass that permission block.",
+      "licenseCleared": false,
+      "removalReason": "Removed Fontkit signature parser and its exclusive dependency subtree. Fixed, hash-bound OFL glyph/metric data preserves the original script font and preview/export fidelity without a replacement runtime parser. See signature-font-review.json. Existing v6 installer still contains this package; new installer audit required."
     },
     {
       "name": "fontkit",
@@ -119,32 +135,28 @@
         "https://github.com/foliojs/fontkit/tree/fbf3b9ef21eebd219eb73e666faed573af0fba09",
         "https://github.com/niklasvh/base64-arraybuffer"
       ],
-      "nextAction": "Inherited Base64 attribution/terms are retained. Obtain attributable version-bound project-level terms; do not substitute a licence from a different PDF fontkit fork or treat the scoped inherited notice as full-package clearance."
+      "nextAction": "Inherited Base64 attribution/terms are retained. Obtain attributable version-bound project-level terms; do not substitute a licence from a different PDF fontkit fork or treat the scoped inherited notice as full-package clearance.",
+      "licenseCleared": false,
+      "removalReason": "Removed Fontkit signature parser and its exclusive dependency subtree. Fixed, hash-bound OFL glyph/metric data preserves the original script font and preview/export fidelity without a replacement runtime parser. See signature-font-review.json. Existing v6 installer still contains this package; new installer audit required."
     }
   ],
-  "removedInputs": [
-    {
-      "name": "tr46",
-      "removalReason": "Removed Tesseract 7's unused node-fetch fallback using a scoped pnpm override. Both unchanged Node adapters already select global.fetch on the supported Node >=22.13 runtime. The locked node-fetch/whatwg-url/tr46/webidl-conversions chain is absent. Local HTTP image/model English/French recognition passed without cache writes; no source/worker/core bytes were patched.",
-      "licenseCleared": false,
-      "upstreamStatus": "https://github.com/jsdom/tr46/issues/58",
-      "version": "0.0.3",
-      "gitHead": "a8009f9ce80ff5dbe71dd71e203afe4e4c878d28",
-      "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==",
-      "tarball": "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz",
-      "archiveSha256": "164ae1eb32cea353551bbc7f9358dcaae4ffabbe65ec37a92ca464a9570a2a0a",
-      "tree": {
-        "files": 5,
-        "bytes": 268388,
-        "sha256": "9e350a75fbe04de81195554070fefc8ce578ca520c610c0a8f303fcc40b51759"
-      },
-      "manifestSha256": "615087f58ee138fd35c2b414c355b72e36e5919725b8aecc1c34f6a5585b9779",
-      "noticeComplete": false,
-      "finding": "MIT declaration but no full packaged/root source terms. lib/mappingTable.json is generated Unicode mapping data; package metadata alone does not settle the data notice.",
-      "supportingSources": [
-        "https://github.com/Sebmaster/tr46.js/tree/a8009f9ce80ff5dbe71dd71e203afe4e4c878d28"
-      ],
-      "nextAction": "Bind full project terms and the exact Unicode data release/attribution, or remove/replace with tested compatible input handling."
-    }
-  ]
+  "dependencyUseReviewAtBaseline": {
+    "date": "2026-10-19",
+    "commands": [
+      "pnpm why --recursive fontkit dfa brotli @napi-rs/canvas-win32-x64-msvc",
+      "node scripts/verify-windows-npm-notices.mjs --registry"
+    ],
+    "publishedAndInstalledPayloadsMatched": 4,
+    "signaturePath": "packages/pdf-engine/src/signature-font.ts dynamically imports fontkit 2.0.4 to parse the fixed bundled Dancing Script asset, lay out glyph paths and embed the unmodified font. dfa 1.2.0 and brotli 1.3.3 are its transitive dependencies. They cannot be treated as absent, or removed without preserving signature preview/export fidelity and reviewing a replacement.",
+    "optionalNodeCanvas": "The native canvas package is an optional Node-side PDF.js dependency, not an intentional browser/WebView import. This dependency-graph observation is not proof of absence from a specific installer and does not clear native Skia/ICU notices.",
+    "upstreamRecheck": "Read-only checks of fontkit PR 300 and dfa issue 7 still found no authoritative version-bound complete grant. An open unmerged proposed licence and a request for maintainer approval are not treated as accepted terms. No new issue/comment was posted and no posting-permission block was bypassed.",
+    "effectOfProjectLicenseChange": "An open-source licence for PDFrig's own code does not supply missing third-party grants, copyrights, build provenance or data notices. All four gaps stay open."
+  },
+  "currentDependencyUseReview": {
+    "date": "2026-10-20",
+    "removedPackages": ["brotli@1.3.3", "dfa@1.2.0", "fontkit@2.0.4"],
+    "evidence": "signature-font-review.json",
+    "finalReplacementInstallerVerified": false,
+    "licenseCleared": false
+  }
 }

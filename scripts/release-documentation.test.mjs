@@ -34,7 +34,7 @@ test('approved MIT terms cover current first-party manifests without relicensing
   );
   const review = JSON.parse(await load('docs/dependencies/desktop-notice-review.json'));
   assert.equal(review.publicReleaseApproved, false);
-  assert.equal(review.remainingTextGaps, 28);
+  assert.equal(review.remainingTextGaps, 25);
 });
 
 test('VIEW-001 release README links resolve and do not claim unfinished editor capabilities', async () => {
@@ -171,7 +171,7 @@ test('publication audit keeps privacy findings separate from source-license and 
   assert.equal(audit.sourceLicenseFollowup.historicalBuildRecordsRetainOriginalStatus, true);
   assert.equal(audit.sourceLicenseFollowup.installerRebuiltForLicenseChange, false);
   assert.equal(audit.sourceLicenseFollowup.thirdPartyNoticesClearedByProjectLicense, false);
-  assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('28')));
+  assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('24 other-platform')));
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('native OCR')));
 });
 
@@ -334,9 +334,12 @@ test('VIEW-001 All tools installer binds the corrected profile and installed smo
   );
   const { internalWindowsProfile } = await import('./internal-windows-profile.mjs');
   const profile = internalWindowsProfile(['--private-test']);
-  assert.equal(build.version, profile.version);
+  assert.equal(build.version, '0.1.0-alpha.20261019.6'); // Historical artifact, not the next build profile.
   assert.equal(build.identifier, profile.identifier);
-  assert.equal(build.buildDirectory.split('/').at(-1), profile.buildId);
+  assert.equal(
+    build.buildDirectory.split('/').at(-1),
+    'private-test-20261019-all-tools-confirmation',
+  );
   assert.equal(build.publicReleaseApproved, false);
   assert.equal(build.published, false);
   assert.equal(build.installedAppTested, true);
@@ -348,7 +351,7 @@ test('VIEW-001 All tools installer binds the corrected profile and installed smo
   assert.equal(build.notices.unresolvedUpstreamTextGaps, 28);
   assert.equal(build.rejectedPredecessor.uploaded, false);
   assert.equal(build.installerFilename, 'PDFrig-setup.exe');
-  assert.equal(build.originalBuildFilename, `PDFrig_${profile.version}_x64-setup.exe`);
+  assert.equal(build.originalBuildFilename, `PDFrig_${build.version}_x64-setup.exe`);
   assert.match(build.sourceCommit, /^[a-f0-9]{40}$/u);
   assert.match(build.installerSha256, /^[a-f0-9]{64}$/u);
   assert.equal(build.installedSmokeTest.installerExitCode, 0);
@@ -421,11 +424,19 @@ test('notice review accounts for every remaining group without treating texts as
   const supplements = await load('dependencies/desktop-license-supplements.json');
   const qa = await load('operations/windows-installer-qa.json');
   assert.equal(review.publicReleaseApproved, false);
-  assert.equal(review.remainingTextGaps, 28);
-  assert.equal(review.declaredInputCount, qa.noticeAudit.declaredInputCount);
-  assert.equal(review.remainingTextGaps, qa.noticeAudit.remainingTextGaps);
+  assert.equal(review.remainingTextGaps, 25);
+  assert.equal(review.declaredInputCount, 560);
+  assert.equal(review.windowsTargetMetadata.remainingCandidateGaps, 1);
   assert.equal(
-    review.windowsTargetMetadata.remainingCandidateGaps,
+    review.previousDeclaredInputSnapshot.declaredInputCount,
+    qa.noticeAudit.declaredInputCount,
+  );
+  assert.equal(
+    review.previousDeclaredInputSnapshot.remainingTextGaps,
+    qa.noticeAudit.remainingTextGaps,
+  );
+  assert.equal(
+    review.previousDeclaredInputSnapshot.windowsCandidateGaps,
     qa.noticeAudit.windowsCandidateGaps,
   );
   assert.equal(review.resolvedSupplementCount, supplements.packages.length);

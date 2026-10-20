@@ -132,7 +132,7 @@ test('active provenance reviews cannot silently clear the existing notice gate',
   const gaps = all.remainingGroups.find((group) => group.id === 'npm-and-optional-native').packages;
   assert.equal(review.publicReleaseApproved, false);
   assert.equal(review.allNoticesComplete, false);
-  assert.equal(review.packages.length, 4);
+  assert.equal(review.packages.length, 1);
   assert.equal(review.removedInputs[0].name, 'tr46');
   assert.equal(review.removedInputs[0].licenseCleared, false);
   assert.deepEqual(
@@ -148,18 +148,27 @@ test('active provenance reviews cannot silently clear the existing notice gate',
   }
 });
 
-test('signature dependency review does not mistake active font parsing for an excluded input', async () => {
+test('signature dependencies are removed, not retroactively licensed or cleared in older installers', async () => {
   const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
   const review = JSON.parse(await load('docs/dependencies/windows-npm-notice-review.json'));
   const engine = JSON.parse(await load('packages/pdf-engine/package.json'));
   const signature = await load('packages/pdf-engine/src/signature-font.ts');
-  assert.equal(review.dependencyUseReview.publishedAndInstalledPayloadsMatched, 4);
-  assert.equal(engine.dependencies.fontkit, 'catalog:');
-  assert.ok(signature.includes("Promise.all([import('fontkit'), getBytes()])"));
+  assert.equal(review.dependencyUseReviewAtBaseline.publishedAndInstalledPayloadsMatched, 4);
+  assert.equal(engine.dependencies.fontkit, undefined);
+  assert.ok(!signature.includes("import('fontkit')"));
+  const lock = await load('pnpm-lock.yaml');
+  for (const name of ['fontkit', 'dfa', 'brotli']) {
+    assert.ok(!lock.includes(`${name}@`));
+    assert.equal(review.removedInputs.find((entry) => entry.name === name).licenseCleared, false);
+  }
   assert.ok(signature.includes('document.registerFontkit'));
   assert.ok(signature.includes('subset: false'));
-  assert.ok(review.dependencyUseReview.optionalNodeCanvas.includes('not proof of absence'));
   assert.ok(
-    review.dependencyUseReview.effectOfProjectLicenseChange.includes('four gaps stay open'),
+    review.dependencyUseReviewAtBaseline.optionalNodeCanvas.includes('not proof of absence'),
+  );
+  assert.ok(
+    review.dependencyUseReviewAtBaseline.effectOfProjectLicenseChange.includes(
+      'four gaps stay open',
+    ),
   );
 });

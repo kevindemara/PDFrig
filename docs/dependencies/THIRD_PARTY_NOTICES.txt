@@ -20,14 +20,17 @@ No Poppler/qpdf/native OCR container is included in the browser/Windows path.
 This technical adoption review is not a legal certification or a complete
 vulnerability clearance of the compiled native graph. Public release remains gated.
 
-Fontkit 2.0.4 declares MIT (<https://github.com/foliojs/fontkit>), but complete
+Fontkit 2.0.4 was removed from the current source dependency graph with dfa and
+Brotli. Older installers still include it. The following historical notice is
+retained, not a retroactive licence grant. Fontkit declares MIT
+(<https://github.com/foliojs/fontkit>), but complete
 project-level permission/copyright text remains a release gap. Its src/utils.js
 attributes a Base64 decoder to niklasvh/base64-arraybuffer. The original 2012
 Niklas von Hertzen MIT notice is retained verbatim in
 upstream/base64-arraybuffer-1.0.2.txt, with exact source evidence and scoped
 desktop notice retention in fontkit-derived-notice.json. This inherited-code
 notice does not grant or establish permission for the whole Fontkit package.
-Development-only @types/fontkit 2.0.9 declares MIT. Complete final-distribution
+Development-only @types/fontkit 2.0.9 was removed too. Complete final-distribution
 SBOM/notices and licence compatibility review remain required.
 
 Dancing Script, Copyright 2016 The Dancing Script Project Authors
@@ -37,6 +40,12 @@ DancingScript-OFL.txt, also shipped in both application
 public `third-party/DancingScript-OFL.txt` assets. Google Fonts git blob
 `9f521e7fb357ec9ea9820ebd36a9d7b1f72f2935`, 133,636 bytes. Include this non-npm
 asset in release SBOMs; the font retains OFL regardless of the project licence.
+
+The fixed glyph/metric cache named 'PDFrig Script Preview' is derived from that
+same font and also retains OFL-1.1, including original copyright and full terms.
+The original TTF is embedded unchanged. signature-font-review.json records the
+exact font/data hashes, regeneration tool and fidelity checks. FontTools is an
+optional MIT-licensed regeneration tool, not an application dependency.
 
 | Component             | Licence           | Source                                            |
 | --------------------- | ----------------- | ------------------------------------------------- |

@@ -12,12 +12,10 @@ catalog:
   '@cantoo/pdf-lib': 2.9.1
   '@supabase/ssr': 0.12.4
   '@supabase/supabase-js': 2.112.3
-  '@types/fontkit': 2.0.9
   '@types/node': 24.13.3
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.4
   aws4fetch: 1.0.20
-  fontkit: 2.0.4
   pdfjs-dist: 6.2.108
   react: 19.2.8
   react-dom: 19.2.8

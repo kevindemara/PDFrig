@@ -14,6 +14,7 @@ import {
 import { desktopNoticeScope } from './desktop-notice-scope.mjs';
 import { brotliDictionaryEvidence } from './brotli-dictionary-evidence.mjs';
 import { brotliCompressSync } from 'node:zlib';
+import { installedNpmEvidence, npmTreeEvidence } from './npm-notice-evidence.mjs';
 
 const repository = fileURLToPath(new URL('../', import.meta.url));
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -90,28 +91,58 @@ test('README/licence declarations alone are gaps, never generic template permiss
   assert.ok(!result.text.includes('declaration only'));
 });
 
-test('Brotli decoder attribution and full adopted terms are retained without clearing the package gap', async () => {
+function syntheticDictionary() {
+  const bytes = Buffer.from(Array.from({ length: 122784 }, (_, index) => index % 256));
+  return {
+    source: Buffer.from(
+      `exports.dictionary = new Uint8Array([${[...bytes].map((value) => `0x${value.toString(16).padStart(2, '0')},`).join('')}]);`,
+    ),
+    packed: Buffer.from(`module.exports="${brotliCompressSync(bytes).toString('base64')}";`),
+  };
+}
+
+test('historical partial-notice retention refuses gaps and drift using self-contained synthetic inputs', async () => {
   const npmPartials = await loadDesktopNpmPartialNotices(repository);
+  const f = await fixture();
+  const prefix =
+    '/* Copyright 2026 Synthetic Test Authors.\nhttp://www.apache.org/licenses/LICENSE-2.0\nlimitations under the License.\n';
+  npmPartials.noticePrefixSha256 = hash(prefix);
+  for (const source of npmPartials.sources) {
+    const content = Buffer.from(
+      prefix + '*/\n// Synthetic collector control, not upstream code.\n',
+    );
+    await mkdir(path.dirname(path.join(f.directory, source.file)), { recursive: true });
+    await writeFile(path.join(f.directory, source.file), content);
+    source.sha256 = hash(content);
+  }
+  const dictionary = syntheticDictionary();
+  const source = Buffer.concat([Buffer.from(prefix + '*/\n'), dictionary.source]);
+  const packed = dictionary.packed;
+  npmPartials.sources.find((item) => item.file === 'dec/dictionary-data.js').sha256 = hash(source);
+  await writeFile(path.join(f.directory, 'dec/dictionary-data.js'), source);
+  await writeFile(path.join(f.directory, 'dec/dictionary.bin.js'), packed);
+  Object.assign(npmPartials.derivedPayloads[0], brotliDictionaryEvidence(source, packed));
+  npmPartials.binding.tree = npmTreeEvidence(await installedNpmEvidence(f.directory));
   const pkg = {
     ecosystem: 'npm',
     name: 'brotli',
     version: '1.3.3',
     license: 'MIT',
-    directory: path.join(repository, 'node_modules/.pnpm/brotli@1.3.3/node_modules/brotli'),
+    directory: f.directory,
   };
   const options = { root: repository, npmPartials, supplements: { packages: [], texts: [] } };
   const result = await collectDesktopLicenseNotices([pkg], options);
   assert.deepEqual(result.gaps, ['brotli@1.3.3']);
   assert.equal(result.provenance.length, 9);
-  const dictionary = result.provenance.find(
+  const retainedDictionary = result.provenance.find(
     (entry) => entry.origin === 'reviewed-partial-npm-derived-data-notice',
   );
-  assert.equal(dictionary?.file, 'dec/dictionary.bin.js');
-  assert.equal(dictionary?.derivation.bytes, 122784);
+  assert.equal(retainedDictionary?.file, 'dec/dictionary.bin.js');
+  assert.equal(retainedDictionary?.derivation.bytes, 122784);
   assert.ok(result.provenance.every((entry) => entry.packageNoticeComplete === false));
   assert.ok(result.provenance.every((entry) => entry.scopeLicense === 'Apache-2.0'));
   assert.equal(result.components[0].licenses[0].expression, 'MIT');
-  assert.match(result.text, /Copyright 2013 Google Inc/u);
+  assert.match(result.text, /Copyright 2026 Synthetic Test Authors/u);
   assert.match(result.text, /END OF TERMS AND CONDITIONS/u);
   for (const mutation of ['tree', 'terms', 'source', 'prefix', 'dictionary']) {
     const changed = structuredClone(npmPartials);
@@ -131,9 +162,7 @@ test('Brotli decoder attribution and full adopted terms are retained without cle
 });
 
 test('Brotli browser dictionary evidence refuses code, corruption, mismatches and excessive decoded bytes without executing package code', async () => {
-  const dir = path.join(repository, 'node_modules/.pnpm/brotli@1.3.3/node_modules/brotli/dec');
-  const source = await readFile(path.join(dir, 'dictionary-data.js'));
-  const packed = await readFile(path.join(dir, 'dictionary.bin.js'));
+  const { source, packed } = syntheticDictionary();
   assert.equal(brotliDictionaryEvidence(source, packed).bytes, 122784);
   const oversized = Buffer.from(
     `module.exports="${brotliCompressSync(Buffer.alloc(122785)).toString('base64')}";`,
@@ -164,12 +193,20 @@ test('exact reviewed supplements bind archive, original manifest, VCS commit/pat
 
 test('Fontkit inherited Base64 notice is retained without inventing project permission', async () => {
   const fontkitDerivative = await loadFontkitDerivedNotice(repository);
+  const f = await fixture();
+  await mkdir(path.join(f.directory, 'src'));
+  const content = Buffer.from(
+    fontkitDerivative.attribution + '\n// Synthetic collector input, not Fontkit implementation.\n',
+  );
+  await writeFile(path.join(f.directory, 'src/utils.js'), content);
+  fontkitDerivative.sourceSha256 = hash(content);
+  fontkitDerivative.binding.tree = npmTreeEvidence(await installedNpmEvidence(f.directory));
   const pkg = {
     ecosystem: 'npm',
     name: 'fontkit',
     version: '2.0.4',
     license: 'MIT',
-    directory: path.join(repository, 'node_modules/.pnpm/fontkit@2.0.4/node_modules/fontkit'),
+    directory: f.directory,
   };
   const options = { root: repository, fontkitDerivative, supplements: { packages: [], texts: [] } };
   const result = await collectDesktopLicenseNotices([pkg], options);

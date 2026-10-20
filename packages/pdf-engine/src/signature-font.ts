@@ -1,30 +1,29 @@
-import type { Font } from 'fontkit';
 import type { PDFDocument, PDFFont } from '@cantoo/pdf-lib';
 import type { NormalizedRect } from '@pdfmason/editor-core';
+import { createFixedSignatureFont } from './fixed-signature-font.js';
 
-let fontPromise: Promise<Font> | undefined;
+let fontPromise: Promise<ReturnType<typeof createFixedSignatureFont>> | undefined;
 let bytesPromise: Promise<Uint8Array> | undefined;
 const features = { kern: false, liga: false };
 const embeddedFonts = new WeakMap<PDFDocument, Promise<PDFFont>>();
 
-// SIGN-001/002: parse only this reviewed, bundled font. Never user-supplied font bytes.
+// SIGN-001/002: embed only the reviewed font; never parse user-supplied font bytes.
 const getBytes = (): Promise<Uint8Array> => {
-  bytesPromise ??= import('./signature-font-data.js').then(({ signatureFontBase64 }) =>
-    Uint8Array.from(atob(signatureFontBase64), (value) => value.charCodeAt(0)),
-  );
+  bytesPromise ??= import('./signature-font-data.js').then(async ({ signatureFontBase64 }) => {
+    const bytes = Uint8Array.from(atob(signatureFontBase64), (value) => value.charCodeAt(0));
+    if (bytes.length !== 133636) throw new Error('EDIT_SIGNATURE_FONT_INVALID');
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    const hash = Array.from(digest, (value) => value.toString(16).padStart(2, '0')).join('');
+    if (hash !== '21808625578fe8d8cd10cb684be546dca077b27cd03a53a2f1ec11dc743c924c')
+      throw new Error('EDIT_SIGNATURE_FONT_INVALID');
+    return bytes;
+  });
   return bytesPromise;
 };
-const getFont = (): Promise<Font> => {
-  fontPromise ??= Promise.all([import('fontkit'), getBytes()]).then(([fontkit, bytes]) => {
-    // @types/fontkit types this as Node Buffer; the browser entry accepts Uint8Array.
-    // This bridge is isolated to the fixed asset and covered in the real-browser lane.
-    const create = fontkit.create as unknown as (
-      bytes: Uint8Array,
-    ) => ReturnType<typeof fontkit.create>;
-    const font = create(bytes);
-    if (!('layout' in font)) throw new Error('EDIT_SIGNATURE_FONT_INVALID');
-    return font;
-  });
+const getFont = (): Promise<ReturnType<typeof createFixedSignatureFont>> => {
+  fontPromise ??= Promise.all([import('./signature-font-facts.js'), getBytes()]).then(
+    ([{ signatureFontFacts }]) => createFixedSignatureFont(signatureFontFacts),
+  );
   return fontPromise;
 };
 
@@ -32,14 +31,17 @@ export const embedSignatureFont = async (document: PDFDocument): Promise<PDFFont
   const existing = embeddedFonts.get(document);
   if (existing !== undefined) return existing;
   const font = await getFont();
-  document.registerFontkit({ create: () => font });
+  const bytes = await getBytes();
+  document.registerFontkit({
+    create: (input) => {
+      if (input !== bytes) throw new Error('EDIT_SIGNATURE_FONT_INVALID');
+      return font;
+    },
+  });
   // Embed the unmodified upstream font, retaining its original reserved font name.
   // Awaiting above may race with a second placement; recheck before embedding.
   const ready = embeddedFonts.get(document);
   if (ready !== undefined) return ready;
-  const bytes = await getBytes();
-  const current = embeddedFonts.get(document);
-  if (current !== undefined) return current;
   const result = document.embedFont(bytes, { subset: false, features });
   embeddedFonts.set(document, result);
   return result;
@@ -73,7 +75,7 @@ export const layoutScriptSignature = async (
   const height = rect.height * pageHeight;
   if (![width, height].every(Number.isFinite) || width <= 8 || height <= 8)
     throw new Error('EDIT_SIGNATURE_BOX_TOO_SMALL');
-  const run = font.layout(text, features);
+  const run = font.layout(text);
   const advance = run.glyphs.reduce((sum, glyph) => sum + glyph.advanceWidth, 0);
   const fontSize = Math.min(
     label === 'initials' ? 24 : 32,

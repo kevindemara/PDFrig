@@ -336,8 +336,11 @@ coordination. See the [publication audit](docs/operations/publication-audit.json
 - Finish the standalone local/self-hosted production configuration and remove
   obsolete managed-service surfaces.
 - Complete third-party notices/SBOMs. The conservative
-  dependency review still has **28 notice-text gaps**, including **four prospective
-  Windows npm inputs**; a passing policy check does not clear those gaps.
+  dependency review has **25 conservative notice-text gaps**: 24 other-platform
+  Rust inputs and one optional Windows npm input. Fontkit, dfa and Brotli have
+  been removed from the current signature implementation, not retroactively
+  licensed. The older Windows installer still contains them; a replacement
+  needs its own artifact audit. A passing policy check is not release clearance.
 - Complete independent Windows installation, upgrade/uninstall, offline OCR,
   shortcuts/high-DPI, accessibility and export testing.
 

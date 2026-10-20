@@ -20,12 +20,7 @@ const review = JSON.parse(
 assert.equal(review.schemaVersion, 1);
 assert.equal(review.publicReleaseApproved, false);
 assert.equal(review.allNoticesComplete, false);
-const expected = [
-  '@napi-rs/canvas-win32-x64-msvc@1.0.7',
-  'brotli@1.3.3',
-  'dfa@1.2.0',
-  'fontkit@2.0.4',
-];
+const expected = ['@napi-rs/canvas-win32-x64-msvc@1.0.7'];
 assert.deepEqual(
   review.packages.map((entry) => `${entry.name}@${entry.version}`),
   expected,
@@ -63,5 +58,17 @@ for (const entry of review.packages) {
   }
 }
 console.log(
-  `Four Windows npm payload bindings passed (${registry ? 'registry + installed' : 'offline installed'}). Four notice gaps remain; no legal/native clearance.`,
+  `One Windows npm payload binding passed (${registry ? 'registry + installed' : 'offline installed'}). One conservative notice gap remains; no legal/native clearance.`,
+);
+const lock = await readFile(path.join(root, 'pnpm-lock.yaml'), 'utf8');
+const engine = JSON.parse(
+  await readFile(path.join(root, 'packages/pdf-engine/package.json'), 'utf8'),
+);
+for (const name of ['fontkit', 'dfa', 'brotli']) {
+  assert.ok(!lock.includes(`${name}@`), `${name} must stay absent from the lock`);
+  assert.equal(engine.dependencies[name], undefined);
+  assert.equal(review.removedInputs.find((entry) => entry.name === name)?.licenseCleared, false);
+}
+console.log(
+  'Fontkit/dfa/Brotli removed from the current graph, not retroactively licensed. Older installers require their own audit.',
 );

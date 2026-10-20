@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-20",
+  "featureIds": ["SIGN-001", "SIGN-002"],
+  "scope": "Fixed bundled signature font only; not a parser for user-supplied fonts or general-purpose shaping. Original adapter code is MIT; derived outlines and metrics retain OFL-1.1.",
+  "sourceFont": {
+    "name": "DancingScript-Regular",
+    "copyright": "Copyright 2016 The Dancing Script Project Authors",
+    "reservedFontName": "Dancing Script",
+    "license": "OFL-1.1",
+    "terms": "DancingScript-OFL.txt",
+    "gitBlob": "9f521e7fb357ec9ea9820ebd36a9d7b1f72f2935",
+    "bytes": 133636,
+    "sha256": "21808625578fe8d8cd10cb684be546dca077b27cd03a53a2f1ec11dc743c924c",
+    "embeddedTtfModified": false,
+    "hashVerifiedBeforeEmbedding": true
+  },
+  "derivedData": {
+    "name": "PDFrig Script Preview",
+    "license": "OFL-1.1",
+    "file": "packages/pdf-engine/src/signature-font-facts.ts",
+    "sha256Lf": "92d6d2876a9f1033e59d7cbb0ef80e99d2d250f4453581ba9310cb1f0249c50d",
+    "jsonFactsSha256": "a69415300ed61aa98258e6bfdb70005280ba02736af5fc2910a257ad5341e579",
+    "mappedCharacters": 559,
+    "glyphs": 567,
+    "combiningSubstitutions": 8,
+    "internalEnumerationKeysAdmittedAsUserText": false
+  },
+  "optionalRegenerationTool": {
+    "name": "FontTools",
+    "version": "4.67.0",
+    "license": "MIT",
+    "applicationDependency": false,
+    "wheel": "fonttools-4.67.0-py3-none-any.whl",
+    "bytes": 1213142,
+    "sha256": "4304f03ed7f4ba000a8dcc941ad854bfa52e2f3b6112b8f099b6f431cf98e701",
+    "metadata": "https://pypi.org/pypi/fonttools/4.67.0/json",
+    "command": "node scripts/generate-signature-font-facts.mjs <verified-wheel>"
+  },
+  "fidelityChecks": {
+    "exactSvgOutlineMatches": 567,
+    "allSupportedTwoCharacterCases": 312481,
+    "matchingSuccessfulCases": 312452,
+    "retainedRefusals": 29,
+    "baselineSemanticSha256": "93bb104eb5236acf2d9bd5c8fa0034554b13fe122bace61a3e35120fb61f262f",
+    "syntheticEightSampleExportQpdfPassed": true,
+    "oldAndNew144DpiPopplerPngsByteIdentical": true,
+    "realEditorSignaturePreviewDragResizeExportTestPassed": true,
+    "customerDocumentsUsed": false
+  },
+  "removedDependencies": ["fontkit@2.0.4", "dfa@1.2.0", "brotli@1.3.3", "@types/fontkit@2.0.9"],
+  "removedLicensesCleared": false,
+  "olderV6InstallerContainsRemovedPackages": true,
+  "replacementInstallerVerified": false,
+  "sources": [
+    "https://openfontlicense.org/ofl-faq/",
+    "https://github.com/fonttools/fonttools/blob/main/LICENSE"
+  ],
+  "remainingScope": "A new binary and its notices must be audited and tested. This narrowly tested dependency elimination is not full product security or legal certification."
+}
