@@ -24,6 +24,9 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.equal(pins.evidence.deniedRendererBindingsTested, 9);
   assert.equal(pins.evidence.deniedModelBindingsTested, 3);
   assert.equal(pins.evidence.deniedRawOutputBindingsTested, 11);
+  assert.equal(pins.evidence.deniedAuxiliaryBindingsTested, 10);
+  assert.equal(pins.evidence.nativeTextOwnershipVerification.originalControlExit, 42);
+  assert.equal(pins.evidence.nativeTextOwnershipVerification.patchedExit, 0);
   assert.equal(pins.evidence.legacyApiTrapsTested, 4);
   assert.equal(pins.apiSecurityReview.completeNativeVulnerabilityClearance, false);
   assert.equal(
@@ -76,6 +79,10 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(build.includes('patch_renderer_apis(glue)'));
   assert.ok(build.includes('patch_model_apis(glue)'));
   assert.ok(build.includes('patch_output_apis(glue)'));
+  assert.ok(build.includes('patch_auxiliary_apis(glue)'));
+  assert.ok(build.includes('patch_text_ownership(glue)'));
+  assert.ok(build.includes('verify_text_source_contract(core, tess)'));
+  assert.ok(build.includes('test_text_ownership(work)'));
   assert.ok(build.includes('patch_model_loader(model_path.read_bytes())'));
   assert.ok(build.includes("'deniedAlternateImageBindings': denied_image_bindings"));
   assert.ok(build.includes('patch_baseapi(baseapi_path.read_bytes())'));
@@ -90,6 +97,8 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
   assert.ok(bindings.includes('OCR_CANDIDATE_RENDERER_API_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_MODEL_API_DRIFT'));
   assert.ok(bindings.includes('OCR_CANDIDATE_OUTPUT_API_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_AUXILIARY_API_DRIFT'));
+  assert.ok(bindings.includes('OCR_CANDIDATE_TEXT_OWNERSHIP_DRIFT'));
   const dump = await readFile(path.join(wrapper, 'src/worker-script/utils/dump.js'), 'utf8');
   const workerEntry = await readFile(path.join(wrapper, 'src/worker-script/index.js'), 'utf8');
   assert.ok(workerEntry.includes('api.AnalyseLayout()'));
@@ -100,6 +109,17 @@ test('OCR-001 minimal research build is pinned, isolated and never substitutes a
     const method = name.replace(/_\d+$/u, '');
     assert.ok(!dump.includes(`api.${method}(`) && !workerEntry.includes(`api.${method}(`));
   }
+  for (const name of pins.apiSecurityReview.auxiliaryOutputs.deniedBindings) {
+    const method = name.replace(/_\d+$/u, '');
+    assert.ok(!dump.includes(`api.${method}(`) && !workerEntry.includes(`api.${method}(`));
+  }
+  const textHeader = await readFile(path.join(root, 'scripts/ocr-candidate-text.h'));
+  assert.equal(
+    createHash('sha256').update(textHeader).digest('hex'),
+    pins.evidence.nativeTextBridgeSha256,
+  );
+  assert.ok(textHeader.toString().includes('std::unique_ptr<char[]> input(owned)'));
+  assert.ok(textHeader.toString().includes('std::malloc(length + 1)'));
 });
 
 test('OCR-001 native model directory is hash-bound, bounded and independently exercised', async () => {

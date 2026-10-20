@@ -115,6 +115,67 @@ RETAINED_OUTPUT_APIS = {
     'GetJSONText_1': ('char*', 'TessBaseAPI* self, int page_number', 'return self->GetJSONText(page_number);'),
 }
 
+# Not used by the pinned worker: borrowed strings, native arrays/DAWG pointers,
+# and variable getters writing through caller-supplied output pointers.
+AUXILIARY_APIS = {
+    'GetInputName_0': ('const char*', 'TessBaseAPI* self', 'return self->GetInputName();'),
+    'GetDatapath_0': ('const char*', 'TessBaseAPI* self', 'return self->GetDatapath();'),
+    'GetIntVariable_2': ('bool', 'TessBaseAPI* self, const char* name, IntPtr* value',
+                         'return self->GetIntVariable(name, value);'),
+    'GetBoolVariable_2': ('bool', 'TessBaseAPI* self, const char* name, BoolPtr* value',
+                          'return self->GetBoolVariable(name, value);'),
+    'GetDoubleVariable_2': ('bool', 'TessBaseAPI* self, const char* name, DoublePtr* value',
+                            'return self->GetDoubleVariable(name, value);'),
+    'GetStringVariable_1': ('const char*', 'TessBaseAPI* self, const char* name',
+                            'return self->GetStringVariable(name);'),
+    'GetInitLanguagesAsString_0': ('const char*', 'TessBaseAPI* self',
+                                  'return self->GetInitLanguagesAsString();'),
+    'AllWordConfidences_0': ('IntPtr*', 'TessBaseAPI* self', 'return self->AllWordConfidences();'),
+    'GetUnichar_1': ('const char*', 'TessBaseAPI* self, int unichar_id',
+                      'return self->GetUnichar(unichar_id);'),
+    'GetDawg_1': ('const Dawg*', 'TessBaseAPI* self, int i', 'return self->GetDawg(i);'),
+}
+RETAINED_VERSION = ('const char* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_Version_0'
+                    '(TessBaseAPI* self) {\n  return self->Version();\n}')
+
+
+def patch_auxiliary_apis(glue):
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    inventory = re.findall(r'^(?:const char\*|const Dawg\*|IntPtr\*) EMSCRIPTEN_KEEPALIVE (' +
+                           prefix + r'\w+)\(', glue, re.M)
+    inventory += re.findall(r'^bool EMSCRIPTEN_KEEPALIVE (' + prefix +
+                            r'Get\w+Variable_\d+)\(', glue, re.M)
+    expected = [prefix + name for name in AUXILIARY_APIS] + [prefix + 'Version_0']
+    if sorted(inventory) != sorted(expected) or glue.count(RETAINED_VERSION) != 1:
+        raise RuntimeError('OCR_CANDIDATE_AUXILIARY_API_DRIFT')
+    for name, (result, parameters, body) in AUXILIARY_APIS.items():
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_AUXILIARY_API_DRIFT')
+        glue = glue.replace(original, original.replace(body,
+            'abort(); /* PDFrig research: unused borrowed/output-pointer API. */'))
+    return glue, [prefix + name for name in AUXILIARY_APIS]
+
+
+def patch_text_ownership(glue):
+    # The unchanged generated JS copies both results with UTF8ToString then
+    # _free. Tesseract itself allocates these two particular strings with new[].
+    prefix = 'emscripten_bind_TessBaseAPI_'
+    for name in ['GetUTF8Text_0', 'GetJSONText_1']:
+        result, parameters, body = RETAINED_OUTPUT_APIS[name]
+        original = f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n  {body}\n}}'
+        if glue.count(original) != 1:
+            raise RuntimeError('OCR_CANDIDATE_TEXT_OWNERSHIP_DRIFT')
+        guard = 'if (!self) return nullptr;'
+        if name == 'GetJSONText_1':
+            guard = 'if (!self || page_number < 0 || page_number >= 500) return nullptr;'
+        call = body.removeprefix('return ').removesuffix(';')
+        replacement = (f'{result} EMSCRIPTEN_KEEPALIVE {prefix}{name}({parameters}) {{\n'
+                       '  // PDFrig research: owned new[] result -> bounded malloc copy for JS _free.\n'
+                       f'  {guard}\n  return pdfrigCandidateTextForJs({call}, pdfrigCandidateMaxTextBytes);\n}}')
+        glue = glue.replace(original, replacement)
+    return glue
+
 
 def patch_output_apis(glue):
     prefix = 'emscripten_bind_TessBaseAPI_'
@@ -261,6 +322,25 @@ extern "C" int EMSCRIPTEN_KEEPALIVE pdfrig_candidate_leptonica_selftest() {
     pixDestroy(&pix); boxDestroy(&box); boxaDestroy(&boxa);
     ptaDestroy(&pta); pixcmapDestroy(&cmap); pixaDestroy(&pixa);
     if (pix || box || boxa || pta || cmap || pixa) abort();
+  }
+  return 1;
+}
+'''
+
+
+def text_selftest_source():
+    return r'''
+extern "C" int EMSCRIPTEN_KEEPALIVE pdfrig_candidate_text_ownership_selftest() {
+  for (int cycle = 0; cycle < 100; ++cycle) {
+    char* source = new char[9];
+    std::memcpy(source, "OCR 4827", 9);
+    char* copy = pdfrigCandidateTextForJs(source, 8);
+    if (!copy || std::strcmp(copy, "OCR 4827")) abort();
+    std::free(copy);
+    char* over = new char[3];
+    std::memcpy(over, "xx", 3);
+    if (pdfrigCandidateTextForJs(over, 1)) abort();
+    if (pdfrigCandidateTextForJs(nullptr, 8)) abort();
   }
   return 1;
 }

@@ -52,23 +52,41 @@
     "approved reproducible artifact delivery/build-from-source integration; existing application OCR remains unchanged"
   ],
   "evidence": {
-    "date": "2026-10-19",
+    "date": "2026-10-20",
     "variant": "baseline-lstm",
-    "sha256": "af24d1feeb416727524737f138b6abf0486be24fd5b50802721ffa3aaa5569b0",
-    "bytes": 2408529,
+    "sha256": "046a074081ed918489f4c5e98b9ab3d5fb1a2ef02dcb19a953ce31b237a425cb",
+    "bytes": 2408371,
     "repeatedArtifactMatch": true,
-    "buildWarnings": [
-      "Make reported clock skew at the end of the second build. Both builds used independent fresh source trees with no reused object files and produced identical artifact bytes and receipts; each passed actual WASM and browser smoke checks. This is not a warning-free reference-host or production-build certification."
-    ],
-    "reproductionScope": "Two independent fresh source-tree builds of this raw-output-restricted revision produced identical artifacts and receipts under the pinned image. Both passed fourteen patch-contract tests, directory/image preflight sanitizers, RecodeNode controls/ownership sanitizers, public API tests, eleven raw-output traps, three model/config traps, nine renderer traps, six alternate-ingestion traps, 1970 actual WASM model-directory checks, 1072 image refusals and English/French browser smoke. The scan/export suite also passed separately against this candidate and the unchanged application core. Cross-host reproducibility is not certified.",
+    "buildWarnings": [],
+    "reproductionScope": "Two independent fresh source-tree builds produced identical artifact bytes and receipts under the pinned image. Both passed nineteen patch-contract tests, text/directory/image preflight sanitizers, RecodeNode controls, actual WASM API/trap tests and English/French browser smoke. Five scan/export tests passed against this candidate and separately against the unchanged application core. No cross-host or production certification.",
+    "previousRevision": {
+      "date": "2026-10-19",
+      "sha256": "af24d1feeb416727524737f138b6abf0486be24fd5b50802721ffa3aaa5569b0",
+      "bytes": 2408529,
+      "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
+      "modifiedGlueSha256": "ff43f4d087fa32864cf6eef8aef86bc0c4b0dba7b68566be024aec904a360906",
+      "scope": "Previously reproduced raw-output-restricted research candidate, superseded by the owned-text bridge/auxiliary API reduction. Never adopted. Its second build reported clock skew; current builds did not."
+    },
     "englishSyntheticSmoke": true,
     "frenchSyntheticSmoke": true,
     "pixelForgedExifIgnored": true,
     "unexpectedRequests": 0,
     "browserPageErrors": 0,
     "modifiedTesseractCmakeSha256": "1d3d904b0820f0c9db3c4c7eb28fac471753d2d180abf4fc69c523b208a61661",
-    "modifiedWrapperSha256": "a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657",
-    "modifiedGlueSha256": "ff43f4d087fa32864cf6eef8aef86bc0c4b0dba7b68566be024aec904a360906",
+    "modifiedWrapperSha256": "0e16f4d68abb2de8ebafefb8b1b35b568474a2973db5fd8fa0329b80ace955b5",
+    "modifiedGlueSha256": "09e6beca0f1294613d6ab475732297fe0c421dad5e99f880d66fbdb5fdc229c0",
+    "nativeTextBridgeSha256": "1dd78f759944ab3fb0f9af645f9fd09a16ad2cd189daa9037c63228e980ced4d",
+    "deniedAuxiliaryBindingsTested": 10,
+    "nativeTextOwnershipVerification": {
+      "sanitizers": ["address", "undefined"],
+      "warningsAsErrors": true,
+      "cycles": 1000,
+      "deterministicLengths": 2048,
+      "maximumTextBytes": 8388608,
+      "originalControlExit": 42,
+      "patchedExit": 0,
+      "scope": "Actual bridge header; original new[]/free mismatch control and corrected malloc-copy/delete[] ownership. Bounds copying, not prior native recognition/serialization allocation or all engine internals."
+    },
     "modifiedRecodebeamSha256": "785a24665e61242d74608abf85f0de9b4e1af8295da7a4553cfa0d27f47ecc43",
     "modifiedBaseapiSha256": "dbe5d76fb88a318fdf2ea329727c3e65b200ff19919252df929e2f630bd03d84",
     "nativeP6PreflightSha256": "9915881dbe155a95006f24554fe3835cd66edcba70e1a696967a1fc88ca4560a",
@@ -136,17 +154,45 @@
       "Leptonica getters now use public functions; 25 raw/ownership bindings trap instead of exposing layouts or C++-deleting C-managed/possibly borrowed objects. The wider generated API is not fully cleared.",
       "Four unavailable legacy/OSD bindings deliberately abort; the candidate supports only the bounded LSTM recognition path.",
       "The RecodeNode nontrivial memcpy was replaced by a hash-bound upstream member-wise assignment with a self-assignment guard. Targeted ownership sanitizer tests pass; other old-engine code and legacy move-like copy semantics are not cleared.",
-      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate image, nine optional renderer, three unused model/config and eleven raw component/image/iterator output exports abort before argument access. Both worker-used Init3/4 and AnalyseLayout overloads remain available. A strict model directory preflight precedes component allocation. Remaining TessBaseAPI pointer APIs and deeper LSTM/DAWG/unicharset decoding are not cleared by these narrow checks.",
+      "The worker's SetImageFile path admits only canonical bounded P6. Six alternate image, nine optional renderer, three unused model/config, eleven raw component/image/iterator and ten auxiliary output exports abort before argument access. Worker-used Init3/4 and AnalyseLayout overloads remain. Owned JSON/UTF8 text is copied into a bounded malloc buffer compatible with unchanged JS free; the original is released with delete[]. Preceding engine allocation, retained pointer APIs and deeper decoding are not cleared.",
       "Baseline used for all feature-choice URLs in the isolated smoke, not SIMD/relaxed-SIMD validation.",
       "No candidate bytes replaced application assets or were added to Git."
     ]
   },
   "apiSecurityReview": {
-    "date": "2026-10-19",
+    "date": "2026-10-20",
     "completeNativeVulnerabilityClearance": false,
     "scope": "Research artifact only; application runtime is unchanged. Public getter and owned-object self-tests do not establish arbitrary pointer safety or general binding compatibility.",
     "leptonica": "Removed pix_internal.h coupling. Seventeen scalar getters use public APIs and reject null pointers; 25 raw-array, reference-count/internal-capacity and ownership-ambiguous destroy accessors abort. The current worker uses TessBaseAPI JSON text results, not those Leptonica wrappers. The synthetic self-test owns all six object types locally and releases them through their matching public destroy functions for 100 cycles.",
-    "patchContractTests": "Fourteen Python unittest cases execute before the isolated build. They check public Leptonica getters, six alternate-image, nine renderer, three model/config and eleven raw output signatures/bodies; preserve image/Init3/Init4, AnalyseLayout and JSON/UTF8 entries; and reject missing/duplicate/new opaque output overloads, changed calls and repeated application. Native verification checks the corresponding real WASM exports plus the actual model directory loader. English/French worker smoke uses the same candidate.",
+    "patchContractTests": "Nineteen Python unittest cases execute before the isolated build. Exact inventories/bodies cover public Leptonica getters, six alternate-image, nine renderer, three model/config, eleven raw and ten auxiliary output bindings plus the owned JSON/UTF8 bridge. Image/Init3/Init4, AnalyseLayout and Version remain guarded. Missing/duplicate/new overloads, changed calls and reapplication fail closed. Actual WASM traps, model directory and English/French worker smoke are separate checks.",
+    "auxiliaryOutputs": {
+      "deniedBindings": [
+        "GetInputName_0",
+        "GetDatapath_0",
+        "GetIntVariable_2",
+        "GetBoolVariable_2",
+        "GetDoubleVariable_2",
+        "GetStringVariable_1",
+        "GetInitLanguagesAsString_0",
+        "AllWordConfidences_0",
+        "GetUnichar_1",
+        "GetDawg_1"
+      ],
+      "finding": "Unused borrowed strings, owned arrays, DAWG pointers and variable output pointers have ownership/provenance obligations outside the editor protocol. Ten exact bindings abort before accessing self/arguments; unchanged worker-used Version is retained. This is surface reduction, not a claim of exploitable vulnerabilities in those getters.",
+      "verification": "Nineteen patch-contract tests include exact inventory/body drift refusals. Each of the ten real WASM exports traps in a fresh instance with an owned API and in-bounds argument storage. Pinned worker entry/dump are checked not to call these methods.",
+      "remaining": "Other configuration, layout iterator, native result construction and deeper parser internals remain unapproved. Application core is unchanged."
+    },
+    "ownedTextResults": {
+      "originalSourceSha256": {
+        "glue.js": "5cf9ed8d01ec206d4bf770df091c7fd0be7fe889ba0daa6a2f63ad519a657e08",
+        "baseapi.cpp": "13e4b10e89549b70fe9c89c24a4590241d9c880fdcd116ef33de963da91856f1",
+        "jsonrenderer.cpp": "b9ccb07e2cdcfc77ff0bbc27660989231eea80f1aabaf776049f7396d8bf53d6"
+      },
+      "finding": "Pinned native GetUTF8Text/GetJSONText return new[] buffers documented for delete[], but generated JS frees them with _free. Source-level allocation-contract mismatch; not a CVE or WASM exploitability claim.",
+      "change": "Research wrapper takes the owned buffer, copies a complete NUL-terminated result of at most 8 MiB into malloc storage and releases the original with delete[]. Over-budget output refuses without truncation. Generated JS stays unchanged and frees the compatible copy. Null self and JSON page outside 0..499 are refused before native entry.",
+      "verification": "Actual bridge header passes ASan/UBSan, warnings-as-errors, 1000 cycles, 2048 deterministic lengths, UTF8, empty and exact/over-cap cases. Original free(new[]) control exits 42 with allocator mismatch. Research WASM self-test passes 100 cycles; English/French worker recognition passes.",
+      "limits": "The cap bounds bridge copying only, not engine recognition or prior JSON/string construction, arbitrary pointers, other output formats or total native resource use. Research only; not adopted."
+    },
     "rawComponentOutputs": {
       "deniedBindings": [
         "GetInputImage_0",
@@ -162,9 +208,9 @@
         "GetIterator_0"
       ],
       "finding": "Unused TessBaseAPI bindings return raw Pix/Boxa/ResultIterator pointers and accept Pixa/LongStar output pointers with ownership/allocation obligations outside the editor protocol. The research patch keeps their ABI names but unconditionally aborts before self/argument access, allocation or returning a native object. This reduces exposed API, not an assertion of a proven exploit in the original getters.",
-      "retainedWorkerPath": "The pinned worker dump uses GetUTF8Text and GetJSONText for text/blocks; both remain unchanged. AnalyseLayout is used by its layout-only branch and both overloads are retained with exact-body guards. Internal C++ image/component/iterator operations are not patched by replacing these exported wrapper bodies. A regression checks the pinned JS worker does not call the eleven refused methods.",
+      "retainedWorkerPath": "The pinned worker dump uses GetUTF8Text and GetJSONText for text/blocks, now using the owned-text bridge recorded separately. AnalyseLayout's two overloads remain exact-body guarded. Internal C++ image/component/iterator operations are not patched by replacing exported wrapper bodies. A regression checks the pinned JS worker does not call refused methods.",
       "verification": "All eleven real WASM exports trap in fresh instances with an owned TessBaseAPI and allocated in-bounds argument storage. Exact signatures, bodies, inventory, retained calls and drift refusals are contract-tested. English/French recognition, model/input refusals and scan/export comparisons are exercised separately.",
-      "remaining": "Retained layout iterators, string ownership, configuration/variable setters, native JSON/result allocation and other remaining APIs still need review. This research reduction is not adopted in the shipped core, arbitrary-pointer clearance or complete native security approval."
+      "remaining": "Retained layout iterators, configuration/variable setters, native JSON/result construction and other APIs still need review. Owned-text copying is reviewed separately, not whole-native allocation clearance. Not adopted in the shipped core."
     },
     "modelDirectoryAndApis": {
       "source": "src/ccutil/tessdatamanager.cpp",
@@ -222,7 +268,7 @@
     },
     "remaining": [
       "Old Tesseract fork advisories and source delta review; model and PNM decoding coverage beyond the targeted canonical-input preflight mutations.",
-      "Remaining TessBaseAPI pointer/string ownership, configuration and native result allocation outside the current worker path; nine optional renderer and eleven raw output bindings are disabled in the research artifact only.",
+      "Remaining TessBaseAPI pointer/configuration and native result construction; ten auxiliary, nine optional renderer and eleven raw output bindings are disabled in research only. The owned-text bridge does not clear preceding result allocation or other formats.",
       "Final candidate notices, binary/source delivery, SIMD/baseline performance policy and WebView2/export regressions."
     ]
   }

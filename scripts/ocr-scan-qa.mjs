@@ -25,6 +25,9 @@ export async function loadOcrQaCandidate(file) {
   assert.deepEqual(receipt.sourcePins, pins.sources);
   assert.equal(receipt.deniedRendererBindings.length, 9);
   assert.equal(receipt.deniedRawOutputBindings.length, 11);
+  assert.equal(receipt.deniedAuxiliaryBindings.length, 10);
+  assert.equal(receipt.nativeTextOwnershipTests.originalControlExit, 42);
+  assert.equal(receipt.nativeTextOwnershipTests.patchedExit, 0);
   assert.equal(receipt.modifiedGlueSha256, pins.evidence.modifiedGlueSha256);
   assert.equal(receipt.sha256, pins.evidence.sha256);
   const bytes = await readFile(candidate);

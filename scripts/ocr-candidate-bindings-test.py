@@ -3,7 +3,9 @@ import unittest
 from ocr_candidate_bindings import (FIELDS, INPUT_APIS, RENDERER_APIS, MODEL_APIS,
                                     GUARDED_INIT, GUARDED_INIT3, patch_bindings, patch_input_apis,
                                     patch_renderer_apis, patch_model_apis, OUTPUT_APIS,
-                                    RETAINED_OUTPUT_APIS, patch_output_apis)
+                                    RETAINED_OUTPUT_APIS, patch_output_apis,
+                                    AUXILIARY_APIS, RETAINED_VERSION, patch_auxiliary_apis,
+                                    patch_text_ownership)
 
 
 def fixture():
@@ -177,6 +179,60 @@ class OutputApiContract(unittest.TestCase):
                         source + '\nPageIterator* EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_AnalyseLayout_2() {\n}\n']:
             with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_OUTPUT_API_DRIFT'):
                 patch_output_apis(altered)
+
+
+class AuxiliaryApiContract(unittest.TestCase):
+    def fixture(self):
+        return '\n\n'.join(f'{result} EMSCRIPTEN_KEEPALIVE emscripten_bind_TessBaseAPI_{name}'
+                           f'({parameters}) {{\n  {body}\n}}'
+                           for name, (result, parameters, body) in AUXILIARY_APIS.items()) + '\n' + RETAINED_VERSION
+
+    def test_ten_unused_apis_refuse_and_version_survives(self):
+        patched, denied = patch_auxiliary_apis(self.fixture())
+        self.assertEqual(len(denied), 10)
+        self.assertEqual(len(set(denied)), 10)
+        self.assertEqual(patched.count('abort();'), 10)
+        self.assertEqual(patched.count('self->'), 1)
+        self.assertIn(RETAINED_VERSION, patched)
+
+    def test_each_signature_body_missing_duplicate_and_reapplication_refused(self):
+        source = self.fixture()
+        altered = [source + source, patch_auxiliary_apis(source)[0],
+                   source.replace('self->Version();', 'changed;')]
+        for name, (_, parameters, body) in AUXILIARY_APIS.items():
+            altered.extend([source.replace(body, 'changed;', 1),
+                            source.replace(f'{name}({parameters})', f'{name}(Other* self)', 1),
+                            source.replace(f'emscripten_bind_TessBaseAPI_{name}', 'removed', 1)])
+        for changed in altered:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_AUXILIARY_API_DRIFT'):
+                patch_auxiliary_apis(changed)
+
+    def test_new_pointer_outputs_and_overloads_refuse(self):
+        for result in ['const char*', 'const Dawg*', 'IntPtr*', 'bool']:
+            suffix = 'GetNewVariable_3' if result == 'bool' else 'GetNew_3'
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_AUXILIARY_API_DRIFT'):
+                patch_auxiliary_apis(self.fixture() + f'\n{result} EMSCRIPTEN_KEEPALIVE '
+                                     f'emscripten_bind_TessBaseAPI_{suffix}() {{\n}}')
+
+
+class TextOwnershipContract(unittest.TestCase):
+    def test_two_owned_results_use_bounded_bridge_and_page_number_guard(self):
+        patched = patch_text_ownership(output_fixture())
+        self.assertEqual(patched.count('pdfrigCandidateTextForJs('), 2)
+        self.assertIn('page_number < 0 || page_number >= 500', patched)
+        self.assertIn('pdfrigCandidateTextForJs(self->GetUTF8Text(),', patched)
+        self.assertIn('pdfrigCandidateTextForJs(self->GetJSONText(page_number),', patched)
+        self.assertNotIn('_free(', patched)
+
+    def test_drift_missing_duplicate_and_reapplication_refuse(self):
+        source = output_fixture()
+        for altered in [source + source, source.replace('return self->GetUTF8Text();', 'changed;'),
+                        source.replace('GetJSONText_1(TessBaseAPI* self, int page_number)',
+                                       'GetJSONText_1(TessBaseAPI* self, long page_number)'),
+                        source.replace('emscripten_bind_TessBaseAPI_GetUTF8Text_0', 'removed'),
+                        patch_text_ownership(source)]:
+            with self.subTest(), self.assertRaisesRegex(RuntimeError, 'OCR_CANDIDATE_TEXT_OWNERSHIP_DRIFT'):
+                patch_text_ownership(altered)
 
 
 if __name__ == '__main__':

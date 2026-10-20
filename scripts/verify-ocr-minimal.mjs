@@ -56,10 +56,33 @@ assert.equal(receipt.sha256, createHash('sha256').update(coreBytes).digest('hex'
 assert.equal(receipt.sha256, pins.evidence.sha256);
 assert.equal(coreBytes.length, pins.evidence.bytes);
 assert.equal(receipt.leptonicaPrivateLayouts, false);
+assert.equal(receipt.modifiedGlueSha256, pins.evidence.modifiedGlueSha256);
+assert.equal(receipt.modifiedWrapperSha256, pins.evidence.modifiedWrapperSha256);
 assert.equal(
-  receipt.modifiedGlueSha256,
-  'ff43f4d087fa32864cf6eef8aef86bc0c4b0dba7b68566be024aec904a360906',
+  receipt.textOwnershipSourceContract['glue.js'],
+  '5cf9ed8d01ec206d4bf770df091c7fd0be7fe889ba0daa6a2f63ad519a657e08',
 );
+assert.equal(
+  receipt.textOwnershipSourceContract['baseapi.cpp'],
+  '13e4b10e89549b70fe9c89c24a4590241d9c880fdcd116ef33de963da91856f1',
+);
+assert.equal(
+  receipt.textOwnershipSourceContract['jsonrenderer.cpp'],
+  'b9ccb07e2cdcfc77ff0bbc27660989231eea80f1aabaf776049f7396d8bf53d6',
+);
+assert.equal(
+  receipt.nativeTextBridgeSha256,
+  createHash('sha256')
+    .update(await readFile(path.join(root, 'scripts/ocr-candidate-text.h')))
+    .digest('hex'),
+);
+assert.deepEqual(receipt.nativeTextOwnershipTests.sanitizers, ['address', 'undefined']);
+assert.equal(receipt.nativeTextOwnershipTests.originalControlExit, 42);
+assert.equal(receipt.nativeTextOwnershipTests.patchedExit, 0);
+assert.equal(receipt.nativeTextOwnershipTests.cycles, 1000);
+assert.equal(receipt.nativeTextOwnershipTests.deterministicLengths, 2048);
+assert.equal(receipt.nativeTextOwnershipTests.maximumTextBytes, 8388608);
+assert.equal(receipt.textOwnershipSelftestCycles, 100);
 assert.equal(
   receipt.modifiedModelLoaderSha256,
   'bd5e48bb3d3de33fc3d2130dffcefa613caec1904d33c310cb585b848cde3abe',
@@ -120,6 +143,36 @@ for (const name of rendererBindings) {
   assert.throws(() => isolated[`_${name}`](pointer, pointer, 1), WebAssembly.RuntimeError);
 }
 assert.equal(native._pdfrig_candidate_leptonica_selftest(), 1);
+assert.equal(native._pdfrig_candidate_text_ownership_selftest(), 1);
+const auxiliaryBindings = [
+  'GetInputName_0',
+  'GetDatapath_0',
+  'GetIntVariable_2',
+  'GetBoolVariable_2',
+  'GetDoubleVariable_2',
+  'GetStringVariable_1',
+  'GetInitLanguagesAsString_0',
+  'AllWordConfidences_0',
+  'GetUnichar_1',
+  'GetDawg_1',
+].map((name) => `emscripten_bind_TessBaseAPI_${name}`);
+assert.deepEqual(receipt.deniedAuxiliaryBindings, auxiliaryBindings);
+for (const name of auxiliaryBindings) {
+  const isolated = await factory({ printErr: () => undefined });
+  const ownedApi = new isolated.TessBaseAPI();
+  const pointer = isolated._malloc(128);
+  assert.ok(ownedApi.ptr > 0 && pointer > 0);
+  for (let index = 0; index < 128; index++) isolated.setValue(pointer + index, 0, 'i8');
+  assert.throws(
+    () => isolated[`_${name}`](ownedApi.ptr, pointer, pointer),
+    WebAssembly.RuntimeError,
+  );
+}
+const guardedTextApi = new native.TessBaseAPI();
+assert.equal(native._emscripten_bind_TessBaseAPI_GetUTF8Text_0(0), 0);
+for (const page of [-2147483648, -1, 500, 2147483647])
+  assert.equal(native._emscripten_bind_TessBaseAPI_GetJSONText_1(guardedTextApi.ptr, page), 0);
+native.destroy(guardedTextApi);
 const modelBindings = ['Init_2', 'ReadConfigFile_1', 'ReadDebugConfigFile_1'].map(
   (name) => `emscripten_bind_TessBaseAPI_${name}`,
 );
@@ -420,6 +473,9 @@ try {
     deniedRendererBindingsTested: rendererBindings.length,
     deniedModelBindingsTested: modelBindings.length,
     deniedRawOutputBindingsTested: outputBindings.length,
+    deniedAuxiliaryBindingsTested: auxiliaryBindings.length,
+    nativeTextOwnershipTests: receipt.nativeTextOwnershipTests,
+    textOwnershipSelftestCycles: receipt.textOwnershipSelftestCycles,
     nativeModelPreflightTests: receipt.nativeModelPreflightTests,
     actualModelDirectoryCases: modelDirectoryCases,
     pinnedModelDirectoriesAdmitted: 2,

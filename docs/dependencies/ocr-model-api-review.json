@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "featureIds": ["OCR-001"],
-  "reviewDate": "2026-10-19",
+  "reviewDate": "2026-10-20",
   "status": "bounded-model-admission-and-result-review-native-clearance-incomplete",
   "publicReleaseApproved": false,
   "runtimeReplacementApproved": false,
@@ -59,7 +59,9 @@
     "additionalDeniedRendererBindings": 9,
     "additionalDeniedModelBindings": 3,
     "additionalDeniedRawOutputBindings": 11,
-    "scope": "Exact optional native PDF-renderer signatures/bodies, three unused model/config entries and eleven raw component/image/iterator output getters abort in the research candidate before argument access. Existing 25 raw/ownership, six alternate image-input and four legacy traps remain. The worker requires Init3/4, AnalyseLayout and JSON/UTF8 text, which remain unchanged. No research core is installed into the app; retained pointer/string ownership and native result allocation still need review."
+    "additionalDeniedAuxiliaryBindings": 10,
+    "ownedTextBridge": "Pinned GetUTF8Text/GetJSONText allocate new[] but unchanged JS uses _free. The research bridge releases originals with delete[], provides malloc-owned complete copies of at most 8 MiB and refuses over-budget results. Null self and JSON page outside 0..499 are refused. Original ASan mismatch control exits 42; actual bridge passes 1000 cycles, 2048 deterministic lengths, UTF8 and exact/over-cap cases. Cap does not bound prior engine serialization/allocation. No CVE/exploitability assertion.",
+    "scope": "Exact optional renderer, model/config, raw component and ten auxiliary borrowed-string/array/variable-output/DAWG entries abort before argument access. Existing traps remain. Init3/4, AnalyseLayout and Version are retained. JSON/UTF8 use the separately reviewed ownership bridge. Nineteen patch-contract tests, real WASM traps and two independently reproduced builds pass. No candidate is installed into the app; retained pointers, other formats, native result construction and deeper parser internals remain unapproved."
   },
   "verification": {
     "unitSuites": [
@@ -70,7 +72,7 @@
     "browserSuite": "tests/browser/ocr-scans.spec.ts",
     "runtimesTested": [
       "pinned application core",
-      "raw-output-restricted baseline research candidate"
+      "owned-text-bridge and auxiliary-output-restricted baseline research candidate"
     ],
     "syntheticScanCasesPerRuntime": 4,
     "languages": ["eng", "fra"],
@@ -90,6 +92,6 @@
     "Exact native fork/API ownership and traineddata/LSTM/PNM parser review and broader native sanitizer/fuzz coverage.",
     "Final candidate source-to-binary integration, notices/security approval and baseline/SIMD performance/platform policy; candidate is not adopted.",
     "Recognition/alignment benchmarks and browser diversity beyond the synthetic Chromium cases; reference Windows WebView2/offline installer testing on an approved host.",
-    "Remaining Windows dependency notice gaps and exact final artifact clearance. The user-approved MIT licence for PDFrig's own code does not clear third-party obligations. No billing or Windows security changes are authorized by this review."
+    "Exact final artifact clearance and candidate licence integration. Prior Windows notice gaps were removed from the replacement dependency graph; that does not clear an unadopted candidate or other-platform dependencies. MIT for PDFrig does not supersede third-party terms. No billing or Windows security changes."
   ]
 }

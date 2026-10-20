@@ -6,10 +6,13 @@ import re
 import shutil
 import subprocess
 import tarfile
-from ocr_candidate_bindings import patch_bindings, patch_input_apis, patch_renderer_apis, patch_model_apis, patch_output_apis, selftest_source
+from ocr_candidate_bindings import (patch_bindings, patch_input_apis, patch_renderer_apis,
+                                    patch_model_apis, patch_output_apis, selftest_source,
+                                    patch_auxiliary_apis, patch_text_ownership, text_selftest_source)
 from ocr_candidate_recode import patch_recodebeam, test_backport
 from ocr_candidate_p6 import patch_baseapi, test_preflight
 from ocr_candidate_model import patch_model_loader, test_model_directory
+from ocr_candidate_text import test_text_ownership, verify_text_source_contract
 
 work = Path('/work')
 pins = json.loads((work / 'source-pins.json').read_text())
@@ -20,6 +23,7 @@ def run(*args):
 run('python3', str(work / 'bindings_test.py'))
 p6_tests = test_preflight(work)
 model_tests = test_model_directory(work)
+text_tests = test_text_ownership(work)
 
 def unpack(source, destination):
     archive = work / (source['id'] + '.tar.gz')
@@ -58,6 +62,7 @@ for source in pins['sources']:
 # Copy the pinned toolchain cache into the only writable mount, never alter the image.
 shutil.copytree('/emsdk/upstream/emscripten/cache', work / 'em-cache')
 tess = locations['tesseract']
+text_source_contract = verify_text_source_contract(core, tess)
 model_path = tess / 'src/ccutil/tessdatamanager.cpp'
 model_path.write_bytes(patch_model_loader(model_path.read_bytes()))
 shutil.copyfile(work / 'pdfrig-candidate-model.h', tess / 'src/ccutil/pdfrig-candidate-model.h')
@@ -86,6 +91,11 @@ if wrapper.count('#include <allheaders.h>') != 1:
 # Do not expose private Leptonica layouts merely to compile old generated glue.
 if 'pix_internal.h' in wrapper:
     raise RuntimeError('OCR_CANDIDATE_PRIVATE_LAYOUT')
+if hashlib.sha256(wrapper_path.read_bytes()).hexdigest() != 'a58d5f023f4835b3132bc18169b5ab12eef94c604fdcc1255740eb488f637657':
+    raise RuntimeError('OCR_CANDIDATE_WRAPPER_SOURCE_DRIFT')
+wrapper = wrapper.replace('#include <allheaders.h>', '#include <allheaders.h>\n#include "pdfrig-candidate-text.h" // PDFrig research text-ownership bridge')
+shutil.copyfile(work / 'pdfrig-candidate-text.h', core / 'javascript/src/pdfrig-candidate-text.h')
+wrapper_path.write_text(wrapper)
 glue_path = core / 'javascript/src/glue.cpp'
 glue = glue_path.read_text()
 glue, denied_bindings = patch_bindings(glue)
@@ -93,6 +103,8 @@ glue, denied_image_bindings = patch_input_apis(glue)
 glue, denied_renderer_bindings = patch_renderer_apis(glue)
 glue, denied_model_bindings = patch_model_apis(glue)
 glue, denied_output_bindings = patch_output_apis(glue)
+glue, denied_auxiliary_bindings = patch_auxiliary_apis(glue)
+glue = patch_text_ownership(glue)
 for unavailable in ['self->ClearAdaptiveClassifier();',
                     'return self->GetOsdText(page_number);',
                     'return self->DetectOS(osr);', 'self->print_scores();']:
@@ -103,6 +115,7 @@ for unavailable in ['self->ClearAdaptiveClassifier();',
     glue = glue.replace(unavailable, 'abort(); /* PDFrig candidate: unsupported legacy/OSD API. */')
 # glue.cpp closes its own extern-C block; these names live in namespace tesseract.
 glue += selftest_source()
+glue += text_selftest_source()
 glue_path.write_text(glue)
 
 dep = work / 'dep'
@@ -156,6 +169,11 @@ result = {'schemaVersion': 1, 'publicReleaseApproved': False,
           'deniedRendererBindings': denied_renderer_bindings,
           'deniedModelBindings': denied_model_bindings,
           'deniedRawOutputBindings': denied_output_bindings,
+          'deniedAuxiliaryBindings': denied_auxiliary_bindings,
+          'textOwnershipSourceContract': text_source_contract,
+          'nativeTextBridgeSha256': hashlib.sha256((work / 'pdfrig-candidate-text.h').read_bytes()).hexdigest(),
+          'nativeTextOwnershipTests': text_tests,
+          'textOwnershipSelftestCycles': 100,
           'publicApiSelftestCycles': 100,
           'disabledCodecMacros': disabled,
           'linkedApplicationArchives': sorted(Path(archive).name for archive in archives),
