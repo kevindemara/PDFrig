@@ -8,8 +8,8 @@ export function internalWindowsProfile(args = []) {
   return Object.freeze(
     branded
       ? {
-          version: '0.1.0-alpha.20261019.4',
-          buildId: 'private-test-20261019-pdfrig',
+          version: '0.1.0-alpha.20261019.5',
+          buildId: 'private-test-20261019-all-tools',
           productName: 'PDFrig',
           title: 'PDFrig',
           identifier: 'com.pdfmason.desktop.privatetest',

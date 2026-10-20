@@ -238,11 +238,10 @@ test('branded private build records artifact identity without claiming Windows o
       'utf8',
     ),
   );
-  const { internalWindowsProfile } = await import('./internal-windows-profile.mjs');
-  const profile = internalWindowsProfile(['--private-test']);
-  assert.equal(review.version, profile.version);
-  assert.equal(review.identifier, profile.identifier);
-  assert.equal(review.buildDirectory.split('/').at(-1), profile.buildId);
+  // Historical artifact evidence must not be relabeled when the next build is versioned.
+  assert.equal(review.version, '0.1.0-alpha.20261019.4');
+  assert.equal(review.identifier, 'com.pdfmason.desktop.privatetest');
+  assert.equal(review.buildDirectory.split('/').at(-1), 'private-test-20261019-pdfrig');
   assert.equal(review.publicReleaseApproved, false);
   assert.equal(review.installedAppTested, false);
   assert.equal(review.published, false);
@@ -255,7 +254,7 @@ test('branded private build records artifact identity without claiming Windows o
   assert.match(review.sourceCommit, /^[a-f0-9]{40}$/u);
   assert.match(review.installerSha256, /^[a-f0-9]{64}$/u);
   assert.equal(review.installerFilename, 'PDFrig-setup.exe');
-  assert.equal(review.originalBuildFilename, `PDFrig_${profile.version}_x64-setup.exe`);
+  assert.equal(review.originalBuildFilename, `PDFrig_${review.version}_x64-setup.exe`);
   assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
 });
 
