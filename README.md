@@ -275,6 +275,21 @@ approve any prerequisite installations yourself. It builds an **internal QA
 installer**, not a public release; using AI does not remove licensing, security
 or manual testing requirements.
 
+**Purpose of BUILD_WITH_AI.txt:** this is a copy-and-paste task brief for an
+optional coding assistant, not an executable, automatic installer or AI feature
+inside PDFrig. It guides prerequisite checks, locked source builds, tests,
+internal packaging and checksum reporting, and requires approval before installing
+tools or the app. Users downloading a finished installer do not need this file.
+Maintainers can include it in a source-only build handoff between authorized PCs;
+record the exact source commit and archive checksum, and exclude credentials,
+private keys and generated installers from that source handoff.
+
+If another PC is already building a chosen revision, do not change its checkout
+mid-build to pick up documentation updates. Record the revision actually built.
+After artifact verification and the applicable release approvals, attach the
+installer and matching checksum to a GitHub Release asset, not a source commit.
+A successful build alone is not public-release approval.
+
 Install Rust **1.98.0**, the free Microsoft C++ Build Tools workload and Windows
 SDK, plus WebView2. See the [official Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
 First complete the Git/Node.js/pnpm setup in [Quick start](#quick-start), clone the

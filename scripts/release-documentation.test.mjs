@@ -88,6 +88,13 @@ test('Windows download routes put finished-app installation before optional sour
   assert.ok(source.includes('internal QA'));
   assert.ok(source.includes('pnpm desktop:dev'));
   assert.ok(source.includes('it does not install PDFrig'));
+  assert.ok(source.includes('Purpose of BUILD_WITH_AI.txt'));
+  assert.ok(source.includes('not an executable, automatic installer or AI feature'));
+  assert.ok(source.includes('Users downloading a finished installer do not need this file'));
+  assert.ok(source.includes('exact source commit and archive checksum'));
+  assert.ok(source.includes('do not change its checkout'));
+  assert.ok(source.includes('GitHub Release asset, not a source commit'));
+  assert.ok(source.includes('A successful build alone is not public-release approval'));
 });
 
 test('tool-neutral build prompt tracks pinned tools, real commands and review records', async () => {
