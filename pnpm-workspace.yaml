@@ -13,11 +13,11 @@ catalog:
   '@supabase/ssr': 0.12.4
   '@supabase/supabase-js': 2.112.3
   '@types/node': 24.13.3
-  '@types/react': 19.2.18
+  '@types/react': 19.3.0
   '@types/react-dom': 19.2.4
   aws4fetch: 1.0.20
   pdfjs-dist: 6.2.108
-  react: 19.2.8
+  react: 19.3.1
   react-dom: 19.2.8
   stripe: 22.5.0
   typescript: 6.0.3
