@@ -215,7 +215,8 @@ test('branded private build records artifact identity without claiming Windows o
   assert.equal(review.observedBuildMetadata.generatedShortcutName, 'PDFrig.lnk');
   assert.match(review.sourceCommit, /^[a-f0-9]{40}$/u);
   assert.match(review.installerSha256, /^[a-f0-9]{64}$/u);
-  assert.equal(review.installerFilename, `PDFrig_${profile.version}_x64-setup.exe`);
+  assert.equal(review.installerFilename, 'PDFrig-setup.exe');
+  assert.equal(review.originalBuildFilename, `PDFrig_${profile.version}_x64-setup.exe`);
   assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
 });
 
