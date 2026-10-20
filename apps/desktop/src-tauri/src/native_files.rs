@@ -363,7 +363,13 @@ fn validate_save_selection(path: PathBuf, kind: SaveKind) -> Result<PathBuf, Str
     if !parent_metadata.is_dir() {
         return Err(error("NATIVE_SAVE_PATH_BLOCKED"));
     }
-    Ok(path)
+    // Existing parent can be canonicalized even though the new destination
+    // cannot. Windows canonical paths retain extended-length UTF-16 support.
+    let filename = path
+        .file_name()
+        .ok_or_else(|| error("NATIVE_SAVE_PATH_BLOCKED"))?;
+    let directory = fs::canonicalize(parent).map_err(|_| error("NATIVE_SAVE_PATH_BLOCKED"))?;
+    Ok(directory.join(filename))
 }
 
 fn create_save_transfer(
@@ -421,24 +427,68 @@ fn discard_save(transfer: SaveTransfer) {
     let _ = fs::remove_file(temporary);
 }
 
+#[cfg(target_os = "windows")]
+fn commit_new_file(temporary: &Path, target: &Path) -> std::io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{MOVEFILE_WRITE_THROUGH, MoveFileExW};
+
+    let terminated = |path: &Path| -> std::io::Result<Vec<u16>> {
+        let mut wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+        if wide.contains(&0) {
+            return Err(std::io::Error::from(std::io::ErrorKind::InvalidInput));
+        }
+        wide.push(0);
+        Ok(wide)
+    };
+    let source = terminated(temporary)?;
+    let destination = terminated(target)?;
+    // SAFETY: both UTF-16 buffers are NUL-terminated and live through the call.
+    // Never use REPLACE_EXISTING, COPY_ALLOWED or a std::fs::rename fallback:
+    // the destination must remain protected even if created after selection.
+    let moved = unsafe {
+        MoveFileExW(
+            source.as_ptr(),
+            destination.as_ptr(),
+            MOVEFILE_WRITE_THROUGH,
+        )
+    };
+    if moved == 0 {
+        Err(std::io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn commit_new_file(temporary: &Path, target: &Path) -> std::io::Result<()> {
+    fs::hard_link(temporary, target).and_then(|()| fs::remove_file(temporary))
+}
+
 fn finalize_save(transfer: SaveTransfer) -> Result<(), String> {
+    let prepared = (|| {
+        if transfer.next_offset != transfer.expected_size
+            || transfer
+                .file
+                .metadata()
+                .map_err(|_| error("NATIVE_WRITE_FAILED"))?
+                .len()
+                != transfer.expected_size
+        {
+            return Err(error("NATIVE_FILE_CHANGED"));
+        }
+        transfer
+            .file
+            .sync_all()
+            .map_err(|_| error("NATIVE_WRITE_FAILED"))
+    })();
+    if let Err(failure) = prepared {
+        discard_save(transfer);
+        return Err(failure);
+    }
     let temporary = transfer.temporary.clone();
     let target = transfer.target.clone();
-    transfer
-        .file
-        .sync_all()
-        .map_err(|_| error("NATIVE_WRITE_FAILED"))?;
     drop(transfer.file);
-    if fs::symlink_metadata(&target).is_ok() {
-        let _ = fs::remove_file(&temporary);
-        return Err(error("NATIVE_OVERWRITE_BLOCKED"));
-    }
-
-    #[cfg(target_os = "windows")]
-    let committed = fs::rename(&temporary, &target);
-
-    #[cfg(not(target_os = "windows"))]
-    let committed = fs::hard_link(&temporary, &target).and_then(|()| fs::remove_file(&temporary));
+    let committed = commit_new_file(&temporary, &target);
 
     if let Err(failure) = committed {
         let _ = fs::remove_file(&temporary);
@@ -949,6 +999,126 @@ mod tests {
         discard_save(transfer);
         assert!(!temporary.exists());
         assert!(!path.exists());
+    }
+
+    #[test]
+    fn commit_primitive_never_replaces_an_existing_destination() {
+        let source = temporary_pdf_path("atomic-source");
+        let target = temporary_pdf_path("atomic-destination");
+        fs::write(&source, b"new synthetic output").expect("source should exist");
+        fs::write(&target, b"existing synthetic output").expect("target should exist");
+        assert!(commit_new_file(&source, &target).is_err());
+        assert_eq!(fs::read(&source).unwrap(), b"new synthetic output");
+        assert_eq!(fs::read(&target).unwrap(), b"existing synthetic output");
+        fs::remove_file(source).unwrap();
+        fs::remove_file(target).unwrap();
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn no_replace_save_supports_unicode_and_extended_length_paths() {
+        let root = temporary_pdf_path("long-directory").with_extension("");
+        fs::create_dir(&root).unwrap();
+        let canonical_root = fs::canonicalize(&root).unwrap();
+        let mut directories = vec![canonical_root.clone()];
+        let mut directory = canonical_root;
+        for _ in 0..7 {
+            directory = directory.join("synthetic-nested-folder-4827");
+            fs::create_dir(&directory).unwrap();
+            directories.push(directory.clone());
+        }
+        let path = directory.join("synthetic-é-4827.pdf");
+        assert!(path.as_os_str().len() > 260);
+        let bytes = b"%PDF-1.7\nsynthetic unicode long-path output";
+        let mut transfer =
+            create_save_transfer(path.clone(), bytes.len() as u64, SaveKind::Pdf).unwrap();
+        transfer.file.write_all(bytes).unwrap();
+        transfer.next_offset = bytes.len() as u64;
+        finalize_save(transfer).unwrap();
+        assert_eq!(fs::read(&path).unwrap(), bytes);
+        fs::remove_file(path).unwrap();
+        for created in directories.into_iter().rev() {
+            fs::remove_dir(created).unwrap();
+        }
+    }
+
+    #[test]
+    fn late_destination_collision_preserves_winner_and_cleans_partial() {
+        let path = temporary_pdf_path("late-collision");
+        let bytes = b"%PDF-1.7\nsynthetic new output";
+        let mut transfer = create_save_transfer(path.clone(), bytes.len() as u64, SaveKind::Pdf)
+            .expect("selection should be free initially");
+        transfer.file.write_all(bytes).unwrap();
+        transfer.next_offset = bytes.len() as u64;
+        let partial = transfer.temporary.clone();
+        fs::write(&path, b"a later synthetic file").unwrap();
+        assert_eq!(
+            finalize_save(transfer),
+            Err(error("NATIVE_OVERWRITE_BLOCKED"))
+        );
+        assert_eq!(fs::read(&path).unwrap(), b"a later synthetic file");
+        assert!(!partial.exists());
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn competing_finalizers_commit_exactly_one_complete_copy() {
+        let path = temporary_pdf_path("competing-finalizers");
+        let barrier = std::sync::Arc::new(std::sync::Barrier::new(2));
+        let mut threads = Vec::new();
+        let mut partials = Vec::new();
+        let copies = [b"%PDF-1.7\nsynthetic first", b"%PDF-1.7\nsynthetic other"];
+        for bytes in copies {
+            let mut transfer =
+                create_save_transfer(path.clone(), bytes.len() as u64, SaveKind::Pdf).unwrap();
+            transfer.file.write_all(bytes).unwrap();
+            transfer.next_offset = bytes.len() as u64;
+            partials.push(transfer.temporary.clone());
+            let ready = barrier.clone();
+            threads.push(std::thread::spawn(move || {
+                ready.wait();
+                finalize_save(transfer)
+            }));
+        }
+        let results: Vec<_> = threads
+            .into_iter()
+            .map(|thread| thread.join().unwrap())
+            .collect();
+        assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
+        assert_eq!(
+            results
+                .iter()
+                .filter(|result| **result == Err(error("NATIVE_OVERWRITE_BLOCKED")))
+                .count(),
+            1
+        );
+        let saved = fs::read(&path).unwrap();
+        assert!(copies.iter().any(|bytes| saved == *bytes));
+        assert!(partials.iter().all(|partial| !partial.exists()));
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn finalizer_refuses_incomplete_or_changed_length_without_publishing() {
+        for changed_length in [false, true] {
+            let path = temporary_pdf_path("incomplete-finalizer");
+            let bytes = b"%PDF-1.7\nsynthetic output";
+            let mut transfer =
+                create_save_transfer(path.clone(), bytes.len() as u64, SaveKind::Pdf).unwrap();
+            transfer.file.write_all(bytes).unwrap();
+            transfer.next_offset = if changed_length {
+                bytes.len() as u64
+            } else {
+                0
+            };
+            if changed_length {
+                transfer.file.set_len(5).unwrap();
+            }
+            let partial = transfer.temporary.clone();
+            assert_eq!(finalize_save(transfer), Err(error("NATIVE_FILE_CHANGED")));
+            assert!(!path.exists());
+            assert!(!partial.exists());
+        }
     }
 
     #[test]
