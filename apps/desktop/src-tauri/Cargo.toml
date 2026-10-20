@@ -30,5 +30,5 @@ windows-sys = { version = "=0.61.2", features = ["Win32_Foundation", "Win32_Secu
 zeroize = "=1.9.0"
 
 [dev-dependencies]
-minisign = "=0.9.1"
+minisign = "=0.10.0"
 minisign-verify = "=0.2.5"
