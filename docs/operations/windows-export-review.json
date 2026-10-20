@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "featureIds": ["OCR-003", "OCR-001", "EDIT-002"],
+  "scope": "Windows PDF and JSON comment-report save transport; no PDF content, permissions, document processing or file-overwrite policy changes",
+  "publicReleaseApproved": false,
+  "fixSourceCommit": "9c93a2c9b518dd107e123debd3879cf7e2cb6769",
+  "affectedPrivateRelease": {
+    "tag": "private-test-20261019-1",
+    "sourceBaseline": "3955e57f46e783937f29e3b167129e4fef38c6fb",
+    "additionalSource": "source-packaging.patch attached to that release; not a source commit",
+    "installerSha256": "8e99614983b68b591f1ef54ea5ce7b9a5c100d01c31f7c657d8a829b58040c9b",
+    "ownerReportedFailure": "Export refused after choosing a new filename; same generic save failure recorded in the release build receipt"
+  },
+  "cause": "Tauri 2.11.5 sets binary IPC Content-Type to application/octet-stream. The app incorrectly used that transport header as document MIME, so the native PDF/JSON save handler rejected the first chunk.",
+  "repair": "Keep binary Content-Type application/octet-stream and carry the document MIME in x-pdfmason-content-type. Independently validate both headers against the native selection kind; preserve all existing raw-body, size, header, token, offset, completion, cancellation and destination/overwrite checks.",
+  "tests": {
+    "sharedCheckSuite": "pnpm check passed",
+    "desktopAdapterAndTransportTests": 30,
+    "pinnedRealTransportRegressionTests": 9,
+    "realTransportFixtures": "apps/desktop/test-fixtures/tauri-ipc/provenance.json; unmodified scripts and full MIT terms; isolated test VM with simulated native responses, not live WebView verification",
+    "nativeUnitTests": 13,
+    "nativeSignatureVerifierTests": 3,
+    "rustFormatting": "passed",
+    "rustClippyAllTargetsWarningsDenied": "passed",
+    "limitations": "Actual installed WebView export, independent exported-PDF comparison and clean-machine compatibility still require testing. Unit/transport tests do not establish installed-app correctness."
+  },
+  "currentHost": {
+    "priorBlock": "Code Integrity event 3077 on 2026-10-14: build-script-build.exe launched by cargo.exe, policy VerifiedAndReputableDesktop, status 0xc0e90002",
+    "currentReadOnlyIndicators": {
+      "verifiedAndReputablePolicyState": 0,
+      "usermodeCodeIntegrityPolicyEnforcementStatus": 0,
+      "kernelCodeIntegrityPolicyEnforcementStatus": 2
+    },
+    "activePolicyList": "CiTool read-only list returned access denied; no elevated query or policy changes attempted",
+    "securitySettingsChangedByThisWork": false,
+    "reasonForDifferenceFromHistoricalState": "unknown; indicators were read before the normal locked native tests, which completed successfully on this same host",
+    "nativeTestsPassedUnderNormalCurrentPolicy": true
+  },
+  "qaBuild": {
+    "command": "pnpm desktop:internal-build --installer-qa",
+    "version": "0.1.0-alpha.20261019.2",
+    "isolatedIdentifier": "com.pdfmason.desktop.installerqa",
+    "buildDirectory": "apps/desktop/src-tauri/target/installer-qa-20261019-export-fix",
+    "status": "passed-local-internal-build",
+    "installerProduced": true,
+    "installerFilename": "PDFrig Installer QA_0.1.0-alpha.20261019.2_x64-setup.exe",
+    "installerBytes": 16305762,
+    "installerSha256": "b1296e04d3acc391b0c8c06c99bdbf6edfb7a50b51a4ccd632da92287b44f4e5",
+    "authenticode": "NotSigned",
+    "updaterTestSignature": "verified; tamper, truncation and wrong-key cases rejected",
+    "ephemeralPrivateKeyCleanupConfirmed": true,
+    "installedAppTested": false,
+    "published": false
+  },
+  "remainingGates": [
+    "installed-app save/export to a new filename, cancellation, refusal of existing destinations, PDF/JSON type separation and independent PDF output comparison",
+    "clean Windows install/upgrade/uninstall, taskbar/high-DPI icons, WebView2 and offline OCR verification",
+    "complete source/distribution licensing, final artifact notices/SBOM and native OCR security review"
+  ]
+}

@@ -208,12 +208,18 @@ apply; hosting, domains and optional providers are not guaranteed free.
 ## Windows
 
 The shared editor runs in a Tauri 2 Windows shell. Building it requires the
-separate free Rust/C++/Windows SDK toolchain. Internal unsigned NSIS build
-orchestration exists for controlled testing, but the current native build is
-blocked by Windows Application Control. **No current-source installer has been
-produced or install-tested. Windows compliance is not certified.** Old internal
-artifacts do not verify today's source. Clean-machine installation, upgrade/uninstall,
-notices and release review remain open; see the [Windows QA record](docs/operations/windows-installer-qa.json).
+separate free Rust/C++/Windows SDK toolchain. The original build host previously
+blocked a Rust helper under Windows Application Control. A later read-only check
+found user-mode enforcement off, and normal locked native tests then passed on
+that same PC; no security settings were changed by this work. The original block
+remains in the [historical Windows QA record](docs/operations/windows-installer-qa.json).
+
+An older private test prerelease exists, but its installed-app export failed.
+The transport MIME mismatch is now repaired in source; current evidence and the
+QA installer build are recorded in the [export-fix review](docs/operations/windows-export-review.json).
+**No rebuilt installer with this export fix has been install-tested. Windows compliance is not certified.**
+Installed export, clean-machine installation, upgrade/uninstall, offline OCR,
+notices and release review remain open. Old installers do not verify new source.
 
 Choose the download that matches your goal:
 
@@ -226,7 +232,7 @@ Choose the download that matches your goal:
 ### Install the finished Windows app
 
 **For ordinary users: install the finished app; do not build it yourself.**
-There is no supported download yet: **no installer is published yet**. The steps
+There is no supported public download yet: **no supported public installer is published yet**. The steps
 below describe the intended path after a reviewed installer is available, not
 evidence that installation or Windows compatibility has already been verified.
 

@@ -53,7 +53,7 @@ test('Windows setup instructions distinguish development, future installer and u
   assert.ok(readme.includes('x86_64-pc-windows-msvc'));
   assert.ok(readme.includes('it does not install PDFrig'));
   assert.ok(readme.includes('Windows compliance is not certified'));
-  assert.ok(readme.includes('No current-source installer'));
+  assert.ok(readme.includes('No rebuilt installer with this export fix has been install-tested'));
   assert.ok(readme.includes('Windows **Installed apps**'));
   assert.ok(readme.includes('No credentials or paid services are needed'));
   assert.ok(readme.includes('do not disable Application Control'));
@@ -76,7 +76,7 @@ test('Windows download routes put finished-app installation before optional sour
   assert.ok(readme.includes('[BUILD_WITH_AI.txt](BUILD_WITH_AI.txt)'));
   const installation = readme.slice(installStart, buildStart);
   assert.match(installation, /https:\/\/github\.com\/kevindemara\/PDFrig\/releases/u);
-  assert.ok(installation.includes('no installer is published yet'));
+  assert.ok(installation.includes('no supported public installer is published yet'));
   assert.ok(installation.includes('Source code (zip)'));
   assert.ok(installation.includes('Source code (tar.gz)'));
   assert.match(installation, /not need Node\.js, pnpm, Rust, C\+\+ Build\s+Tools/u);
@@ -163,6 +163,28 @@ test('AI build instructions retain approval gates instead of treating a build as
     guide,
     /--ignore-scripts|--no-verify|--dangerously|--skip|ExecutionPolicy Bypass/iu,
   );
+});
+
+test('Windows export repair records local build success without claiming installed-app or security clearance', async () => {
+  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+  const review = JSON.parse(await load('docs/operations/windows-export-review.json'));
+  const builder = await load('scripts/build-internal-windows.mjs');
+  assert.equal(review.publicReleaseApproved, false);
+  assert.equal(review.currentHost.securitySettingsChangedByThisWork, false);
+  assert.equal(review.currentHost.nativeTestsPassedUnderNormalCurrentPolicy, true);
+  assert.equal(review.qaBuild.status, 'passed-local-internal-build');
+  assert.equal(review.qaBuild.installerProduced, true);
+  assert.equal(review.qaBuild.installedAppTested, false);
+  assert.equal(review.qaBuild.published, false);
+  assert.equal(review.qaBuild.authenticode, 'NotSigned');
+  assert.equal(review.qaBuild.ephemeralPrivateKeyCleanupConfirmed, true);
+  assert.match(review.fixSourceCommit, /^[a-f0-9]{40}$/u);
+  assert.match(review.qaBuild.installerSha256, /^[a-f0-9]{64}$/u);
+  assert.ok(builder.includes(review.qaBuild.version));
+  assert.ok(builder.includes(review.qaBuild.buildDirectory.split('/').at(-1)));
+  assert.equal(review.tests.pinnedRealTransportRegressionTests, 9);
+  assert.ok(review.remainingGates.some((gate) => gate.includes('installed-app')));
+  assert.ok(review.remainingGates.some((gate) => gate.includes('licensing')));
 });
 
 test('notice review accounts for every remaining group without treating texts as legal clearance', async () => {
