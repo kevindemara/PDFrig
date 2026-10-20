@@ -95,9 +95,8 @@ test('Windows setup instructions distinguish development, future installer and u
   assert.ok(readme.includes('x86_64-pc-windows-msvc'));
   assert.ok(readme.includes('it does not install PDFrig'));
   assert.ok(readme.includes('Windows compliance is not certified'));
-  assert.ok(
-    readme.includes('successful installation and use on a second Windows PC has been reported'),
-  );
+  assert.ok(readme.includes('Clean-machine installation, disconnected-network OCR'));
+  assert.ok(readme.includes('broader security checks remain open'));
   assert.ok(readme.includes('Windows **Installed apps**'));
   assert.ok(readme.includes('No credentials or paid services are needed'));
   assert.ok(readme.includes('do not disable Application Control'));
@@ -149,6 +148,36 @@ test('Windows download routes put finished-app installation before optional sour
   assert.ok(
     rawReadme.includes('```powershell\n' + 'git clone https://github.com/kevindemara/PDFrig.git'),
   );
+});
+
+test('public-facing installer instructions use the exact published asset, checksum and visibility caveat', async () => {
+  const readme = (await readFile(new URL('../README.md', import.meta.url), 'utf8')).replace(
+    /\s+/gu,
+    ' ',
+  );
+  const release = JSON.parse(
+    await readFile(
+      new URL('../docs/operations/windows-save-race-release.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const windows = readme.slice(
+    readme.indexOf('### Install the finished Windows app'),
+    readme.indexOf('### Build from source'),
+  );
+  assert.ok(windows.includes(release.downloadUrl));
+  assert.ok(windows.includes(release.releaseUrl));
+  assert.ok(windows.includes(release.version));
+  assert.ok(windows.includes(release.downloadUrl.replace('PDFrig-setup.exe', 'SHA256SUMS.txt')));
+  assert.ok(windows.includes('You do not need to build the app.'));
+  assert.ok(
+    windows.includes('Anonymous download access cannot be verified until the repository is public'),
+  );
+  assert.ok(windows.includes('not a draft'));
+  assert.ok(windows.includes('unsigned alpha release'));
+  assert.equal(release.draft, false);
+  assert.equal(release.prerelease, true);
+  assert.doesNotMatch(windows, /releases\/latest\/download/u);
 });
 
 test('publication audit keeps privacy findings separate from source-license and release approval', async () => {

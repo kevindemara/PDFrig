@@ -10,10 +10,10 @@ Your original file stays unchanged; save your work as a new PDF.
 or paid service is needed for the local PDF tools. Start with the browser version
 below; the Windows installer is an alternative if you prefer a desktop app.
 
-**Public alpha release.** Text editing and OCR have
-document-specific limits. PDFrig's own code is MIT-licensed. Third-party notice
-and native OCR security reviews are not complete; see [License](#license) and
-[release work](#roadmap-and-launch).
+**Public alpha release.** Expect document-specific limits and review every export.
+PDFrig's own code is MIT-licensed. Native OCR security and third-party dependency
+reviews are still in progress; this is not a security-certified release. See
+[important limitations](#important-limitations) and [License](#license).
 
 [Browser setup](#quick-start) · [Windows download](#install-the-finished-windows-app) ·
 [Features](#what-works-today) · [Self-hosting](#self-hosting) · [Build from source](#build-from-source)
@@ -97,22 +97,18 @@ environment-variable names retain the original PDFMason name for compatibility.
 — Windows x64, version `0.1.0-alpha.20261020.2`.
 
 The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2)
-includes the installer, `SHA256SUMS.txt`, notices and the build record. While the
-repository is private, sign in to GitHub with repository access to download it.
+includes the finished installer,
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/SHA256SUMS.txt),
+third-party notices and verification records. **You do not need to build the app.**
 
-This is an **unsigned alpha release**.
-This installer passed a same-machine upgrade, script signature preview/drag/resize,
-native Save As (including cancellation and a new Unicode filename), and local English OCR with reviewed apply. Independent readers
-verified signature text and its unchanged embedded font. The scanned-page export
-is searchable and renders byte-for-byte identically to the original at 144 DPI.
-Its exact payload contains none of the four previously flagged Windows npm inputs.
-This is not clean-machine, offline OCR, uninstall or general security certification.
-It fixes a rare competing-writer overwrite race in the previous Windows build;
-use this replacement instead of `0.1.0-alpha.20261020.1`.
-Windows compliance is not certified. Outstanding licensing and security reviews
-are described below.
-A successful installation and use on a second Windows PC has been reported for
-an earlier alpha; that does not verify this replacement on a clean machine.
+This is an **unsigned alpha release**. The current installer was tested for
+same-machine upgrade, OCR, signatures, native Save As and unsaved-change warnings.
+Independent checks verified searchable exports and unchanged scan appearance on
+synthetic test documents. Clean-machine installation, disconnected-network OCR,
+uninstall and broader security checks remain open. Windows compliance is not certified.
+
+Use this version instead of `0.1.0-alpha.20261020.1`: it fixes a rare native-save
+race that could overwrite a file created by another process during export.
 
 1. Download **PDFrig-setup.exe**, not **Source code (zip)** or **Source code (tar.gz)**.
 2. Verify its checksum in PowerShell against `SHA256SUMS.txt`:
@@ -136,14 +132,16 @@ verifies download integrity, not a trusted publisher. No paid code-signing
 certificate is required for this test build. If installation is blocked, use the
 local browser version instead.
 
+If GitHub shows **404 / Not Found**, the repository may still be private; downloads
+then require signing in with repository access. The linked release is published,
+not a draft. Anonymous download access cannot be verified until the repository
+is public.
+
 Installers are GitHub Release assets: no Windows installer EXE is included in
 the tracked source files. See the [build evidence](docs/operations/windows-save-race-build.json)
 and [download verification](docs/operations/windows-save-race-release.json) for exact
 artifact hashes and test limits. These are historical build/test records, not
 security certification or a complete license review.
-Earlier [build](docs/operations/windows-license-audit-build.json) and
-[download](docs/operations/windows-license-audit-release.json) records are retained for audit history,
-not as recommendations to install an older build.
 For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
 ### Upgrade and uninstall
@@ -305,6 +303,9 @@ retain the detailed security work and reproducibility evidence. The research
 candidate is not adopted; do not substitute it for pinned application assets.
 The [text-engine review](docs/dependencies/source-text-engine-review.json) records
 the selected original-text editing approach and its limits.
+Earlier Windows [build](docs/operations/windows-license-audit-build.json) and
+[download](docs/operations/windows-license-audit-release.json) records are retained
+for audit history, not as recommendations to install an older build.
 
 ### Contributor safety rules
 
@@ -337,19 +338,19 @@ need separate review. Making a repository public also exposes its Releases and
 their attachments. Never rewrite history or delete release evidence without
 coordination. See the [publication audit](docs/operations/publication-audit.json).
 
-## Roadmap and launch
+## Roadmap and release work
 
 - Broaden supported text encodings, fonts, paragraph layouts and accessibility.
 - Broaden OCR language/accuracy coverage and complete native parser/model review.
 - Finish the standalone local/self-hosted production configuration and remove
   obsolete managed-service surfaces.
-- Complete third-party notices/SBOMs. The conservative
-  dependency review has **25 conservative notice-text gaps**: 24 other-platform
-  Rust inputs and one optional Windows npm input. Fontkit, dfa and Brotli have
-  been removed from the current signature implementation, not retroactively
-  licensed. The replacement EXE has been inspected and contains none of those
-  four gap inputs. Older installers still contain the removed packages; their
-  findings remain in the audit history. A passing policy check is not release clearance.
+- Complete third-party notices and software bills of materials. The conservative
+  build-input inventory has **25 notice-text gaps**: 24 other-platform Rust inputs
+  and one optional Windows npm input. The Rust gaps are outside the Windows target;
+  the exact installer audit found neither the optional npm input nor the removed
+  Fontkit, dfa and Brotli dependencies in the current payload and embedded assets.
+  Historical findings remain in the audit records; a passing policy check is not
+  a complete distribution review.
 - Complete independent Windows installation, upgrade/uninstall, offline OCR,
   shortcuts/high-DPI, accessibility and export testing.
 
