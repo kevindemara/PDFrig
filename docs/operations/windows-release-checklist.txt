@@ -1,0 +1,69 @@
+PDFrig Windows release-candidate checks
+======================================
+
+These checks need another authorized Windows x64 PC or a clean Windows test
+account/environment. The current developer-host test is not a substitute.
+Do not buy a certificate, change billing, disable antivirus/Application Control,
+or bypass a Windows/browser trust block. Record a block and stop that test.
+
+Candidate: 0.1.0-alpha.20261020.1
+Installer: PDFrig-setup.exe
+SHA-256: d52ef610c95343f2c606bc2537cd7c5a1574fe77c8d7ce856c92508f3a309846
+Download: https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-1
+
+1. Download the EXE and SHA256SUMS.txt while signed in with private repo access.
+   Run Get-FileHash .\PDFrig-setup.exe -Algorithm SHA256 and compare the hash.
+   The source ZIP is not an installer. A checksum is not a publisher certificate.
+
+2. Back up/export any open PDFrig work and close the app. Install through normal
+   Windows prompts. No Node, pnpm, Rust, C++, Docker or local web server should be
+   needed to run the finished app. Record Windows and WebView2 versions, any
+   WebView2 download, installation errors and whether elevation was requested.
+
+3. Confirm the app is named PDFrig (not Installer QA), version is correct in
+   Installed apps, and the Start-menu/Desktop shortcuts and taskbar icon work.
+   In the installation's licenses directory check PDFrig-LICENSE.txt,
+   THIRD_PARTY_NOTICES.txt and UPSTREAM-LICENSE-TEXTS.txt are present.
+
+4. Use synthetic test PDFs from packages/test-corpus/fixtures, not private or
+   customer files. Open smoke-one-page.pdf; type "Synthetic Signature", place
+   it, drag and resize it. Review export, save to a new filename, reopen in an
+   independent reader and check placement, script font and searchable text.
+
+5. Test existing-text editing on searchable-text.pdf with a supported short
+   replacement and a longer replacement that fits its paragraph. Build actual
+   PDF preview, inspect, acknowledge and apply. Export to a new name. Compare
+   independent-reader output with the actual-PDF preview. Unsupported font,
+   complex layout or overflowing edits should refuse without changing source.
+
+6. After WebView2 installation, test without internet using the PC's normal
+   network disconnect controls, only if you are authorized to do so. Reopen the
+   app first. Open scanned-ocr.pdf, Text > OCR this page, English, Build actual
+   PDF preview. It should recognize "OCR FIXTURE 4827" without downloads, keep
+   the artwork unchanged, and enable reviewed apply only after a valid preview.
+   Export, reopen independently, search/copy the recognized words and compare
+   appearance. Repeat with a synthetic French scan. Restore connectivity when
+   done. Do not change security settings or global proxy/firewall policy.
+
+7. Test All tools with unsaved edits: Cancel must retain the document and undo
+   history. Discard and continue must open tools only after explicit consent.
+   Save first before testing replacement of a PDF. Cancel a native Save As;
+   source/existing files must stay intact. Use a new name for successful exports.
+
+8. If testing an upgrade, first record the previous version and verify existing
+   PDFs stay unchanged. Test an upgrade from the previous installer already on
+   your own machine; obsolete installers are no longer offered for download.
+
+9. After exporting/closing all work, uninstall via Windows Installed apps. Check
+   app shortcuts/executable are removed but your source PDFs and exported copies
+   remain. Record optional recent-file/account cache behavior; complete cache
+   erasure has not been certified. Reinstall and repeat a basic open/export.
+
+10. Check keyboard navigation, visible focus, dialog Escape/Cancel, screen reader
+    labels, 125/150/200% display scaling and a small display. Record failures with
+    synthetic screenshots only. Never include private document contents, full
+    personal paths, keys, account details or machine identifiers in public issues.
+
+Report PASS/FAIL/NOT TESTED for each item, Windows/WebView2 versions, candidate
+hash and a concise safe description. A test pass is not a complete native OCR
+parser/model/API or legal review. That security work remains a separate gate.

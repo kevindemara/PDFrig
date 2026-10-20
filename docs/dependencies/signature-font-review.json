@@ -46,15 +46,18 @@
     "syntheticEightSampleExportQpdfPassed": true,
     "oldAndNew144DpiPopplerPngsByteIdentical": true,
     "realEditorSignaturePreviewDragResizeExportTestPassed": true,
-    "customerDocumentsUsed": false
+    "customerDocumentsUsed": false,
+    "independentReaderUnmodifiedFontStreamVerified": true,
+    "composedMarksToUnicodeVerified": true
   },
   "removedDependencies": ["fontkit@2.0.4", "dfa@1.2.0", "brotli@1.3.3", "@types/fontkit@2.0.9"],
   "removedLicensesCleared": false,
   "olderV6InstallerContainsRemovedPackages": true,
-  "replacementInstallerVerified": false,
+  "replacementInstallerVerified": true,
   "sources": [
     "https://openfontlicense.org/ofl-faq/",
     "https://github.com/fonttools/fonttools/blob/main/LICENSE"
   ],
-  "remainingScope": "A new binary and its notices must be audited and tested. This narrowly tested dependency elimination is not full product security or legal certification."
+  "remainingScope": "A new binary and its notices must be audited and tested. This narrowly tested dependency elimination is not full product security or legal certification.",
+  "replacementArtifact": "windows-installer-dependency-audit.json#private-test-20261020-1"
 }

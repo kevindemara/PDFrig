@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { brotliCompressSync } from 'node:zlib';
 import test from 'node:test';
+import { readFile } from 'node:fs/promises';
 import {
   readWindowsAssetTable,
   pinnedWindowsAssets,
@@ -128,4 +129,70 @@ test('malformed or incomplete source maps never become absence evidence', () => 
         windowsPackageFootprints(new Map([['/x.map', { content: Buffer.from(content) }]]), ['x']),
       /WINDOWS_ASSET_AUDIT_INVALID/u,
     );
+});
+
+test('replacement installer evidence binds exclusions, MIT notice, tested binary and README without granting clearance', async () => {
+  const load = async (file) =>
+    JSON.parse(await readFile(new URL(`../${file}`, import.meta.url), 'utf8'));
+  const audit = await load('docs/dependencies/windows-installer-dependency-audit.json');
+  const build = await load('docs/operations/windows-license-audit-build.json');
+  const release = await load('docs/operations/windows-license-audit-release.json');
+  const [older, next] = audit.artifacts;
+  assert.equal(older.findings.fontkitDfaBrotliPresent, true);
+  assert.ok(older.packageFootprints.some((entry) => entry.package === 'fontkit'));
+  assert.equal(audit.publicReleaseApproved, false);
+  assert.equal(next.id, release.tag);
+  assert.equal(next.installer.sha256, build.installerSha256);
+  assert.equal(next.installer.bytes, build.installerBytes);
+  assert.equal(next.installer.sourceCommit, build.sourceCommit);
+  assert.equal(next.executable.sha256, build.installedBinarySha256);
+  assert.equal(next.payload.length, 11);
+  assert.equal(next.executable.assets.length, 28);
+  assert.deepEqual(next.packageFootprints, []);
+  assert.equal(next.findings.fontkitDfaBrotliPresent, false);
+  assert.equal(next.findings.nativeCanvasAndIcuDataAbsent, true);
+  assert.equal(next.findings.licensesCleared, false);
+  assert.equal(next.buildAssetComparisons.filter((item) => item.sha256Matched).length, 27);
+  assert.equal(
+    next.payload.find((item) => item.path === 'licenses/PDFrig-LICENSE.txt').sha256,
+    build.notices.mitLicenseSha256,
+  );
+  for (const entry of [build, release]) assert.equal(entry.publicReleaseApproved, false);
+  assert.equal(build.installedSmokeTest.ocrExport144DpiPngByteIdenticalToOriginal, true);
+  assert.equal(
+    build.installedSmokeTest.signatureExportSearchableAndOriginalFontStreamHashMatched,
+    true,
+  );
+  assert.equal(build.installedSmokeTest.nativeSaveAsNewFilePassed, true);
+  assert.equal(release.assetSha256, build.installerSha256);
+  assert.equal(release.assetBytes, build.installerBytes);
+  assert.equal(release.executableSourceCommit, build.sourceCommit);
+  assert.equal(release.releaseTargetCommit, build.sourceCommit);
+  assert.equal(release.githubAssetDigest, `sha256:${build.installerSha256}`);
+  for (const key of [
+    'repositoryPrivateAtUploadAndVerification',
+    'downloadedArtifactHashVerified',
+    'downloadedCompanionHashesVerified',
+    'uploadedChecksumListingVerified',
+    'downloadedInstallerSignatureVerifiedWithNegativeCases',
+    'publishedTagTargetVerified',
+  ])
+    assert.equal(release[key], true);
+  assert.ok(release.assets.includes('PDFrig-LICENSE.txt'));
+  assert.ok(release.assets.every((name) => !name.endsWith('.key')));
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  assert.ok(readme.includes(release.downloadUrl));
+  assert.ok(readme.includes(release.releaseUrl));
+  assert.ok(readme.includes(release.version));
+  assert.ok(readme.includes('docs/operations/windows-license-audit-build.json'));
+  assert.ok(readme.includes('docs/operations/windows-license-audit-release.json'));
+  assert.ok(readme.includes('docs/operations/windows-release-checklist.txt'));
+  const cleanup = release.obsoleteReleaseCleanup;
+  assert.equal(cleanup.userApproved, true);
+  assert.equal(cleanup.assetsRemoved, 14);
+  assert.equal(cleanup.allBackupAssetSizesAndGithubSha256DigestsVerified, true);
+  assert.equal(cleanup.gitTagTargetsUnchanged, true);
+  assert.equal(cleanup.gitHistoryRewritten, false);
+  assert.equal(cleanup.backupTrackedInGit, false);
+  assert.equal(cleanup.remainingRelease, release.tag);
 });

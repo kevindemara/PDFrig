@@ -93,22 +93,24 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261019-6/PDFrig-setup.exe)
-— Windows x64, version `0.1.0-alpha.20261019.6`.
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-1/PDFrig-setup.exe)
+— Windows x64, version `0.1.0-alpha.20261020.1`.
 
-The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261019-6)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-1)
 includes the installer, `SHA256SUMS.txt`, notices and the build record. While the
 repository is private, sign in to GitHub with repository access to download it.
 
 This is an **unsigned alpha release**.
-This installer passed a same-machine upgrade, All tools navigation with Cancel and
-Discard confirmation, and a synthetic form export checked independently for field
-values and unchanged surrounding pixels.
-A successful installation and use on a second Windows PC has been reported, but
-that was an earlier alpha. This is not comprehensive installer, offline OCR or
-upgrade/uninstall testing.
+This installer passed a same-machine upgrade, script signature preview/drag/resize,
+native Save As, and local English OCR with reviewed apply. Independent readers
+verified signature text and its unchanged embedded font. The scanned-page export
+is searchable and renders byte-for-byte identically to the original at 144 DPI.
+Its exact payload contains none of the four previously flagged Windows npm inputs.
+This is not clean-machine, offline OCR, uninstall or general security certification.
 Windows compliance is not certified. Outstanding licensing and security reviews
 are described below.
+A successful installation and use on a second Windows PC has been reported for
+an earlier alpha; that does not verify this replacement on a clean machine.
 
 1. Download **PDFrig-setup.exe**, not **Source code (zip)** or **Source code (tar.gz)**.
 2. Verify its checksum in PowerShell against `SHA256SUMS.txt`:
@@ -133,10 +135,11 @@ certificate is required for this test build. If installation is blocked, use the
 local browser version instead.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [build evidence](docs/operations/windows-all-tools-build.json)
-and [download verification](docs/operations/windows-all-tools-release.json) for exact
+the tracked source files. See the [build evidence](docs/operations/windows-license-audit-build.json)
+and [download verification](docs/operations/windows-license-audit-release.json) for exact
 artifact hashes and test limits. These are historical build/test records, not
 security certification or a complete license review.
+For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
 ### Upgrade and uninstall
 
@@ -339,8 +342,9 @@ coordination. See the [publication audit](docs/operations/publication-audit.json
   dependency review has **25 conservative notice-text gaps**: 24 other-platform
   Rust inputs and one optional Windows npm input. Fontkit, dfa and Brotli have
   been removed from the current signature implementation, not retroactively
-  licensed. The older Windows installer still contains them; a replacement
-  needs its own artifact audit. A passing policy check is not release clearance.
+  licensed. The replacement EXE has been inspected and contains none of those
+  four gap inputs. Older installers still contain the removed packages; their
+  findings remain in the audit history. A passing policy check is not release clearance.
 - Complete independent Windows installation, upgrade/uninstall, offline OCR,
   shortcuts/high-DPI, accessibility and export testing.
 

@@ -75,7 +75,7 @@
       "id": "npm-and-optional-native",
       "packages": ["@napi-rs/canvas-win32-x64-msvc@1.0.7"],
       "status": "npm-source-and-vendored-obligations-needed",
-      "payloadEvidence": "windows-npm-notice-review.json retains the active Canvas binding and all historical removed package evidence. The old v6 installer audit proves Fontkit/dfa/Brotli present and Canvas native payload absent there; a new installer must be inspected separately.",
+      "payloadEvidence": "windows-npm-notice-review.json retains the active Canvas binding and all historical removed package evidence. The old v6 installer audit proves Fontkit/dfa/Brotli present and Canvas native payload absent there; a new installer must be inspected separately. The exact v20261020.1 replacement has now been inspected: no Canvas addon or ICU data in 11 extracted files or 28 embedded assets, and no Fontkit/dfa/Brotli source footprints. 27 non-HTML assets match current Vite output byte-for-byte; HTML serialization was reviewed.",
       "finding": "Optional native Canvas remains in the conservative declared graph. No root full terms or exact binary build provenance is invented. Current Fontkit/dfa/Brotli source dependencies are removed, not licensed retroactively.",
       "nextAction": "Prove optional Canvas absent from the exact replacement installer and its embedded assets, or establish all native/data terms and provenance before shipping it. Preserve old artifact findings."
     }
@@ -94,7 +94,9 @@
     "excludedCargoCount": 208,
     "remainingCandidateGaps": 1,
     "finalArtifactContentsVerified": false,
-    "scope": "Locked/offline metadata: 24 other-platform Rust gaps retained in the full inventory, one optional Windows npm input. No final replacement-artifact clearance inferred."
+    "scope": "Locked/offline metadata: 24 other-platform Rust gaps retained in the full inventory, one optional Windows npm input. No final replacement-artifact clearance inferred.",
+    "exactReplacementArtifactGapInputsPresent": 0,
+    "exactReplacementArtifact": "windows-installer-dependency-audit.json#private-test-20261020-1"
   },
   "previousDeclaredInputSnapshot": {
     "declaredInputCount": 571,

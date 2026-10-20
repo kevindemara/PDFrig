@@ -169,7 +169,7 @@ test('publication audit keeps privacy findings separate from source-license and 
   assert.equal(audit.sourceLicenseFollowup.license, 'MIT');
   assert.equal(audit.sourceLicenseFollowup.redistributionAndCommercialResalePermitted, true);
   assert.equal(audit.sourceLicenseFollowup.historicalBuildRecordsRetainOriginalStatus, true);
-  assert.equal(audit.sourceLicenseFollowup.installerRebuiltForLicenseChange, false);
+  assert.equal(audit.sourceLicenseFollowup.installerRebuiltForLicenseChange, true);
   assert.equal(audit.sourceLicenseFollowup.thirdPartyNoticesClearedByProjectLicense, false);
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('24 other-platform')));
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('native OCR')));
@@ -375,12 +375,11 @@ test('VIEW-001 All tools installer binds the corrected profile and installed smo
   assert.ok(build.remainingGates.some((gate) => gate.includes('uninstall')));
 });
 
-test('VIEW-001 current Windows download matches the verified All tools artifact and README', async () => {
+test('VIEW-001 historical All tools download retains its exact tested artifact identity', async () => {
   const load = async (name) =>
     JSON.parse(await readFile(new URL(`../docs/operations/${name}`, import.meta.url), 'utf8'));
   const build = await load('windows-all-tools-build.json');
   const release = await load('windows-all-tools-release.json');
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
   assert.equal(release.repository, 'kevindemara/PDFrig');
   assert.equal(release.repositoryPrivateAtUploadAndVerification, true);
   assert.equal(release.publicReleaseApproved, false);
@@ -407,11 +406,6 @@ test('VIEW-001 current Windows download matches the verified All tools artifact 
     release.downloadUrl,
     `https://github.com/${release.repository}/releases/download/${release.tag}/PDFrig-setup.exe`,
   );
-  assert.ok(readme.includes(release.downloadUrl));
-  assert.ok(readme.includes(release.releaseUrl));
-  assert.ok(readme.includes(release.version));
-  assert.ok(readme.includes('docs/operations/windows-all-tools-build.json'));
-  assert.ok(readme.includes('docs/operations/windows-all-tools-release.json'));
   assert.ok(release.assets.includes('windows-all-tools-build.json'));
   assert.ok(release.assets.includes('SHA256SUMS.txt'));
   assert.ok(release.assets.every((name) => !name.endsWith('.key')));

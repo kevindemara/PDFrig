@@ -79,14 +79,14 @@
     "licenseAndCopyrightNoticeMustBeRetained": true,
     "currentNpmAndCargoManifestsUpdated": true,
     "historicalBuildRecordsRetainOriginalStatus": true,
-    "installerRebuiltForLicenseChange": false,
+    "installerRebuiltForLicenseChange": true,
     "thirdPartyNoticesClearedByProjectLicense": false,
     "publicDistributionApproved": false
   },
   "remainingPublicationGates": [
-    "Resolve the one remaining conservative Windows npm input by exact replacement-artifact inspection; retain the 24 other-platform notice gaps in the full source/build inventory. Complete bundled/native/data notice and security review.",
+    "The four Windows npm gaps are addressed for the exact replacement EXE by elimination or payload exclusion, not new licence grants. Retain the 24 other-platform plus excluded optional npm gaps in the full build inventory. Complete native/data notices and security review.",
     "Complete the native OCR parser/model/API security review and broader independent Windows/assistive-technology tests",
-    "Review all remaining GitHub Releases before visibility changes; repository publication also exposes release assets"
+    "Complete clean-machine/WebView2 bootstrap, offline OCR, upgrade/uninstall and assistive-technology checks; current results are on one existing developer host."
   ],
   "limitations": "Pattern-based scans and fixture provenance do not prove absence of all private information. Binary installer internals, encrypted fixture metadata, unreachable Git objects, remote caches/forks, GitHub issue/PR attachments and repository settings are not certified. Required third-party author names/emails in license notices are intentionally retained.",
   "currentDependencyReview": {
@@ -95,6 +95,21 @@
     "remainingTextGaps": 25,
     "windowsCandidateGaps": 1,
     "removedNotCleared": ["fontkit@2.0.4", "dfa@1.2.0", "brotli@1.3.3"],
-    "replacementInstallerVerified": false
+    "replacementInstallerVerified": true,
+    "exactReplacementArtifactGapInputsPresent": 0
+  },
+  "currentReleaseAttachments": {
+    "date": "2026-10-20",
+    "userApproved": true,
+    "removedReleases": ["private-test-20261019-4", "private-test-20261019-6"],
+    "assetsRemoved": 14,
+    "allBackupAssetSizesAndGithubSha256DigestsVerified": true,
+    "releaseMetadataBackedUp": true,
+    "gitTagTargetsUnchanged": true,
+    "gitHistoryRewritten": false,
+    "backupDirectory": "tmp/obsolete-release-backup-20261020",
+    "backupTrackedInGit": false,
+    "recovery": "Verified assets and release metadata retained locally; recoverable by explicit re-upload. Git tags/history remain. No customer file deleted.",
+    "remainingRelease": "private-test-20261020-1"
   }
 }
