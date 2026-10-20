@@ -120,13 +120,15 @@ describe('Windows platform adapter', () => {
       'write_pdf_chunk',
     ]);
     expect(calls[1]?.headers).toMatchObject({
-      'content-type': 'application/pdf',
+      'content-type': 'application/octet-stream',
+      'x-pdfmason-content-type': 'application/pdf',
       'x-pdfmason-final': 'false',
       'x-pdfmason-offset': '0',
       'x-pdfmason-transfer': 'save-token',
     });
     expect(calls[2]?.headers).toMatchObject({
-      'content-type': 'application/pdf',
+      'content-type': 'application/octet-stream',
+      'x-pdfmason-content-type': 'application/pdf',
       'x-pdfmason-final': 'true',
       'x-pdfmason-offset': String(1024 * 1024),
       'x-pdfmason-transfer': 'save-token',
@@ -172,7 +174,8 @@ describe('Windows platform adapter', () => {
       headers: undefined,
     });
     expect(calls[1]?.headers).toMatchObject({
-      'content-type': 'application/json',
+      'content-type': 'application/octet-stream',
+      'x-pdfmason-content-type': 'application/json',
       'x-pdfmason-final': 'true',
       'x-pdfmason-transfer': 'report-token',
     });

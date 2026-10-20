@@ -1,0 +1,25 @@
+{
+  "component": "tauri",
+  "version": "2.11.5",
+  "repository": "https://github.com/tauri-apps/tauri",
+  "sourceCommit": "7cd71369c00978a3783b6ae3e9972358abbe4ae6",
+  "licenseChoice": "MIT",
+  "purpose": "Unmodified upstream JavaScript transport fixtures, executed only in an isolated test VM with simulated responses and no filesystem or network access. Not installed-app/native verification.",
+  "files": [
+    {
+      "filename": "ipc-protocol.js.txt",
+      "sourcePath": "crates/tauri/scripts/ipc-protocol.js",
+      "sha256": "68ae690606006f733bde75dd8bb6748464954a22c7e83914a93b1abc221d7072"
+    },
+    {
+      "filename": "process-ipc-message-fn.js.txt",
+      "sourcePath": "crates/tauri/scripts/process-ipc-message-fn.js",
+      "sha256": "d51917f89e4d3d318d63f1f4f5a7ac7ea1399a5b85c81a840c4d606597f29132"
+    },
+    {
+      "filename": "LICENSE-MIT.txt",
+      "sourcePath": "LICENSE_MIT",
+      "sha256": "9dd42ea92cff2ede5cd477cbfcce051b2d0115c0ac7f368ee88cb545055dff1d"
+    }
+  ]
+}

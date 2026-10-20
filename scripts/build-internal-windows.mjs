@@ -19,8 +19,8 @@ const cli = path.join(
   'tauri.js',
 );
 const qa = process.argv.includes('--installer-qa');
-const version = qa ? '0.1.0-alpha.20261014.1' : '0.1.0-alpha.20261012.1';
-const buildId = qa ? 'installer-qa-20261014' : 'internal-pdfrig-20261012';
+const version = qa ? '0.1.0-alpha.20261019.2' : '0.1.0-alpha.20261012.1';
+const buildId = qa ? 'installer-qa-20261019-export-fix' : 'internal-pdfrig-20261012';
 const productName = qa ? 'PDFrig Installer QA' : 'PDFrig Internal Test';
 const output = path.join(root, 'apps/desktop/src-tauri/target', buildId);
 const privateDirectory = path.join(

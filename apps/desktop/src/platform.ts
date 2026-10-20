@@ -167,7 +167,10 @@ export const createWindowsPlatformAdapter = (
           const chunk = bytes.subarray(offset, end);
           await invokeCommand<null>('write_pdf_chunk', chunk, {
             headers: {
-              'content-type': mimeType,
+              // Tauri owns Content-Type for binary IPC. Keep document metadata
+              // separate so its application/octet-stream override cannot erase it.
+              'content-type': 'application/octet-stream',
+              'x-pdfmason-content-type': mimeType,
               'x-pdfmason-final': String(end === bytes.byteLength),
               'x-pdfmason-offset': String(offset),
               'x-pdfmason-transfer': selected.transferToken,

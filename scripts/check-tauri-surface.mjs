@@ -110,6 +110,21 @@ assert.match(
   'Native JSON saving must stay restricted to the reviewed comment-report kind.',
 );
 assert.match(
+  nativeFiles,
+  /transport_type != "application\/octet-stream" \|\| document_type != kind\.mime_type\(\)/u,
+  'Binary transport and selected document MIME must both be validated, not conflated.',
+);
+assert.match(
+  nativeFiles,
+  /request_header\(&request, "x-pdfmason-content-type"\)/u,
+  'Document MIME must survive the Tauri transport Content-Type override.',
+);
+assert.match(
+  nativeFiles,
+  /validate_save_content_types\(transfer\.kind, transport_type, document_type\)\?;/u,
+  'The active save handler must invoke the independent MIME checks.',
+);
+assert.match(
   tauriConfig.app.security.csp,
   /https:\/\/\*\.supabase\.co/u,
   'Production authentication may connect only to the configured Supabase vendor domain class.',

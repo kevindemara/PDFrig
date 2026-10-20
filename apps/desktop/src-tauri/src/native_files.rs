@@ -404,6 +404,17 @@ fn has_valid_save_header(kind: SaveKind, bytes: &[u8]) -> bool {
     }
 }
 
+fn validate_save_content_types(
+    kind: SaveKind,
+    transport_type: &str,
+    document_type: &str,
+) -> Result<(), String> {
+    if transport_type != "application/octet-stream" || document_type != kind.mime_type() {
+        return Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED"));
+    }
+    Ok(())
+}
+
 fn discard_save(transfer: SaveTransfer) {
     let temporary = transfer.temporary.clone();
     drop(transfer.file);
@@ -709,7 +720,8 @@ pub fn write_pdf_chunk(app: AppHandle, request: tauri::ipc::Request<'_>) -> Resu
         "false" => false,
         _ => return Err(error("NATIVE_TRANSFER_HEADERS_REQUIRED")),
     };
-    let content_type = request_header(&request, "content-type")?;
+    let transport_type = request_header(&request, "content-type")?;
+    let document_type = request_header(&request, "x-pdfmason-content-type")?;
     let state = app.state::<NativeFileState>();
     let mut slot = state
         .pending_save
@@ -722,9 +734,7 @@ pub fn write_pdf_chunk(app: AppHandle, request: tauri::ipc::Request<'_>) -> Resu
         if transfer.token != token || transfer.next_offset != offset {
             return Err(error("NATIVE_TRANSFER_MISMATCH"));
         }
-        if content_type != transfer.kind.mime_type() {
-            return Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED"));
-        }
+        validate_save_content_types(transfer.kind, transport_type, document_type)?;
         if offset == 0 && !has_valid_save_header(transfer.kind, bytes) {
             return Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED"));
         }
@@ -811,6 +821,44 @@ mod tests {
         assert!(validate_filename_suggestion("C:\\private.pdf", SaveKind::Pdf).is_err());
         assert!(validate_filename_suggestion("not-a-pdf.txt", SaveKind::Pdf).is_err());
         assert!(validate_filename_suggestion("disguised.pdf", SaveKind::CommentReport).is_err());
+    }
+
+    #[test]
+    fn binary_transport_and_document_type_are_validated_separately() {
+        for kind in [SaveKind::Pdf, SaveKind::CommentReport] {
+            assert_eq!(
+                validate_save_content_types(kind, "application/octet-stream", kind.mime_type()),
+                Ok(())
+            );
+            for transport in ["", "application/pdf", "application/json", "text/plain"] {
+                assert_eq!(
+                    validate_save_content_types(kind, transport, kind.mime_type()),
+                    Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED"))
+                );
+            }
+            for document in ["", "application/octet-stream", "text/plain"] {
+                assert_eq!(
+                    validate_save_content_types(kind, "application/octet-stream", document),
+                    Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED"))
+                );
+            }
+        }
+        assert!(
+            validate_save_content_types(
+                SaveKind::Pdf,
+                "application/octet-stream",
+                "application/json"
+            )
+            .is_err()
+        );
+        assert!(
+            validate_save_content_types(
+                SaveKind::CommentReport,
+                "application/octet-stream",
+                "application/pdf"
+            )
+            .is_err()
+        );
     }
 
     #[test]
