@@ -500,6 +500,11 @@ describe('shared application shell', () => {
       screen.getByRole('heading', { name: 'Finish a PDF job without surrendering the file.' }),
     ).toBeVisible();
     expect(screen.getByRole('navigation', { name: 'PDF utility tools' })).toBeVisible();
+    const tools = within(
+      screen.getByRole('navigation', { name: 'PDF utility tools' }),
+    ).getAllByRole('button');
+    expect(tools[0]).toHaveTextContent('01Compress');
+    expect(tools[8]).toHaveTextContent('09PDF tables to spreadsheet');
     expect(screen.getAllByText('On this device')).not.toHaveLength(0);
     expect(screen.getByText(/lossless only/i)).toBeVisible();
     expect(screen.getByText(/office to pdf/i)).toBeVisible();
@@ -510,6 +515,7 @@ describe('shared application shell', () => {
       <UtilityWorkbench
         enabledFeatures={{
           blank: true,
+          tables: false,
           text: false,
           compress: false,
           decorate: true,

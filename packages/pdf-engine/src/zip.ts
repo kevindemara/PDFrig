@@ -27,11 +27,18 @@ const set32 = (view: DataView, offset: number, value: number): void =>
   view.setUint32(offset, value, true);
 
 /** Creates a deterministic, dependency-free ZIP using stored entries (images are already compressed). */
-export const createStoredZip = (entries: readonly ZipEntry[]): Uint8Array => {
+export const createStoredZip = (
+  entries: readonly ZipEntry[],
+  kind: 'flat' | 'ods' = 'flat',
+): Uint8Array => {
   if (entries.length === 0 || entries.length > 500) throw new Error('ZIP_ENTRY_LIMIT');
   const encoder = new TextEncoder();
   const names = entries.map(({ name }) => {
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$/u.test(name)) throw new Error('ZIP_NAME_INVALID');
+    if (
+      !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$/u.test(name) &&
+      !(kind === 'ods' && name === 'META-INF/manifest.xml')
+    )
+      throw new Error('ZIP_NAME_INVALID');
     return encoder.encode(name);
   });
   const localSize = entries.reduce((total, entry, index) => {

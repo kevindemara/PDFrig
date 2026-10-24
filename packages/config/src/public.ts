@@ -31,6 +31,7 @@ const publicEnvironmentSchema = z.object({
   NEXT_PUBLIC_FEATURE_RENDER_ENABLED: z.enum(['true', 'false']).default('true'),
   NEXT_PUBLIC_FEATURE_STAMPS_ENABLED: z.enum(['true', 'false']).default('false'),
   NEXT_PUBLIC_FEATURE_TEXT_ENABLED: z.enum(['true', 'false']).default('false'),
+  NEXT_PUBLIC_FEATURE_TABLES_ENABLED: z.enum(['true', 'false']).default('false'),
   NEXT_PUBLIC_HISTORY_RETENTION_DAYS: z.coerce.number().int().min(1).max(90),
   NEXT_PUBLIC_LEGAL_ENTITY: z.string().min(1),
   NEXT_PUBLIC_PLAN_CURRENCY: z
@@ -109,6 +110,7 @@ export interface PublicConfig {
     readonly render: boolean;
     readonly stamps: boolean;
     readonly text: boolean;
+    readonly tables: boolean;
   };
 }
 
@@ -127,6 +129,7 @@ const developmentDefaults = {
   NEXT_PUBLIC_FEATURE_MEASUREMENT_ENABLED: 'true',
   NEXT_PUBLIC_FEATURE_STAMPS_ENABLED: 'true',
   NEXT_PUBLIC_FEATURE_TEXT_ENABLED: 'true',
+  NEXT_PUBLIC_FEATURE_TABLES_ENABLED: 'true',
   NEXT_PUBLIC_LEGAL_ENTITY: 'PDFrig development',
   NEXT_PUBLIC_HISTORY_RETENTION_DAYS: '30',
   NEXT_PUBLIC_PLAN_CURRENCY: 'CAD',
@@ -237,6 +240,7 @@ export const parsePublicConfig = (
       render: parsed.NEXT_PUBLIC_FEATURE_RENDER_ENABLED === 'true',
       stamps: parsed.NEXT_PUBLIC_FEATURE_STAMPS_ENABLED === 'true',
       text: parsed.NEXT_PUBLIC_FEATURE_TEXT_ENABLED === 'true',
+      tables: parsed.NEXT_PUBLIC_FEATURE_TABLES_ENABLED === 'true',
     }),
   });
 };

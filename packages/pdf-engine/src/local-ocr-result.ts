@@ -35,6 +35,8 @@ export function readLocalOcrWords(
           const word = object(item);
           if (typeof word.text !== 'string' || word.text.length > 256) return invalid();
           if (!word.text.trim()) continue;
+          const confidence = word.confidence === undefined ? undefined : finite(word.confidence);
+          if (confidence !== undefined && (confidence < 0 || confidence > 100)) return invalid();
           const box = object(word.bbox);
           const x0 = finite(box.x0),
             y0 = finite(box.y0),
@@ -43,6 +45,7 @@ export function readLocalOcrWords(
           if (x0 < 0 || y0 < 0 || x1 > width || y1 > height || x1 <= x0 || y1 <= y0)
             return invalid();
           words.push({
+            ...(confidence === undefined ? {} : { confidence }),
             text: word.text,
             x: x0 / width,
             y: y0 / height,

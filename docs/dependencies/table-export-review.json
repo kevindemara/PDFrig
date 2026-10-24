@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "featureIds": ["CONV-007"],
+  "reviewDate": "2026-10-24",
+  "runtimeApprovedForLocalDevelopment": true,
+  "publicReleaseApproved": false,
+  "manualAcceptancePending": true,
+  "implementation": "Existing PDF.js bounded streamTextContent or existing local OCR word boxes -> bounded TypeScript geometry suggestions -> editable correction grid -> owned SheetJS export worker -> browser download / narrow Windows native Save As",
+  "dependency": {
+    "name": "xlsx",
+    "version": "0.20.3",
+    "source": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "tarballSha256": "8dc73fc3b00203e72d176e85b50938627c7b086e607c682e8d3c22c02bb99fe8",
+    "esmSha256": "1a0fb062ee9781b13f6687371b202aaefc53b6ce55b530c027e01f9c087b77db",
+    "typesSha256": "191e4e6aceae3602aa3a1e9a6bc0e98821d6d5fb787e2bc16e250439482bddb6",
+    "vendoredWorkspace": "packages/sheetjs-ce",
+    "vendoringReason": "pnpm 11.22.0 on Windows fails to enumerate licenses for the direct-URL dependency (ERR_PNPM_MISSING_PACKAGE_INDEX_FILE), even after a frozen reinstall. Keep only the unmodified official ESM, type declarations and full license, bound by hash in a private workspace package. Do not modify vendor files or suppress license/security checks; upstream advisory review remains explicit because workspace source is not a registry audit result.",
+    "license": "Apache-2.0",
+    "licenseSha256": "4d2a38ac35cda06a555c84074a819d413339cd3691b822cae50f8f322fe01f64",
+    "retainedNotice": "docs/dependencies/upstream/SheetJS-0.20.3-Apache-2.0.txt",
+    "publicNotice": "third-party/SheetJS-0.20.3-Apache-2.0.txt",
+    "runtimeDependencies": [],
+    "installationScriptsExecuted": false,
+    "scope": "Unmodified ESM module, dynamically imported only inside the table export worker. No runtime workbook read/import API, CLI, remote CDN scripts, Excel automation or paid features. Unit tests use candidate read only for round-trip checks; browser exports also have an independent openpyxl/ODF XML verifier.",
+    "advisoriesReviewed": [
+      "https://cdn.sheetjs.com/advisories/CVE-2023-30533",
+      "https://cdn.sheetjs.com/advisories/CVE-2024-22363"
+    ],
+    "advisoryConclusion": "0.20.3 is beyond the published remediation versions for those two advisories. This is not exhaustive vulnerability clearance; the legacy npm 0.18.5 package is not selected. No scanner suppression added."
+  },
+  "safety": {
+    "uploads": false,
+    "contentPersistence": false,
+    "sourcePdfModified": false,
+    "newOcrModelsOrNativeCore": false,
+    "formulaInference": false,
+    "externalWorkbookLinks": false,
+    "macroOutput": false,
+    "limits": "50 MiB PDF / 500 pages; current page only; 10,000 text stream items/words; 500 rows, 40 columns, 20,000 cells; 2,000 characters/cell and 1,000,000 total; 8 MiB export; 30-second text-stream deadline and owned export worker; OCR inherits 20 MP / 180 seconds. Correction UI renders at most 50 rows at a time.",
+    "cancellation": "Generation ownership rejects late file/render/text/OCR/export results; workers terminate on abort, timeout, malformed response and completion. Source documents are destroyed on replacement/unmount. Windows uses existing no-replace file commit.",
+    "permissions": "COPY checked before rendering extraction preview and again before selectable text or OCR. Table extraction is read-only and does not reuse document-modification locks.",
+    "cellAdmission": "Explicit literal string or finite numeric cells. No source-derived f/h/l fields. Auto preserves leading zeros, ambiguous dates/separators and over-15-digit values as text. Explicit numeric conventions refuse malformed/over-precision input. Invalid XML control characters/surrogates are refused.",
+    "windowsSave": "Only new XLSX/ODS MIME/extension cases; 8 MiB, ZIP-header admission, same token/offset/length/cancellation/new-file-only transport. Header check is not a full Office package validator. Full export contents are verified separately using independent test readers. No new shell or filesystem capabilities.",
+    "odsPackaging": "Library STORED output is repacked with mimetype first/uncompressed/no extra field per ODF package section 3.3. Only the writer's bounded (8 MiB), uncompressed, fixed-entry-name output is admitted; no general uploaded ZIP parser or decompressor. XML payloads remain unchanged. Existing ZIP writer admits only one new fixed internal pathname, META-INF/manifest.xml, under explicit ODS mode; flat/image exports remain strict. Independent verifier checks ZIP CRCs and packaging magic positions."
+  },
+  "limitations": [
+    "Grid suggestions use positioned text and spacing, not a guaranteed semantic table parser; borders are not yet analyzed.",
+    "Manual region/row/column guides and cell corrections are required for ambiguous structure. No merged-cell or original-formula recovery, no cross-page inference.",
+    "OCR is English/French on image-only unrotated pages. Mixed OCR/text pages and rotated text are refused. OCR confidence is a recognition signal, not a calibrated probability of numeric accuracy.",
+    "Existing OCR native parser/model security review remains incomplete; no status promotion is implied.",
+    "Latest published installer is unchanged. Updated installed-app Save As and Excel/LibreOffice GUI interoperability still need manual acceptance. Do not publish/push this work until requested manual confirmation."
+  ]
+}

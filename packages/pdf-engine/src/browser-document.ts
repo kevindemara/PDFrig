@@ -1,6 +1,7 @@
 import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 
 import type { FormFieldType, NormalizedRect, QuarterTurn } from '@pdfmason/editor-core';
+import { TABLE_LIMITS, type TableWord } from './table-extraction.js';
 
 export const LOCAL_PDF_LIMITS = Object.freeze({
   maximumAssemblyBytes: 100 * 1024 * 1024,
@@ -802,6 +803,96 @@ export class BrowserPdfDocument {
       signal.removeEventListener('abort', cancel);
     }
     return isCancelled() ? 'cancelled' : 'ready';
+  }
+
+  /** CONV-007: read-only extraction, separate from modification eligibility. */
+  public async assertCanExtract(signal: AbortSignal): Promise<void> {
+    const { PermissionFlag } = await import('pdfjs-dist/webpack.mjs');
+    const permissions = await this.#document.getPermissions();
+    if (signal.aborted) throw new Error('TABLE_CANCELLED');
+    if (permissions !== null && !permissions.includes(PermissionFlag.COPY))
+      throw new Error('TABLE_COPY_RESTRICTED');
+  }
+
+  public async getTableWords(
+    pageIndex: number,
+    signal: AbortSignal,
+  ): Promise<readonly TableWord[]> {
+    await this.assertCanExtract(signal);
+    if (!Number.isInteger(pageIndex) || pageIndex < 0 || pageIndex >= this.pageCount)
+      throw new Error('TABLE_PAGE_INVALID');
+    const page = await this.#document.getPage(pageIndex + 1);
+    if (signal.aborted) throw new Error('TABLE_CANCELLED');
+    const viewport = page.getViewport({ scale: 1 });
+    // First version refuses rotated/vertical text rather than misplacing its cells.
+    if (
+      viewport.rotation !== 0 ||
+      (typeof viewport.userUnit === 'number' && viewport.userUnit !== 1)
+    )
+      throw new Error('TABLE_ROTATION_UNSUPPORTED');
+    const result: TableWord[] = [];
+    let count = 0,
+      itemCount = 0,
+      timedOut = false;
+    type PageTextContent = Awaited<ReturnType<typeof page.getTextContent>>;
+    const reader = (page.streamTextContent() as ReadableStream<PageTextContent>).getReader();
+    const cancel = () => {
+      void reader.cancel().catch(() => undefined);
+    };
+    const timer = setTimeout(() => {
+      timedOut = true;
+      cancel();
+    }, 30_000);
+    signal.addEventListener('abort', cancel, { once: true });
+    const cancelled = () => signal.aborted,
+      expired = () => timedOut;
+    try {
+      for (;;) {
+        const chunk = await reader.read();
+        if (cancelled()) throw new Error('TABLE_CANCELLED');
+        if (expired()) throw new Error('TABLE_TEXT_TIMEOUT');
+        if (chunk.done) break;
+        itemCount += chunk.value.items.length;
+        if (itemCount > TABLE_LIMITS.words) throw new Error('TABLE_WORD_LIMIT');
+        for (const item of chunk.value.items) {
+          if (!('str' in item) || !item.str.trim()) continue;
+          count += item.str.length;
+          if (count > TABLE_LIMITS.text) throw new Error('TABLE_TEXT_LIMIT');
+          if (
+            item.str.length > TABLE_LIMITS.cellText ||
+            item.dir === 'ttb' ||
+            Math.abs(Number(item.transform[1])) > 0.01 ||
+            Math.abs(Number(item.transform[2])) > 0.01
+          )
+            throw new Error('TABLE_TEXT_UNSUPPORTED');
+          const coordinates: unknown[] = viewport.convertToViewportPoint(
+            Number(item.transform[4]),
+            Number(item.transform[5]),
+          );
+          const x = Number(coordinates[0]),
+            y = Number(coordinates[1]);
+          const height = Math.abs(item.height),
+            width = Math.abs(item.width);
+          if (
+            ![x, y, height, width].every((v) => typeof v === 'number' && Number.isFinite(v)) ||
+            height <= 0 ||
+            width <= 0
+          )
+            continue;
+          const left = Math.max(0, x / viewport.width),
+            top = Math.max(0, (y - height) / viewport.height);
+          const w = Math.min(width / viewport.width, 1 - left),
+            h = Math.min(height / viewport.height, 1 - top);
+          if (w > 0 && h > 0) result.push({ text: item.str, x: left, y: top, width: w, height: h });
+        }
+      }
+      return result;
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', cancel);
+      await reader.cancel().catch(() => undefined);
+      reader.releaseLock();
+    }
   }
 
   public async hasSearchableText(pageIndex: number): Promise<boolean> {

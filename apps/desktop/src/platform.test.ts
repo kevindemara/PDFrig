@@ -216,6 +216,29 @@ describe('Windows platform adapter', () => {
     ).resolves.toBe('cancelled');
     expect(calls).toEqual(['choose_save_pdf']);
   });
+  it.each([
+    ['xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+    ['ods', 'application/vnd.oasis.opendocument.spreadsheet'],
+  ])(
+    'streams reviewed %s through the same bounded native-save transport',
+    async (extension, mimeType) => {
+      const commands: string[] = [];
+      const adapter = createWindowsPlatformAdapter(<T>(command: string): Promise<T> => {
+        commands.push(command);
+        return Promise.resolve(
+          (command === 'choose_save_pdf' ? { transferToken: 'table-token' } : undefined) as T,
+        );
+      });
+      await expect(
+        adapter.saveFile({
+          bytes: new Uint8Array([80, 75, 3, 4, 0]),
+          filenameSuggestion: `table.${extension}`,
+          mimeType,
+        }),
+      ).resolves.toBe('saved');
+      expect(commands).toEqual(['choose_save_pdf', 'write_pdf_chunk']);
+    },
+  );
 
   it('normalizes untrusted native errors to stable content-free codes', async () => {
     const adapter = createWindowsPlatformAdapter(<T>(): Promise<T> =>

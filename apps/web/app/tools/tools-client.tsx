@@ -11,8 +11,15 @@ const createWorker = (): Worker =>
 
 export const ToolsClient = ({
   enabledFeatures,
+  ocrEnabled,
 }: {
   readonly enabledFeatures: Readonly<Record<UtilityId, boolean>>;
+  readonly ocrEnabled: boolean;
 }) => (
-  <UtilityWorkbench createWorker={createWorker} enabledFeatures={enabledFeatures} surface="Web" />
+  <UtilityWorkbench
+    createWorker={createWorker}
+    enabledFeatures={enabledFeatures}
+    ocrEnabled={ocrEnabled}
+    surface="Web"
+  />
 );

@@ -4665,6 +4665,204 @@ button:disabled {
   }
 }
 
+/* CONV-007: source and cells share the workbench, not a second conversion page. */
+.utility-page--tables .utility-intro {
+  padding-block: 1.25rem;
+}
+.utility-page--tables .utility-intro h1 {
+  font-size: 2rem;
+  max-width: none;
+}
+.utility-page--tables .utility-layout--tables {
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+.utility-layout--tables > .utility-notes {
+  display: none;
+}
+.table-workbench {
+  min-width: 0;
+}
+.table-file-controls,
+.table-actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-block: 1rem;
+}
+.table-file-controls input[type='file'] {
+  max-width: 340px;
+}
+.table-file-controls input[type='number'] {
+  max-width: 90px;
+}
+.table-review-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1.15fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.table-source,
+.table-correction {
+  min-width: 0;
+}
+.table-source p,
+.table-correction > p {
+  font-size: 0.85rem;
+}
+.table-source-page {
+  position: relative;
+  border: 1px solid var(--border-default);
+  background: #e8edef;
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+.table-source-page canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.table-selection {
+  position: absolute;
+  border: 2px solid var(--brand-accent);
+  background: rgb(198 93 59 / 12%);
+  pointer-events: none;
+}
+.table-region-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.table-region-fields label {
+  font-size: 0.75rem;
+}
+.table-region-fields input {
+  width: 100%;
+  padding: 0.5rem;
+}
+.table-grid-scroll {
+  max-height: 650px;
+  overflow: auto;
+  border: 1px solid var(--border-default);
+  margin-block: 1rem;
+}
+.table-correction-grid {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  width: 100%;
+}
+.table-correction-grid caption {
+  padding: 0.6rem;
+  text-align: left;
+  color: var(--text-secondary);
+}
+.table-correction-grid th,
+.table-correction-grid td {
+  border: 1px solid var(--border-default);
+  padding: 0.35rem;
+  vertical-align: top;
+}
+.table-correction-grid thead th {
+  background: var(--surface-panel);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.table-correction-grid th select {
+  min-width: 140px;
+  display: block;
+  margin-block: 0.4rem;
+  font-size: 0.75rem;
+}
+.table-correction-grid textarea {
+  min-width: 125px;
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+.table-correction-grid button {
+  padding: 0.35rem;
+  font-size: 0.75rem;
+}
+.table-correction-grid .table-cell-uncertain {
+  background: #fff1cc;
+  box-shadow: inset 3px 0 #a96b00;
+}
+.table-review-check {
+  display: block;
+  margin-block: 1rem;
+}
+.table-empty {
+  padding: 2rem 1rem;
+  background: var(--surface-page);
+  border: 1px dashed var(--border-default);
+}
+.table-workbench details {
+  margin-block: 1rem;
+}
+.table-workbench summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+@media (max-width: 1100px) {
+  .table-review-layout {
+    grid-template-columns: 1fr;
+  }
+  .table-source-page {
+    max-width: 480px;
+  }
+}
+@media (max-width: 800px) {
+  .utility-page--tables .utility-layout--tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+.utility-page.utility-page--tables {
+  width: min(1800px, calc(100% - 32px));
+}
+.utility-page--tables .utility-bench {
+  padding: 1.25rem;
+}
+.table-workbench button {
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 36px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.table-workbench button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.table-workbench input:not([type='checkbox']),
+.table-workbench textarea,
+.table-workbench select {
+  font: inherit;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 0.45rem;
+  background: var(--surface-panel);
+  color: var(--text-primary);
+}
+.table-workbench textarea:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.table-review-check + .table-actions button {
+  background: var(--brand-ink);
+  color: white;
+  border-top: 3px solid var(--brand-accent);
+}
+
 @media (forced-colors: active) {
   .tool-rail li.is-current {
     border-color: Highlight;

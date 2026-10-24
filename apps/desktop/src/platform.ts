@@ -155,7 +155,14 @@ export const createWindowsPlatformAdapter = (
     },
   },
   saveFile: async ({ bytes, filenameSuggestion, mimeType, onProgress, signal }) => {
-    if (mimeType !== 'application/pdf' && mimeType !== 'application/json')
+    if (
+      ![
+        'application/pdf',
+        'application/json',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.oasis.opendocument.spreadsheet',
+      ].includes(mimeType)
+    )
       throw new Error('NATIVE_SAVE_TYPE_UNSUPPORTED');
     try {
       throwIfCancelled(signal);

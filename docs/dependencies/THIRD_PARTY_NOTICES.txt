@@ -4,6 +4,15 @@ This development notice accompanies the Milestone 0–6 alpha dependency graph. 
 
 Top-level runtime selections:
 
+CONV-007 spreadsheet writing uses SheetJS Community Edition 0.20.3,
+Copyright (C) 2012-present SheetJS LLC, https://sheetjs.com/.
+Full Apache-2.0 terms and attribution are retained in
+upstream/SheetJS-0.20.3-Apache-2.0.txt and shipped under public/third-party
+in both hosts. Unmodified ESM/types/license from the exact official tarball are
+retained in packages/sheetjs-ce and bound by hash; runtime
+spreadsheet imports, formula inference and external workbook links are not used.
+See table-export-review.json for the bounded development adoption scope.
+
 Development-only Windows IPC regression fixtures retain two unmodified JavaScript
 transport scripts from tauri 2.11.5, commit 7cd71369c00978a3783b6ae3e9972358abbe4ae6.
 Their original copyright/SPDX headers, exact source paths and hashes, and full

@@ -46,6 +46,8 @@ const DesktopRoot = () => {
   }, []);
   return route === '#tools' && desktopAccess === 'ready' ? (
     <UtilityWorkbench
+      saveFile={(request) => platformAdapter.saveFile(request)}
+      ocrEnabled={import.meta.env.DEV || import.meta.env.VITE_PDFMASON_OCR_ENABLED === 'true'}
       createWorker={createWorker}
       enabledFeatures={{
         ...DEFAULT_UTILITY_FEATURES,
@@ -54,6 +56,7 @@ const DesktopRoot = () => {
           import.meta.env.VITE_PDFMASON_PERMISSIONS_ENABLED,
         ),
         text: import.meta.env.DEV || import.meta.env.VITE_PDFMASON_TEXT_ENABLED === 'true',
+        tables: import.meta.env.DEV || import.meta.env.VITE_PDFMASON_TABLES_ENABLED === 'true',
       }}
       marketingHref="#workspace"
       surface="Windows"

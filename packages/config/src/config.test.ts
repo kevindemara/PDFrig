@@ -78,6 +78,7 @@ describe('environment validation', () => {
       statusPageUrl: null,
     });
     expect(config.utilityFeatures).toEqual({
+      tables: true,
       blank: true,
       compress: true,
       commentReview: true,

@@ -15,8 +15,8 @@ PDFrig's own code is MIT-licensed. Native OCR security and third-party dependenc
 reviews are still in progress; this is not a security-certified release. See
 [important limitations](#important-limitations) and [License](#license).
 
-[Browser setup](#quick-start) · [Windows download](#install-the-finished-windows-app) ·
-[AI-assisted setup](#set-up-with-an-ai-assistant) · [Features](#what-works-today) ·
+[Browser setup](#quick-start) · [Portable Windows ZIP](#portable-windows-zip) · [Windows installer](#install-the-finished-windows-app) ·
+[Mac browser setup](#mac-browser-setup) · [AI-assisted setup](#set-up-with-an-ai-assistant) · [Features](#what-works-today) ·
 [Self-hosting](#self-hosting) · [Build from source](#build-from-source)
 
 ## Quick start
@@ -45,6 +45,58 @@ No credentials or paid services are needed. Initial installation requires intern
 access for dependencies and verified English/French OCR models. After preparation,
 local OCR uses bundled assets, not a runtime CDN or document upload. Never disable
 asset integrity checks to work around a failed download.
+
+### Mac browser setup
+
+Mac users can run the **browser version from source**. There is currently no
+native macOS `.app` or DMG download. These setup commands are checked against the
+repository scripts; they have **not yet been tested on a Mac**, so macOS browser,
+OCR and export compatibility still need manual verification.
+
+Install the pinned [Node.js](https://nodejs.org/en/download) **24.19.0** for your
+Mac's architecture (Apple Silicon or Intel), plus Git. Use an ordinary Terminal
+window with zsh or bash; Rust, the full Xcode app, a Windows installer, Docker,
+paid hosting and service accounts are not needed for browser setup. If Git is
+missing, macOS may offer Apple's free Command Line Tools; those are for Git,
+not a native PDFrig build. Review any system installer prompts yourself.
+
+```sh
+node --version
+git --version
+npm install --global pnpm@11.22.0
+pnpm --version
+git clone https://github.com/kevindemara/PDFrig.git
+cd PDFrig
+pnpm install --frozen-lockfile
+pnpm web:dev
+```
+
+Verify Node and pnpm match `.nvmrc` and `package.json` before continuing. Stop if
+a command fails. If global npm installation reports `EACCES`, use a user-owned
+Node installation or npm prefix; do not change system-folder permissions or
+run the app as root. See [npm's guidance](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally).
+
+Open [the editor](http://127.0.0.1:3000/workspace) or
+[All tools](http://127.0.0.1:3000/tools). Keep Terminal open. **Control+C** stops
+this server. Files stay local; initial dependency and verified OCR-model downloads
+need internet. Check exports in Preview or another independent PDF reader. Safari
+and other Mac browsers have not been validated on this host; report the browser
+version if you encounter a problem.
+
+If port 3000 is occupied, leave the other process alone and use a free loopback
+port. For example, after installing dependencies, run:
+
+```sh
+pnpm build:packages
+NEXT_PUBLIC_APP_URL=http://127.0.0.1:3101 \
+PDFMASON_ALLOWED_ORIGINS=http://127.0.0.1:3101 \
+pnpm --filter @pdfmason/web dev --port 3101
+```
+
+Then use `http://127.0.0.1:3101/workspace`. Do not bind to `0.0.0.0`, expose the
+server through a tunnel, disable macOS protections or install the Windows EXE
+to follow this guide. The [AI Builder prompt](SETUP_WITH_AI.txt) can also assist
+with Mac browser setup; it must inspect the actual OS and shell first.
 
 ### Set up with an AI assistant
 
@@ -85,7 +137,49 @@ Choose **Cancel** to stay and export first, or **Discard and continue** to leave
 session work. The logo shortcut uses the same warning; original and previously
 exported PDFs are not changed.
 
-### Troubleshooting
+### PDF tables to XLSX or ODS
+
+Use **All tools → PDF tables to spreadsheet** in the browser version or the
+[portable Windows app](#portable-windows-zip). The older Windows installer linked
+below does not include this feature. Browser development enables tables by default;
+explicit builds use `NEXT_PUBLIC_FEATURE_TABLES_ENABLED=true` (Windows source builds:
+`VITE_PDFMASON_TABLES_ENABLED=true`). The portable download already enables tables
+and local OCR.
+
+1. Open a PDF containing a table.
+2. Choose a page, then drag around just its table. You can also enter the selection
+   as Left/Top/Width/Height percentages.
+3. Choose **Extract selectable text**. For an image-only scanned page, choose
+   **OCR scanned table** and English or French. Local OCR requires
+   `NEXT_PUBLIC_FEATURE_OCR_ENABLED=true` before starting the browser server;
+   the existing native OCR security limitations still apply.
+4. Compare the PDF and correction grid. Edit cells, add/remove rows or columns,
+   and choose each column's data type. **Auto** converts plain decimal numbers but
+   keeps leading-zero identifiers, ambiguous values and long digit strings as text.
+   Choose an explicit decimal/percentage convention when required. Dates remain text.
+5. For incorrect structure, open **Adjust row and column boundaries**. Enter
+   increasing percentages across/down the selection and rebuild. Rebuilding replaces
+   cell corrections. A blank boundary list produces a single column or row.
+6. Check the review box, then **Save reviewed XLSX** or **Save reviewed ODS**.
+   Any cell, type or layout change clears the review. Check the exported data in
+   your spreadsheet program before using it for calculations.
+
+This first version uses text spacing, not guaranteed table semantics or border
+analysis. It handles one page/table at a time, up to 500 rows, 40 columns and
+20,000 cells. Rotated/vertical text, mixed scan/text OCR pages, original formulas,
+merged-cell reconstruction and cross-page table joining are not supported.
+Yellow cells indicate low OCR confidence or a selection/boundary overlap, not a
+calibrated accuracy score. All extracted values need review. The PDF and scanned
+artwork are never modified; no spreadsheet formulas, macros or external links are
+created from PDF text. XLSX includes a header filter range; ODS filtering can be
+enabled in your spreadsheet program.
+
+Work is session-only. Export before leaving the tool or closing the app. All
+processing stays on this device with no paid service, spreadsheet application or
+API required. Spreadsheet writing uses SheetJS Community Edition under
+Apache-2.0; see [its retained license](docs/dependencies/upstream/SheetJS-0.20.3-Apache-2.0.txt).
+
+### General troubleshooting
 
 - **Port already in use:** stop your own previous server, or choose another
   loopback port with the commands below. Do not terminate unrelated processes.
@@ -111,7 +205,12 @@ environment-variable names retain the original PDFMason name for compatibility.
 ### Install the finished Windows app
 
 [**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/PDFrig-setup.exe)
+
 - Windows x64, version `0.1.0-alpha.20261020.2`.
+
+For the newer table extraction and spreadsheet exports, use the
+[portable ZIP](#portable-windows-zip) or browser version. This installer remains
+the earlier build; it has not been replaced by the portable download.
 
 The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2)
 includes the finished installer,
@@ -161,6 +260,58 @@ artifact hashes and test limits. These are historical build/test records, not
 security certification or a complete license review.
 For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
+### Portable Windows ZIP
+
+[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.1/PDFrig-portable-windows-x64.zip)
+— Windows x64, version `0.1.0-alpha.20261024.1`.
+
+This no-install app includes **PDF table extraction to XLSX/ODS, a correction
+preview and local OCR for scanned tables**. Scanned artwork stays unchanged.
+Review every recognized value; OCR can make mistakes. Local application tests
+and the maintainer's manual tests passed; broader platform testing remains open.
+
+Download the ZIP and its accompanying
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.1/SHA256SUMS.txt).
+Verify the ZIP with `Get-FileHash`, extract **all** files into a
+new folder, and run `PDFrig.exe`. Keep the `licenses` folder with it. No PDFrig
+installation, administrator privileges, Node.js or Rust are needed. Do not run
+the executable from inside the ZIP.
+
+```powershell
+Get-FileHash .\PDFrig-portable-windows-x64.zip -Algorithm SHA256
+```
+
+Compare the result with `SHA256SUMS.txt`. If the direct link fails, open the
+[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.1)
+and choose the ZIP under **Assets**. No GitHub account is required.
+
+**Microsoft Edge WebView2 Runtime is required and is not bundled in this ZIP.**
+If missing, use [Microsoft's official runtime installer](https://developer.microsoft.com/microsoft-edge/webview2/)
+or the standard PDFrig installer, subject to your device policy. Initial runtime
+setup may require internet. This is still an unsigned alpha: stop at a Windows
+security block; do not bypass it.
+
+This version runs without installing PDFrig but **stores settings/cache in the
+Windows user profile**. This version uses a separate identity and profile
+from the installed app. It is not a fully self-contained USB profile; close any
+other copy of this same version before launching another one.
+The ZIP creates no shortcuts, PDF associations or uninstall entry.
+
+To update, close the app and extract the new ZIP into a separate folder. To
+remove it, close it and delete only its app folder after saving any documents
+elsewhere. User-profile settings/cache and WebView2 remain. See
+[portable instructions](docs/operations/windows-portable-source-read-first.txt).
+Clean-machine, missing-runtime and broader Excel/LibreOffice testing remain open.
+
+For maintainers, `pnpm desktop:portable-build --output <unused-directory>` builds
+the current source using the installed Windows build tools, performs local
+source/notice checks and records the exact source and executable hashes. It
+creates a no-install ZIP with matching notices, local OCR assets and no update
+channel. It does not install PDFrig, upload anything or approve a public release.
+The older `pnpm desktop:portable --source <reviewed-payload-directory> --output
+<unused-directory>` command only repackages the previously pinned installer
+payload; it does not include newer source changes.
+
 ### Upgrade and uninstall
 
 There is no automatic public update channel. Export your work, close PDFrig and
@@ -194,12 +345,10 @@ is blocked, stop: do not disable Application Control or rename/move executables
 to evade device policy. Do not change its checkout while another PC is building
 a selected revision; retain the exact source commit and archive checksum.
 
-**Purpose of BUILD_WITH_AI.txt:** the [tool-neutral build prompt](BUILD_WITH_AI.txt)
-helps a coding assistant inspect prerequisites, run locked tests, build an internal
-QA installer and report its checksum. It is not an executable, automatic installer
-or AI feature in PDFrig. Users downloading a finished installer do not need this file.
-Building with an assistant does not remove licensing, security or testing obligations.
-For ordinary browser setup instead, use [SETUP_WITH_AI.txt](SETUP_WITH_AI.txt).
+The optional [AI setup guide](SETUP_WITH_AI.txt) helps users set up the browser
+version and find the Windows build instructions. It is a user installation aid;
+people downloading the finished Windows app do not need it. A successful source
+build still requires independent testing and license/security review.
 
 ### Internal installer testing
 
@@ -228,15 +377,16 @@ documents. Test flags may expose tools that remain gated in normal builds.
 
 Features are document-dependent and may be disabled in a particular build.
 
-| Task               | Support                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Read               | Search, select/copy searchable text, fit a full page, browse outlines and thumbnails                                                   |
-| Edit original text | Replace supported text and rewrap uniform paragraphs at the original font size; actual-PDF review and undo/redo                        |
-| OCR                | Local English/French recognition; add invisible search/copy text while keeping the visible scan unchanged                              |
-| Organize           | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages                                                  |
-| Annotate           | Text boxes/callouts, markup, comments, live drawing, shapes and stamps; drag/resize placed items                                       |
-| Fill and sign      | Supported form fields and typed script-font, drawn or uploaded visual signatures                                                       |
-| Create and refine  | Blank PDFs, images/plain text to PDF, page images, lossless compression, metadata, numbering, headers/footers, crop and bounded resize |
+| Task                        | Support                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Read                        | Search, select/copy searchable text, fit a full page, browse outlines and thumbnails                                                     |
+| Edit original text          | Replace supported text and rewrap uniform paragraphs at the original font size; actual-PDF review and undo/redo                          |
+| OCR                         | Local English/French recognition; add invisible search/copy text while keeping the visible scan unchanged                                |
+| Organize                    | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages                                                    |
+| Annotate                    | Text boxes/callouts, markup, comments, live drawing, shapes and stamps; drag/resize placed items                                         |
+| Fill and sign               | Supported form fields and typed script-font, drawn or uploaded visual signatures                                                         |
+| Create and refine           | Blank PDFs, images/plain text to PDF, page images, lossless compression, metadata, numbering, headers/footers, crop and bounded resize   |
+| Tables (unreleased feature) | Current-page selectable-text or English/French OCR tables, correction grid and reviewed XLSX/ODS output; not yet in the linked installer |
 
 Password/permission tools and redaction have separate feature gates and review
 requirements. Office conversion is not available in this version. The
@@ -302,7 +452,8 @@ pnpm test:browser
 The first command checks formatting, lint, types, unit/component tests, native
 permissions, dependency policy, sensitive files and builds. Browser tests also
 require Playwright Chromium, qpdf **12.4.0**, Poppler, and Python with `pypdf`
-**6.16.1**, `cryptography` **50.0.0** and Pillow **12.3.0**. These verification
+**6.16.1**, `openpyxl` **3.1.5**, ReportLab **4.4.9**, `cryptography` **50.0.0**
+and Pillow **12.3.0**. These verification
 tools are not required for normal browser use. Install Chromium with
 `pnpm exec playwright install chromium`; configure `PDFMASON_QPDF_PATH`,
 `PDFMASON_PYTHON_PATH` and Poppler on PATH. Tests use a dedicated loopback server

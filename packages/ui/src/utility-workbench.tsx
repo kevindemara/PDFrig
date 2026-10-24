@@ -33,6 +33,8 @@ import { DecorationWorkbench } from './decoration-workbench.js';
 import { TextPdfWorkbench } from './text-pdf-workbench.js';
 import { PermissionWorkbench } from './permission-workbench.js';
 import { supportedImageMimeType } from './image-input.js';
+import { TableExtractionWorkbench } from './table-extraction-workbench.js';
+import type { PlatformAdapter } from '@pdfmason/editor-core';
 
 export type UtilityId =
   | 'blank'
@@ -45,6 +47,7 @@ export type UtilityId =
   | 'permissions'
   | 'protect'
   | 'render'
+  | 'tables'
   | 'text';
 // CONV-005 uses an isolated shared lifecycle, not a second host implementation.
 type WorkState = 'idle' | 'ready' | 'working' | 'done' | 'error';
@@ -58,6 +61,8 @@ interface DownloadResult {
 }
 
 export interface UtilityWorkbenchProps {
+  readonly ocrEnabled?: boolean;
+  readonly saveFile?: PlatformAdapter['saveFile'];
   readonly createWorker?: () => Worker;
   readonly enabledFeatures?: Readonly<Record<UtilityId, boolean>>;
   readonly marketingHref?: string;
@@ -113,6 +118,13 @@ const utilities = [
     id: 'render',
     label: 'PDF to images',
     matrix: 'CONV-001',
+  },
+  {
+    description:
+      'Select a PDF table, correct its cells, and save an XLSX or ODS spreadsheet locally.',
+    id: 'tables',
+    label: 'PDF tables to spreadsheet',
+    matrix: 'CONV-007',
   },
   {
     description: 'Create measured blank pages with a standard content-safe ArtBox.',
@@ -330,6 +342,7 @@ export const DEFAULT_UTILITY_FEATURES: Readonly<Record<UtilityId, boolean>> = Ob
   protect: true,
   render: true,
   text: false,
+  tables: false,
 });
 
 // CREATE-002 and the shared utility IDs: server HTML must not accept actions
@@ -339,6 +352,8 @@ const clientHydrated = () => true;
 const serverHydrated = () => false;
 
 export const UtilityWorkbench = ({
+  ocrEnabled = false,
+  saveFile,
   createWorker,
   enabledFeatures = DEFAULT_UTILITY_FEATURES,
   marketingHref = '/',
@@ -346,8 +361,10 @@ export const UtilityWorkbench = ({
   workspaceHref = '/workspace',
 }: UtilityWorkbenchProps) => {
   const hydrated = useSyncExternalStore(subscribeToHydration, clientHydrated, serverHydrated);
-  const [active, setActive] = useState<UtilityId>(
-    () => utilities.find(({ id }) => enabledFeatures[id])?.id ?? 'compress',
+  const [active, setActive] = useState<UtilityId>(() =>
+    enabledFeatures.compress
+      ? 'compress'
+      : (utilities.find(({ id }) => enabledFeatures[id])?.id ?? 'compress'),
   );
   const [authorized, setAuthorized] = useState(false);
   const [blankMarginPoints, setBlankMarginPoints] = useState(36);
@@ -929,7 +946,7 @@ export const UtilityWorkbench = ({
     (active !== 'number' || numberingPreview.length > 0);
 
   return (
-    <main className="utility-page">
+    <main className={`utility-page${active === 'tables' ? ' utility-page--tables' : ''}`}>
       <header className="utility-header">
         <a aria-label="PDFrig home" className="brand-link" href={marketingHref}>
           <BrandLockup />
@@ -955,7 +972,7 @@ export const UtilityWorkbench = ({
         </p>
       </section>
 
-      <div className="utility-layout">
+      <div className={`utility-layout${active === 'tables' ? ' utility-layout--tables' : ''}`}>
         <nav aria-label="PDF utility tools" className="utility-rail">
           {utilities.map((utility, index) => (
             <button
@@ -1000,6 +1017,7 @@ export const UtilityWorkbench = ({
           {active !== 'blank' &&
             active !== 'decorate' &&
             active !== 'text' &&
+            active !== 'tables' &&
             active !== 'permissions' && (
               <label className="utility-dropzone">
                 <input
@@ -1286,6 +1304,13 @@ export const UtilityWorkbench = ({
           ) : null}
           {active === 'text' ? (
             <TextPdfWorkbench {...(createWorker === undefined ? {} : { createWorker })} />
+          ) : null}
+          {active === 'tables' && enabledFeatures.tables ? (
+            <TableExtractionWorkbench
+              surface={surface}
+              ocrEnabled={ocrEnabled}
+              {...(saveFile === undefined ? {} : { saveFile })}
+            />
           ) : null}
           {active === 'permissions' && enabledFeatures.permissions ? (
             <PermissionWorkbench {...(createWorker === undefined ? {} : { createWorker })} />
@@ -1861,67 +1886,70 @@ export const UtilityWorkbench = ({
             </div>
           ) : null}
 
-          {active !== 'decorate' && active !== 'text' && active !== 'permissions' && (
-            <>
-              <div className={`utility-status utility-status--${state}`} role="status">
-                <span aria-hidden="true" className="utility-status__indicator" />
-                <span>{message}</span>
-              </div>
+          {active !== 'decorate' &&
+            active !== 'text' &&
+            active !== 'permissions' &&
+            active !== 'tables' && (
+              <>
+                <div className={`utility-status utility-status--${state}`} role="status">
+                  <span aria-hidden="true" className="utility-status__indicator" />
+                  <span>{message}</span>
+                </div>
 
-              <footer className="utility-actions">
-                <span>
-                  {active === 'blank'
-                    ? 'No source file is needed.'
-                    : 'No source file is overwritten.'}
-                </span>
-                {result === null ? (
-                  <button
-                    className="button button--primary"
-                    disabled={!canRun}
-                    onClick={() => void run()}
-                    type="button"
-                  >
-                    {state === 'working'
-                      ? 'Working…'
-                      : active === 'metadata'
-                        ? 'Save metadata copy'
-                        : 'Create export'}
-                  </button>
-                ) : (
-                  <div className="result-actions">
-                    <span>{result.detail}</span>
-                    <div className="result-actions__buttons">
-                      <button
-                        className="button button--primary"
-                        onClick={() => download(result)}
-                        type="button"
-                      >
-                        Download new copy
-                      </button>
-                      {result.numberingReport === undefined ? null : (
+                <footer className="utility-actions">
+                  <span>
+                    {active === 'blank'
+                      ? 'No source file is needed.'
+                      : 'No source file is overwritten.'}
+                  </span>
+                  {result === null ? (
+                    <button
+                      className="button button--primary"
+                      disabled={!canRun}
+                      onClick={() => void run()}
+                      type="button"
+                    >
+                      {state === 'working'
+                        ? 'Working…'
+                        : active === 'metadata'
+                          ? 'Save metadata copy'
+                          : 'Create export'}
+                    </button>
+                  ) : (
+                    <div className="result-actions">
+                      <span>{result.detail}</span>
+                      <div className="result-actions__buttons">
                         <button
-                          className="button button--secondary"
-                          onClick={() =>
-                            download({
-                              bytes: new TextEncoder().encode(
-                                `${JSON.stringify(result.numberingReport, null, 2)}\n`,
-                              ),
-                              detail: 'Local numbering report',
-                              filename: 'pdfmason-numbering-report.json',
-                              mimeType: 'application/json',
-                            })
-                          }
+                          className="button button--primary"
+                          onClick={() => download(result)}
                           type="button"
                         >
-                          Download numbering report
+                          Download new copy
                         </button>
-                      )}
+                        {result.numberingReport === undefined ? null : (
+                          <button
+                            className="button button--secondary"
+                            onClick={() =>
+                              download({
+                                bytes: new TextEncoder().encode(
+                                  `${JSON.stringify(result.numberingReport, null, 2)}\n`,
+                                ),
+                                detail: 'Local numbering report',
+                                filename: 'pdfmason-numbering-report.json',
+                                mimeType: 'application/json',
+                              })
+                            }
+                            type="button"
+                          >
+                            Download numbering report
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </footer>
-            </>
-          )}
+                  )}
+                </footer>
+              </>
+            )}
         </fieldset>
 
         <aside className="utility-notes" aria-label="Tool safeguards">

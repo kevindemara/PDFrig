@@ -17,3 +17,6 @@ artifacts
 releases
 apps/web/public/ocr
 apps/desktop/public/ocr
+# Preserve hash-bound upstream source verbatim.
+packages/sheetjs-ce/xlsx.mjs
+packages/sheetjs-ce/index.d.ts

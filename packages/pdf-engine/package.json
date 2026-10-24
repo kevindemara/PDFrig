@@ -28,7 +28,8 @@
     "@pdfmason/contracts": "workspace:*",
     "@pdfmason/editor-core": "workspace:*",
     "pdfjs-dist": "catalog:",
-    "tesseract.js": "catalog:"
+    "tesseract.js": "catalog:",
+    "xlsx": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

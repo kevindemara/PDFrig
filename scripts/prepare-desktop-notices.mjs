@@ -1,5 +1,6 @@
 // Dependency metadata/notice audit; no compilation, signer, installer or network.
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -79,6 +80,35 @@ export async function prepareDesktopNotices({
           directory,
         });
       }
+  // pnpm's licenses command omits private workspace dependencies. This vendor
+  // workspace is third-party Apache code, not first-party MIT source.
+  const vendorDirectory = path.join(root, 'packages/sheetjs-ce');
+  const vendor = JSON.parse(await readFile(path.join(vendorDirectory, 'package.json'), 'utf8'));
+  const tableReview = JSON.parse(
+    await readFile(path.join(root, 'docs/dependencies/table-export-review.json'), 'utf8'),
+  );
+  if (
+    vendor.name !== 'xlsx' ||
+    vendor.version !== '0.20.3' ||
+    vendor.license !== 'Apache-2.0' ||
+    createHash('sha256')
+      .update(await readFile(path.join(vendorDirectory, 'LICENSE')))
+      .digest('hex') !== tableReview.dependency.licenseSha256
+  )
+    throw new Error('DESKTOP_VENDOR_NOTICE_MISMATCH');
+  if (
+    !packages.some(
+      (pkg) =>
+        pkg.ecosystem === 'npm' && pkg.name === vendor.name && pkg.version === vendor.version,
+    )
+  )
+    packages.push({
+      ecosystem: 'npm',
+      name: vendor.name,
+      version: vendor.version,
+      license: vendor.license,
+      directory: vendorDirectory,
+    });
   const result = await collectDesktopLicenseNotices(packages, {
     root,
     supplements: await loadDesktopLicenseSupplements(root),

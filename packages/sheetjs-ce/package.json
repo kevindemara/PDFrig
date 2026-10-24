@@ -1,0 +1,17 @@
+{
+  "name": "xlsx",
+  "version": "0.20.3",
+  "private": true,
+  "type": "module",
+  "description": "Unmodified, hash-bound SheetJS CE ESM/types from the official 0.20.3 tarball; Apache-2.0 third-party source, not PDFrig MIT code.",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "homepage": "https://sheetjs.com/",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./xlsx.mjs",
+      "default": "./xlsx.mjs"
+    }
+  }
+}

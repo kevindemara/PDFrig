@@ -121,7 +121,7 @@ export const FEATURE_REGISTRY = {
     'implemented',
   ),
   'CONV-006': feature('CONV-006', 'PDF to Word', 'P', 'Phase 3'),
-  'CONV-007': feature('CONV-007', 'PDF to Excel', 'P', 'Phase 3'),
+  'CONV-007': feature('CONV-007', 'PDF tables to XLSX or ODS', 'P', 'Phase 3', 'implemented'),
   'CONV-008': feature('CONV-008', 'PDF to PowerPoint', 'P', 'Phase 3'),
   'OCR-001': feature('OCR-001', 'OCR to searchable PDF', 'N', 'Paid beta', 'fixture_verified'),
   'OCR-002': feature('OCR-002', 'OCR selected pages', 'P', 'Phase 3'),

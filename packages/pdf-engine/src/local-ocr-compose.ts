@@ -28,6 +28,7 @@ export interface LocalOcrWord {
   readonly width: number;
   readonly height: number;
   readonly baseline: number;
+  readonly confidence?: number;
 }
 export async function composeLocalOcr(
   bytes: Uint8Array,

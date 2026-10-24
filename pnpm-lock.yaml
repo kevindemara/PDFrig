@@ -333,6 +333,9 @@ importers:
       tesseract.js:
         specifier: 'catalog:'
         version: 7.0.0
+      xlsx:
+        specifier: workspace:*
+        version: link:../sheetjs-ce
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -340,6 +343,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@24.13.3)(happy-dom@20.11.6)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(tsx@4.23.12))
+
+  packages/sheetjs-ce: {}
 
   packages/test-corpus:
     devDependencies:

@@ -1,0 +1,37 @@
+PDFrig portable Windows x64
+==========================
+
+Extract ALL files and run PDFrig.exe. No PDFrig installation or developer tools
+are needed to run it. Microsoft Edge WebView2 Runtime must already be installed;
+it is not bundled. Official runtime setup, subject to device policy:
+https://developer.microsoft.com/microsoft-edge/webview2/
+
+This unsigned alpha is version
+0.1.0-alpha.20261024.1. It includes PDF table extraction to XLSX/ODS, correction
+preview and local English/French OCR tables. BUILD_INFO.json records the original
+build provenance. The source snapshot and build-time acceptance fields describe
+the pre-publication build; see the release notes for manual acceptance.
+
+Stop if Windows or your device policy blocks it. Do not disable security, unblock
+a quarantined file or elevate to work around a block. Checksums do not establish
+publisher identity. No account, paid service or API key is needed for local tools.
+
+Open All tools > PDF tables to spreadsheet. Open a PDF containing a table,
+select its table, extract selectable text or OCR a scan, correct the cells and
+column types, check the review box, and Save reviewed XLSX or ODS to a NEW name.
+Review data in your spreadsheet app before calculating. No source-derived
+formulas, macros or external links are created. Mixed scan/text and rotated
+pages, merged-cell recovery and cross-page table joins are not supported.
+OCR never modifies the scanned artwork; native OCR security review remains open.
+
+This version uses a SEPARATE Windows user-profile identity from the older
+installer and the earlier repackaged ZIP. Settings/cache are not stored beside
+the executable, so this is not a self-contained USB profile or trace-free app.
+Close other PDFrig windows to avoid confusion about which copy
+is running. The ZIP creates no shortcuts, file association or uninstall entry.
+
+Export work before closing or updating. Update by extracting a future reviewed
+ZIP to a new folder. To remove, close the app and remove only its extracted
+folder after saving documents elsewhere. User-profile data and WebView2 remain.
+Keep the licenses folder with redistributed copies. No automatic update channel
+is configured for this version.

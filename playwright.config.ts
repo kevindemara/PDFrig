@@ -22,6 +22,8 @@ export default defineConfig({
       NEXT_PUBLIC_FEATURE_MEASUREMENT_ENABLED: 'true',
       NEXT_PUBLIC_FEATURE_REDACTION_ENABLED: 'true',
       NEXT_PUBLIC_FEATURE_STAMPS_ENABLED: 'true',
+      NEXT_PUBLIC_FEATURE_TABLES_ENABLED: 'true',
+      NEXT_PUBLIC_FEATURE_OCR_ENABLED: 'true',
     },
     timeout: 120_000,
   },

@@ -1,0 +1,52 @@
+PDFrig for Windows x64 - portable ZIP
+====================================
+
+1. Extract ALL files from PDFrig-portable-windows-x64.zip to an ordinary writable
+   folder, such as a new folder under Downloads. Do not run inside the ZIP.
+   Keep PDFrig.exe and the licenses folder together. Open PDFrig.exe.
+2. No PDFrig installation, administrator privileges, account, subscription,
+   Node.js, Rust, developer tools or local web server are required to run it.
+3. Microsoft Edge WebView2 Runtime is required and is NOT included in this ZIP.
+   It is commonly present on current Windows PCs, but Microsoft Edge's browser
+   installation alone is not a guarantee. If the runtime is missing, use the
+   official Microsoft WebView2 Runtime installer or PDFrig's standard installer,
+   subject to your device policy. Initial runtime setup may need internet.
+   https://developer.microsoft.com/microsoft-edge/webview2/
+4. This is an unsigned alpha. Stop if Windows or your device policy blocks it.
+   Do not disable security protections, unblock a quarantined file or run as
+   administrator to work around a block. A checksum verifies bytes, not publisher
+   identity. The local browser version is an alternative.
+
+The executable is the same version as the published 0.1.0-alpha.20261020.2
+installer. It has not been rebuilt and does not include newer source-only tools,
+including table extraction. BUILD_INFO.json records its original source and hash.
+OCR uses bundled English/French assets and does not visibly change scanned words.
+Review all PDF previews and exports. Native OCR security review remains open.
+
+What "portable" means here
+--------------------------
+You can run the app from an extracted folder without installing PDFrig. This ZIP
+does not create Start-menu shortcuts, register a PDF association or add an entry
+to Windows Installed apps. It is NOT a fully self-contained profile on a USB stick.
+The app and WebView2 may write settings/cache to your Windows user profile.
+The installer and portable copy use the SAME application identity and settings.
+Recent-file preferences and session/cache data may therefore be shared. Files are
+not copied into this ZIP. Running both copies at once may focus the first copy;
+export your work and close any installed PDFrig window before opening this one.
+
+Save edits with Review export to a NEW filename. Existing files are not replaced.
+Keep your own backups. Do not keep important PDFs only inside the application
+folder: deleting that folder also deletes any documents you put there.
+
+To update: export your work, close PDFrig, verify the new ZIP's checksum and
+extract it into a separate new folder. Do not copy files over a running app.
+There is no automatic public update channel.
+
+To remove: export your work, close PDFrig and delete only its extracted app
+folder after checking for your documents. Settings/cache in your user profile
+and a separately installed WebView2 Runtime remain. Full trace removal is not
+claimed; do not manually delete a shared profile while another PDFrig is using it.
+
+MIT and upstream license notices are in licenses/. Keep them with redistributed
+copies. Project source, browser setup and known limitations:
+https://github.com/kevindemara/PDFrig

@@ -15,7 +15,7 @@ HOW TO USE
 3. Let the assistant carry out local setup. Review requests to install missing
    prerequisites or change an existing checkout. Never approve a security bypass.
 4. Default to the browser version. If you specifically want to build a Windows
-   installer from source, say so; BUILD_WITH_AI.txt covers that separate workflow.
+   app from source, say so; the optional Windows section below covers that workflow.
 
 BEGIN SETUP PROMPT
 
@@ -38,6 +38,11 @@ Detect the operating system, shell, current folder, available Git/Node/pnpm,
 and whether this is a Git checkout. Current pins are Node 24.19.0 and pnpm
 11.22.0; the checked-out .nvmrc and packageManager field are authoritative.
 Do not assume a drive letter, username, shell or existing tool installation.
+On macOS, follow README.md's Mac browser setup section and use zsh/bash syntax
+for process-local environment variables. Choose Node for Apple Silicon or Intel
+as appropriate. There is no native Mac app/DMG release; do not run the Windows
+EXE or install Rust/Xcode to set up the browser app. Mac browser compatibility
+still needs manual verification; do not report a Mac pass from another OS.
 
 If there is no checkout, clone https://github.com/kevindemara/PDFrig.git into a
 new, unused directory. Never clone over another project or delete files to make
@@ -115,11 +120,31 @@ did not. Never upload document contents, personal paths or secrets in public log
 
 5. Optional Windows build, ONLY if I explicitly request it.
 
-First explain that the finished PDFrig-setup.exe can be downloaded without a
-source build. If I still want a source build on authorized Windows x64 hardware,
-follow BUILD_WITH_AI.txt, including its pinned Rust/MSVC/SDK requirements, locked
-tests, notice checks, isolated internal QA profile and signature/checksum checks.
-This is a separate developer workflow, not a prerequisite for the browser app.
+First explain that the finished installer or portable ZIP can be downloaded
+without a source build; follow the current README download links. If I still
+want a source build on authorized Windows x64 hardware, read README.md's Windows
+Build from source and Internal installer testing sections. Verify the pinned
+Rust version from rust-toolchain.toml, the MSVC x64 toolchain, C++ workload,
+Windows SDK and WebView2. Ask before installing or changing tools.
+
+After the locked pnpm setup, run pnpm check. Do not build into an active browser
+server's output folder; stop only a server I authorize or use an isolated checkout.
+For native verification, use the existing Cargo manifest:
+apps/desktop/src-tauri/Cargo.toml. Fetch missing locked dependencies only with
+permission, then run cargo fmt --check, cargo clippy --locked --offline
+--all-targets -- -D warnings, and cargo test --locked --offline against that
+manifest. Check $LASTEXITCODE after each PowerShell command; stop on failure.
+
+For a no-install ZIP, use pnpm desktop:portable-build --output with a NEW unused
+local directory. This requires the installed build tools and cached locked
+dependencies; it creates the executable, license notices and checksums, not an
+installed app. For an installer, follow pnpm desktop:notices and pnpm
+desktop:internal-build --installer-qa as described in README.md. Partial output
+or a successful compilation is not proof that the app works. Verify the archive
+or installer checksum and Authenticode status, then test only synthetic PDFs,
+native Open/Save cancellation, exports and unchanged scan appearance. Report
+unavailable checks as NOT TESTED. No publisher signing or update-channel changes.
+This is an optional developer workflow, not a prerequisite for the browser app.
 Ask before installing/uninstalling an app, changing file associations or replacing
 an existing installation. A local build does not authorize public distribution.
 

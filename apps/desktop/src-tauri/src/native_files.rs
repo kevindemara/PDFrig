@@ -38,6 +38,8 @@ struct SaveTransfer {
 enum SaveKind {
     CommentReport,
     Pdf,
+    Xlsx,
+    Ods,
 }
 
 impl SaveKind {
@@ -45,6 +47,8 @@ impl SaveKind {
         match mime_type {
             "application/pdf" => Ok(Self::Pdf),
             "application/json" => Ok(Self::CommentReport),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => Ok(Self::Xlsx),
+            "application/vnd.oasis.opendocument.spreadsheet" => Ok(Self::Ods),
             _ => Err(error("NATIVE_SAVE_TYPE_UNSUPPORTED")),
         }
     }
@@ -53,6 +57,14 @@ impl SaveKind {
         match self {
             Self::Pdf => has_pdf_extension(path),
             Self::CommentReport => has_json_extension(path),
+            Self::Xlsx => path
+                .extension()
+                .and_then(|s| s.to_str())
+                .is_some_and(|s| s.eq_ignore_ascii_case("xlsx")),
+            Self::Ods => path
+                .extension()
+                .and_then(|s| s.to_str())
+                .is_some_and(|s| s.eq_ignore_ascii_case("ods")),
         }
     }
 
@@ -60,6 +72,7 @@ impl SaveKind {
         match self {
             Self::Pdf => MAXIMUM_PDF_BYTES,
             Self::CommentReport => MAXIMUM_COMMENT_REPORT_BYTES,
+            Self::Xlsx | Self::Ods => 8 * 1024 * 1024,
         }
     }
 
@@ -67,6 +80,8 @@ impl SaveKind {
         match self {
             Self::Pdf => "application/pdf",
             Self::CommentReport => "application/json",
+            Self::Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            Self::Ods => "application/vnd.oasis.opendocument.spreadsheet",
         }
     }
 }
@@ -404,6 +419,7 @@ fn create_save_transfer(
 fn has_valid_save_header(kind: SaveKind, bytes: &[u8]) -> bool {
     match kind {
         SaveKind::Pdf => bytes.starts_with(b"%PDF-"),
+        SaveKind::Xlsx | SaveKind::Ods => bytes.starts_with(b"PK\x03\x04"),
         SaveKind::CommentReport => {
             bytes.starts_with(b"{\n  \"schema\": \"pdfmason.comment-summary\"")
         }
@@ -735,6 +751,12 @@ pub async fn choose_save_pdf(
         SaveKind::CommentReport => dialog
             .add_filter("PDFrig comment summary", &["json"])
             .set_title("Save comment summary"),
+        SaveKind::Xlsx => dialog
+            .add_filter("Excel spreadsheet", &["xlsx"])
+            .set_title("Save reviewed table"),
+        SaveKind::Ods => dialog
+            .add_filter("OpenDocument spreadsheet", &["ods"])
+            .set_title("Save reviewed table"),
     };
     let Some(selected) = dialog.blocking_save_file() else {
         return Ok(None);
@@ -845,6 +867,45 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     use super::*;
+    #[test]
+    fn table_save_types_are_narrow_and_keep_new_file_only_commit() {
+        for (extension, mime, kind) in [
+            (
+                "xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                SaveKind::Xlsx,
+            ),
+            (
+                "ods",
+                "application/vnd.oasis.opendocument.spreadsheet",
+                SaveKind::Ods,
+            ),
+        ] {
+            assert_eq!(SaveKind::from_mime_type(mime), Ok(kind));
+            assert_eq!(
+                validate_filename_suggestion(&format!("table.{extension}"), kind),
+                Ok(format!("table.{extension}").as_str())
+            );
+            assert!(validate_filename_suggestion("../table.xlsx", kind).is_err());
+            assert!(!kind.accepts_path(Path::new("table.exe")));
+            assert!(!kind.accepts_path(Path::new("table.pdf")));
+            assert!(has_valid_save_header(kind, b"PK\x03\x04payload"));
+            assert!(!has_valid_save_header(kind, b"%PDF-"));
+            assert_eq!(kind.maximum_bytes(), 8 * 1024 * 1024);
+            let path = temporary_pdf_path("table-new-file").with_extension(extension);
+            let mut transfer = create_save_transfer(path.clone(), 9, kind).expect("new table file");
+            transfer
+                .file
+                .write_all(b"PK\x03\x04table")
+                .expect("write table");
+            transfer.next_offset = 9;
+            finalize_save(transfer).expect("commit table");
+            assert_eq!(fs::read(&path).expect("read table"), b"PK\x03\x04table");
+            assert!(create_save_transfer(path.clone(), 9, kind).is_err());
+            fs::remove_file(path).expect("remove synthetic table");
+        }
+        assert!(SaveKind::from_mime_type("application/octet-stream").is_err());
+    }
 
     fn temporary_pdf_path(label: &str) -> PathBuf {
         let nonce = SystemTime::now()

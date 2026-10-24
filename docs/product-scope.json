@@ -284,11 +284,11 @@
     },
     {
       "id": "CONV-007",
-      "name": "PDF to Excel",
+      "name": "PDF tables to XLSX or ODS",
       "priority": "P",
       "target": "Phase 3",
-      "supportContract": "Table extraction benchmark and fallback behaviour",
-      "state": "catalogued"
+      "supportContract": "Local current-page text or English/French OCR extraction, region and row/column guides, editable correction grid, reviewed literal/typed-cell XLSX/ODS export. Source PDF/scans unchanged. 500 rows/40 columns/20,000 cells; no formula recovery, merged-cell reconstruction, rotated/mixed OCR pages or cross-page inference. Production gated; manual compatibility review pending.",
+      "state": "implemented"
     },
     {
       "id": "CONV-008",

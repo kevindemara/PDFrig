@@ -16,10 +16,27 @@ test('approved MIT terms cover current first-party manifests without relicensing
       withFileTypes: true,
     }))
       if (entry.isDirectory()) manifests.push(`${base}/${entry.name}/package.json`);
-  assert.equal(manifests.length, 12);
+  assert.equal(manifests.length, 13);
   for (const file of manifests) {
     const manifest = JSON.parse(await load(file));
-    assert.equal(manifest.license, 'MIT', file);
+    if (file === 'packages/sheetjs-ce/package.json') {
+      assert.equal(manifest.name, 'xlsx');
+      assert.equal(manifest.version, '0.20.3');
+      assert.equal(manifest.license, 'Apache-2.0');
+      const review = JSON.parse(await load('docs/dependencies/table-export-review.json'));
+      assert.equal(
+        createHash('sha256')
+          .update(await load('packages/sheetjs-ce/xlsx.mjs'))
+          .digest('hex'),
+        review.dependency.esmSha256,
+      );
+      assert.equal(
+        createHash('sha256')
+          .update(await load('packages/sheetjs-ce/LICENSE'))
+          .digest('hex'),
+        review.dependency.licenseSha256,
+      );
+    } else assert.equal(manifest.license, 'MIT', file);
     assert.equal(manifest.private, true, file); // Not authorization to publish packages.
   }
   assert.match(await load('apps/desktop/src-tauri/Cargo.toml'), /^license = "MIT"$/mu);
@@ -61,6 +78,61 @@ test('VIEW-001 release README links resolve and do not claim unfinished editor c
     if (target === '' || /^https?:\/\//u.test(target)) continue;
     await access(new URL(`../${target}`, import.meta.url));
   }
+});
+
+test('Mac browser instructions match pins and loopback scripts without claiming native support', async () => {
+  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
+  const readme = await load('README.md');
+  const section = readme.slice(
+    readme.indexOf('### Mac browser setup'),
+    readme.indexOf('### Set up with an AI assistant'),
+  );
+  const pkg = JSON.parse(await load('package.json'));
+  const web = JSON.parse(await load('apps/web/package.json'));
+  assert.ok(section.includes(`**${(await load('.nvmrc')).trim()}**`));
+  assert.ok(section.includes(`pnpm@${pkg.packageManager.replace('pnpm@', '')}`));
+  for (const phrase of [
+    '```sh',
+    'pnpm install --frozen-lockfile',
+    'pnpm web:dev',
+    'Control+C',
+    'Apple Silicon or Intel',
+    'not yet been tested on a Mac',
+    'no\nnative macOS',
+    'PDFMASON_ALLOWED_ORIGINS=http://127.0.0.1:3101',
+    'pnpm --filter @pdfmason/web dev --port 3101',
+  ])
+    assert.ok(section.includes(phrase), phrase);
+  assert.ok(web.scripts.dev.includes('--hostname 127.0.0.1'));
+  assert.doesNotMatch(section, /sudo |chmod |xattr |curl .+\|\s*(?:sh|bash)/iu);
+});
+
+test('portable download instructions retain exact asset, runtime and separate-profile limits', async () => {
+  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+  const section = readme.slice(
+    readme.indexOf('### Portable Windows ZIP'),
+    readme.indexOf('### Upgrade and uninstall'),
+  );
+  for (const phrase of [
+    '0.1.0-alpha.20261024.1',
+    'PDFrig-portable-windows-x64.zip',
+    'Get-FileHash',
+    'Extract',
+    'WebView2 Runtime',
+    'not bundled',
+    'Windows user profile',
+    'not a fully',
+    'separate identity and profile',
+    'desktop:portable-build',
+    'table extraction',
+  ])
+    assert.ok(section.toLowerCase().includes(phrase.toLowerCase()), phrase);
+  assert.ok(
+    section.includes('releases/download/v0.1.0-alpha.20261024.1/PDFrig-portable-windows-x64.zip'),
+  );
+  assert.ok(section.includes('releases/download/v0.1.0-alpha.20261024.1/SHA256SUMS.txt'));
+  assert.ok(section.includes('The ZIP creates no shortcuts'));
+  assert.doesNotMatch(section, /awaiting manual|has not been uploaded/iu);
 });
 
 test('VIEW-001 screenshot integrity and safe fixed-corpus provenance are retained', async () => {
@@ -117,7 +189,7 @@ test('Windows download routes put finished-app installation before optional sour
   assert.ok(installStart >= 0 && buildStart > installStart);
   assert.ok(readme.includes('](#install-the-finished-windows-app)'));
   assert.ok(readme.includes('](#build-from-source)'));
-  assert.ok(readme.includes('](BUILD_WITH_AI.txt)'));
+  assert.ok(readme.includes('](SETUP_WITH_AI.txt)'));
   const installation = readme.slice(installStart, buildStart);
   assert.match(installation, /https:\/\/github\.com\/kevindemara\/PDFrig\/releases/u);
   assert.ok(installation.includes('unsigned alpha release'));
@@ -129,12 +201,10 @@ test('Windows download routes put finished-app installation before optional sour
   assert.doesNotMatch(installation, /^pnpm |^cargo /mu);
   const source = readme.slice(buildStart, readme.indexOf('### Internal installer testing'));
   assert.ok(source.includes('source ZIPs lack Git metadata'));
-  assert.ok(source.includes('internal QA installer'));
   assert.ok(source.includes('pnpm desktop:dev'));
   assert.ok(source.includes('it does not install PDFrig'));
-  assert.ok(source.includes('Purpose of BUILD_WITH_AI.txt'));
-  assert.ok(source.includes('not an executable, automatic installer or AI feature'));
-  assert.ok(source.includes('Users downloading a finished installer do not need this file'));
+  assert.ok(source.includes('user installation aid'));
+  assert.ok(source.includes('people downloading the finished Windows app do not need it'));
   assert.ok(source.includes('exact source commit and archive checksum'));
   assert.match(source, /do not change its checkout/iu);
   assert.ok(readme.includes('A successful build alone is not public-release approval'));
@@ -253,7 +323,9 @@ test('AI Builder setup prompt defaults to browser setup with real commands and s
     readme.includes('https://raw.githubusercontent.com/kevindemara/PDFrig/main/SETUP_WITH_AI.txt'),
   );
   assert.ok(readme.indexOf('SETUP_WITH_AI.txt') < readme.indexOf('### Open, edit and export'));
-  assert.ok(guide.includes('BUILD_WITH_AI.txt'));
+  assert.ok(guide.includes('pnpm desktop:portable-build --output'));
+  assert.ok(guide.includes('cargo test --locked --offline'));
+  assert.ok(guide.includes('native Open/Save cancellation'));
   assert.doesNotMatch(guide, /--no-verify|--dangerously|--skip|ExecutionPolicy Bypass/iu);
 });
 
@@ -279,79 +351,6 @@ test('publication audit keeps privacy findings separate from source-license and 
   assert.equal(audit.sourceLicenseFollowup.thirdPartyNoticesClearedByProjectLicense, false);
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('24 other-platform')));
   assert.ok(audit.remainingPublicationGates.some((gate) => gate.includes('native OCR')));
-});
-
-test('tool-neutral build prompt tracks pinned tools, real commands and review records', async () => {
-  const load = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
-  const guide = await load('BUILD_WITH_AI.txt');
-  const pkg = JSON.parse(await load('package.json'));
-  const nodeVersion = (await load('.nvmrc')).trim();
-  const rustVersion = (await load('rust-toolchain.toml')).match(/^channel = "([^"]+)"$/mu)[1];
-  for (const pin of [
-    `Node ${nodeVersion}`,
-    `pnpm ${pkg.packageManager.replace('pnpm@', '')}`,
-    `Rust ${rustVersion}`,
-  ])
-    assert.ok(guide.includes(pin), `Outdated build-guide pin: ${pin}`);
-  const [introduction, body] = guide.split('BEGIN BUILD PROMPT');
-  assert.ok(body.endsWith('END BUILD PROMPT\n'));
-  assert.ok(introduction.includes('A source ZIP lacks Git metadata'));
-  assert.ok(introduction.includes('any coding assistant'));
-  assert.ok(introduction.includes("Your chosen assistant's own access/usage terms are separate"));
-  const commands = [...body.matchAll(/^ {2}((?:pnpm|cargo) .+)$/gmu)].map((match) => match[1]);
-  const manifest = 'apps/desktop/src-tauri/Cargo.toml';
-  assert.deepEqual(commands, [
-    'pnpm install --frozen-lockfile',
-    'pnpm check',
-    `cargo fetch --locked --manifest-path ${manifest}`,
-    `cargo fmt --manifest-path ${manifest} --check`,
-    `cargo clippy --locked --offline --manifest-path ${manifest} --all-targets -- -D warnings`,
-    `cargo test --locked --offline --manifest-path ${manifest}`,
-    'pnpm desktop:notices',
-    'pnpm desktop:internal-build --installer-qa',
-  ]);
-  for (const command of commands.filter((command) => command.startsWith('pnpm '))) {
-    const alias = command.split(' ')[1];
-    if (alias !== 'install') assert.ok(pkg.scripts[alias], `Missing documented command: ${alias}`);
-  }
-  const records = [...body.matchAll(/^ {2}(docs\/\S+)$/gmu)].map((match) => match[1]);
-  assert.equal(records.length, 4);
-  for (const file of [manifest, ...records, 'scripts/build-internal-windows.mjs'])
-    await access(new URL(`../${file}`, import.meta.url));
-  const helper = await load('scripts/build-internal-windows.mjs');
-  assert.ok(helper.includes('internalWindowsProfile(process.argv.slice(2))'));
-  assert.ok(
-    (await load('scripts/internal-windows-profile.mjs')).includes(
-      "args.includes('--installer-qa')",
-    ),
-  );
-  assert.ok(body.includes('SHA256SUMS.txt'));
-  assert.ok(body.includes('Get-AuthenticodeSignature'));
-  assert.ok(body.includes('updater-signature verification'));
-});
-
-test('AI build instructions retain approval gates instead of treating a build as release clearance', async () => {
-  const guide = await readFile(new URL('../BUILD_WITH_AI.txt', import.meta.url), 'utf8');
-  for (const boundary of [
-    'Windows release is an unsigned\nalpha',
-    'prompt does not grant rights to third-party material or waive release gates',
-    'ask before installing or changing tools',
-    'check $LASTEXITCODE immediately',
-    'propose a\nminimal repair for my approval',
-    'partial installer/checksum output is not a successful build',
-    'Ask before installing/uninstalling',
-    'Stop at Windows Application Control',
-    'No purchases, paid certificates/services, billing changes, hosted CI jobs',
-    'NOT license clearance',
-    'unchanged visible\nscans',
-    'independent export/preview comparison',
-    'Do not commit installers, caches or tools',
-  ])
-    assert.ok(guide.includes(boundary), `Missing safety boundary: ${boundary}`);
-  assert.doesNotMatch(
-    guide,
-    /--ignore-scripts|--no-verify|--dangerously|--skip|ExecutionPolicy Bypass/iu,
-  );
 });
 
 test('Windows export repair records local build success without claiming installed-app or security clearance', async () => {

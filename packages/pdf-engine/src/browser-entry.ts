@@ -55,6 +55,8 @@ export * from './signature-font.js';
 export * from './permissions.js';
 export * from './worker.js';
 export * from './zip.js';
+export * from './table-extraction.js';
+export * from './table-export-client.js';
 export type { AssemblyPage, AssemblySource } from './assembly.js';
 export type { EditedPagePlan, EditedPdfOptions, EditedPdfRequest } from './editing.js';
 export type { PdfModificationRisk } from './modification-risks.js';

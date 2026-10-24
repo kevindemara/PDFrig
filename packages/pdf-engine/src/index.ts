@@ -54,6 +54,8 @@ export * from './permissions.js';
 export * from './worker.js';
 export * from './worker-runtime.js';
 export * from './zip.js';
+export * from './table-extraction.js';
+export * from './table-workbook.js';
 
 export interface PdfSource {
   readonly byteLength: number;
