@@ -114,7 +114,7 @@ test('portable download instructions retain exact asset, runtime and separate-pr
     readme.indexOf('### Upgrade and uninstall'),
   );
   for (const phrase of [
-    '0.1.0-alpha.20261024.1',
+    '0.1.0-alpha.20261024.2',
     'PDFrig-portable-windows-x64.zip',
     'Get-FileHash',
     'Extract',
@@ -128,9 +128,9 @@ test('portable download instructions retain exact asset, runtime and separate-pr
   ])
     assert.ok(section.toLowerCase().includes(phrase.toLowerCase()), phrase);
   assert.ok(
-    section.includes('releases/download/v0.1.0-alpha.20261024.1/PDFrig-portable-windows-x64.zip'),
+    section.includes('releases/download/v0.1.0-alpha.20261024.2/PDFrig-portable-windows-x64.zip'),
   );
-  assert.ok(section.includes('releases/download/v0.1.0-alpha.20261024.1/SHA256SUMS.txt'));
+  assert.ok(section.includes('releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt'));
   assert.ok(section.includes('The ZIP creates no shortcuts'));
   assert.doesNotMatch(section, /awaiting manual|has not been uploaded/iu);
 });
@@ -227,7 +227,7 @@ test('public-facing installer instructions use the exact published asset, checks
   );
   const release = JSON.parse(
     await readFile(
-      new URL('../docs/operations/windows-save-race-release.json', import.meta.url),
+      new URL('../docs/operations/windows-security-patch-release.json', import.meta.url),
       'utf8',
     ),
   );
@@ -246,12 +246,7 @@ test('public-facing installer instructions use the exact published asset, checks
   assert.equal(release.draft, false);
   assert.equal(release.prerelease, true);
   assert.doesNotMatch(windows, /releases\/latest\/download/u);
-  const access = JSON.parse(
-    await readFile(
-      new URL('../docs/operations/public-access-verification.json', import.meta.url),
-      'utf8',
-    ),
-  );
+  const access = release.anonymousAccess;
   assert.equal(access.visibility, 'public');
   assert.equal(access.visibilityChangedByThisCheck, false);
   assert.equal(access.authenticationUsed, false);
@@ -264,6 +259,21 @@ test('public-facing installer instructions use the exact published asset, checks
   assert.equal(access.installer.bytes, release.assetBytes);
   assert.equal(access.installer.sha256, release.assetSha256);
   assert.equal(access.installer.checksumListingMatched, true);
+  assert.equal(access.portable.status, 200);
+  assert.equal(access.portable.releaseDraft, false);
+  assert.equal(access.portable.checksumListingMatched, true);
+  assert.ok(windows.includes(access.portable.url));
+  for (const asset of release.assets) {
+    assert.equal(asset.status, 200);
+    assert.match(asset.sha256, /^[a-f0-9]{64}$/u);
+    assert.ok(asset.bytes > 0);
+  }
+  assert.equal(release.sourceCommit, '27b4ed0581e90b1e52c570fbae4f6ac2629414bb');
+  assert.deepEqual(release.dependencyVersions, { next: '16.4.1', zod: '4.6.6' });
+  assert.ok(release.ci.every((run) => run.conclusion === 'success'));
+  assert.ok(
+    release.limitations.some((limit) => limit.includes('Native OCR security review is incomplete')),
+  );
   assert.equal(access.securityOrBillingSettingsChanged, false);
   const images = JSON.parse(
     await readFile(new URL('../docs/screenshots/manifest.json', import.meta.url), 'utf8'),

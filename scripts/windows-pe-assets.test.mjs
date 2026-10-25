@@ -196,7 +196,7 @@ test('replacement installer evidence binds exclusions, MIT notice, tested binary
   assert.equal(cleanup.remainingRelease, release.tag);
 });
 
-test('no-replace-save installer, installed checks and current download stay hash-bound', async () => {
+test('historical no-replace-save installer evidence remains hash-bound when superseded', async () => {
   const load = async (name) =>
     JSON.parse(await readFile(new URL(`../docs/operations/${name}`, import.meta.url), 'utf8'));
   const build = await load('windows-save-race-build.json');
@@ -253,14 +253,8 @@ test('no-replace-save installer, installed checks and current download stay hash
     assert.equal(record.securityPolicyChanges, false);
     assert.equal(record.billingChanges, false);
   }
-  const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
-  for (const value of [
-    release.downloadUrl,
-    release.releaseUrl,
-    release.version,
-    'docs/operations/windows-save-race-build.json',
-    'docs/operations/windows-save-race-release.json',
-  ])
-    assert.ok(readme.includes(value), value);
+  const current = await load('windows-security-patch-release.json');
+  assert.ok(current.supersedes.includes(release.tag));
+  assert.notEqual(current.assetSha256, release.assetSha256);
   assert.ok(release.assets.every((name) => !name.endsWith('.key')));
 });

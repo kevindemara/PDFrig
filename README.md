@@ -139,11 +139,10 @@ exported PDFs are not changed.
 
 ### PDF tables to XLSX or ODS
 
-Use **All tools → PDF tables to spreadsheet** in the browser version or the
-[portable Windows app](#portable-windows-zip). The older Windows installer linked
-below does not include this feature. Browser development enables tables by default;
+Use **All tools → PDF tables to spreadsheet** in the browser version or either
+Windows download below. Browser development enables tables by default;
 explicit builds use `NEXT_PUBLIC_FEATURE_TABLES_ENABLED=true` (Windows source builds:
-`VITE_PDFMASON_TABLES_ENABLED=true`). The portable download already enables tables
+`VITE_PDFMASON_TABLES_ENABLED=true`). Both Windows downloads already enable tables
 and local OCR.
 
 1. Open a PDF containing a table.
@@ -204,27 +203,29 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/PDFrig-setup.exe)
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-setup.exe)
 
-- Windows x64, version `0.1.0-alpha.20261020.2`.
+- Windows x64, version `0.1.0-alpha.20261024.2`.
 
-For the newer table extraction and spreadsheet exports, use the
-[portable ZIP](#portable-windows-zip) or browser version. This installer remains
-the earlier build; it has not been replaced by the portable download.
+Includes table extraction, its correction preview, XLSX/ODS exports, local OCR
+and the All tools button. Both Windows downloads contain the patched Zod dependency;
+the browser source also updates Next.js. Use this release instead of older downloads.
 
-The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/private-test-20261020-2)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.2)
 includes the finished installer,
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/private-test-20261020-2/SHA256SUMS.txt),
-third-party notices and verification records. **You do not need to build the app.**
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt)
+and third-party notices. **You do not need to build the app.**
 
 This is an **unsigned alpha release**. The current installer was tested for
-same-machine upgrade, OCR, signatures, native Save As and unsaved-change warnings.
-Independent checks verified searchable exports and unchanged scan appearance on
-synthetic test documents. Clean-machine installation, disconnected-network OCR,
+same-machine upgrade, original-text editing/export, native Save As cancellation/retry
+and scanned-table OCR spreadsheet exports. Independent checks verified text placement,
+font size, unchanged page content and spreadsheet values/types on synthetic documents.
+The portable build also passed OCR PDF export with unchanged scan appearance.
+Clean-machine installation, disconnected-network OCR,
 uninstall and broader security checks remain open. Windows compliance is not certified.
 
-Use this version instead of `0.1.0-alpha.20261020.1`: it fixes a rare native-save
-race that could overwrite a file created by another process during export.
+The earlier native-save race fix is retained: export does not overwrite a file
+created by another process while the save is in progress.
 
 1. Download **PDFrig-setup.exe**, not **Source code (zip)** or **Source code (tar.gz)**.
 2. Verify its checksum in PowerShell against `SHA256SUMS.txt`:
@@ -254,24 +255,24 @@ If a direct download fails, open the linked release page and select its asset;
 do not bypass browser or Windows security warnings.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [build evidence](docs/operations/windows-save-race-build.json)
-and [download verification](docs/operations/windows-save-race-release.json) for exact
-artifact hashes and test limits. These are historical build/test records, not
+the tracked source files. See the [release verification](docs/operations/windows-security-patch-release.json)
+for exact artifact hashes, source commit, passing CI and anonymous download checks.
+These are build/test records, not
 security certification or a complete license review.
 For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
 ### Portable Windows ZIP
 
-[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.1/PDFrig-portable-windows-x64.zip)
-— Windows x64, version `0.1.0-alpha.20261024.1`.
+[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-portable-windows-x64.zip)
+— Windows x64, version `0.1.0-alpha.20261024.2`.
 
 This no-install app includes **PDF table extraction to XLSX/ODS, a correction
 preview and local OCR for scanned tables**. Scanned artwork stays unchanged.
-Review every recognized value; OCR can make mistakes. Local application tests
-and the maintainer's manual tests passed; broader platform testing remains open.
+Review every recognized value; OCR can make mistakes. Local automated and native
+application checks passed; broader platform testing remains open.
 
 Download the ZIP and its accompanying
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.1/SHA256SUMS.txt).
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt).
 Verify the ZIP with `Get-FileHash`, extract **all** files into a
 new folder, and run `PDFrig.exe`. Keep the `licenses` folder with it. No PDFrig
 installation, administrator privileges, Node.js or Rust are needed. Do not run
@@ -282,7 +283,7 @@ Get-FileHash .\PDFrig-portable-windows-x64.zip -Algorithm SHA256
 ```
 
 Compare the result with `SHA256SUMS.txt`. If the direct link fails, open the
-[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.1)
+[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.2)
 and choose the ZIP under **Assets**. No GitHub account is required.
 
 **Microsoft Edge WebView2 Runtime is required and is not bundled in this ZIP.**
@@ -377,16 +378,16 @@ documents. Test flags may expose tools that remain gated in normal builds.
 
 Features are document-dependent and may be disabled in a particular build.
 
-| Task                        | Support                                                                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Read                        | Search, select/copy searchable text, fit a full page, browse outlines and thumbnails                                                     |
-| Edit original text          | Replace supported text and rewrap uniform paragraphs at the original font size; actual-PDF review and undo/redo                          |
-| OCR                         | Local English/French recognition; add invisible search/copy text while keeping the visible scan unchanged                                |
-| Organize                    | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages                                                    |
-| Annotate                    | Text boxes/callouts, markup, comments, live drawing, shapes and stamps; drag/resize placed items                                         |
-| Fill and sign               | Supported form fields and typed script-font, drawn or uploaded visual signatures                                                         |
-| Create and refine           | Blank PDFs, images/plain text to PDF, page images, lossless compression, metadata, numbering, headers/footers, crop and bounded resize   |
-| Tables (unreleased feature) | Current-page selectable-text or English/French OCR tables, correction grid and reviewed XLSX/ODS output; not yet in the linked installer |
+| Task               | Support                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Read               | Search, select/copy searchable text, fit a full page, browse outlines and thumbnails                                                              |
+| Edit original text | Replace supported text and rewrap uniform paragraphs at the original font size; actual-PDF review and undo/redo                                   |
+| OCR                | Local English/French recognition; add invisible search/copy text while keeping the visible scan unchanged                                         |
+| Organize           | Merge, insert, reorder, rotate, duplicate, delete, split and extract compatible pages                                                             |
+| Annotate           | Text boxes/callouts, markup, comments, live drawing, shapes and stamps; drag/resize placed items                                                  |
+| Fill and sign      | Supported form fields and typed script-font, drawn or uploaded visual signatures                                                                  |
+| Create and refine  | Blank PDFs, images/plain text to PDF, page images, lossless compression, metadata, numbering, headers/footers, crop and bounded resize            |
+| Tables             | Current-page selectable-text or English/French OCR tables, correction grid and reviewed XLSX/ODS output in the browser and both Windows downloads |
 
 Password/permission tools and redaction have separate feature gates and review
 requirements. Office conversion is not available in this version. The

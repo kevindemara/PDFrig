@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T01:26:31.782991+00:00",
+  "repository": "kevindemara/PDFrig",
+  "tag": "v0.1.0-alpha.20261024.2",
+  "version": "0.1.0-alpha.20261024.2",
+  "releaseUrl": "https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.2",
+  "downloadUrl": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-setup.exe",
+  "assetBytes": 16597191,
+  "assetSha256": "4a5b18e14be2392e92fc455d9d58963fa9aad9a0ac7a7e7bf8756bb56def3d47",
+  "draft": false,
+  "prerelease": true,
+  "sourceCommit": "27b4ed0581e90b1e52c570fbae4f6ac2629414bb",
+  "dependencyVersions": {
+    "next": "16.4.1",
+    "zod": "4.6.6"
+  },
+  "productionAudit": "No known vulnerabilities found",
+  "ci": [
+    {
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/40148644677",
+      "conclusion": "success"
+    },
+    {
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/40148644767",
+      "conclusion": "success"
+    }
+  ],
+  "assets": [
+    {
+      "name": "PDFrig-LICENSE.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-LICENSE.txt",
+      "status": 200,
+      "bytes": 1069,
+      "sha256": "8a753bd1af90dbf9a7756f5e73d372ebac08ec070b7d0033e053336babdc9eb4",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 17790393,
+      "sha256": "29854dcdcb84fdca308aac2cf8709f27fa717cf353d796f3ef2d2c7f0f073e17",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16597191,
+      "sha256": "4a5b18e14be2392e92fc455d9d58963fa9aad9a0ac7a7e7bf8756bb56def3d47",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt",
+      "status": 200,
+      "bytes": 454,
+      "sha256": "949315739d18330661536359f16048a98925ac49ac0b689e4335a5260a04e44e",
+      "checksumListingMatched": false
+    },
+    {
+      "name": "THIRD_PARTY_NOTICES.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/THIRD_PARTY_NOTICES.txt",
+      "status": 200,
+      "bytes": 10587,
+      "sha256": "4b7e1bad089df2d90cbd3cf9f742e1817e93f9be14bdbf54c155a635fb025e69",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "UPSTREAM-LICENSE-TEXTS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/UPSTREAM-LICENSE-TEXTS.txt",
+      "status": 200,
+      "bytes": 4412754,
+      "sha256": "5afaea84495c8bcb272420795f4e06e6162c205c757a14a256f79bb5cb0064df",
+      "checksumListingMatched": true
+    }
+  ],
+  "anonymousAccess": {
+    "visibility": "public",
+    "visibilityChangedByThisCheck": false,
+    "authenticationUsed": false,
+    "cookiesUsed": false,
+    "method": "Fresh HTTPS GETs with User-Agent and Accept headers only; no token, auth headers, cookies or browser profile. Redirects restricted to HTTPS GitHub hosts.",
+    "securityOrBillingSettingsChanged": false,
+    "repositoryPageStatus": 200,
+    "readmeStatus": 200,
+    "logoStatus": 200,
+    "setupGuideStatus": 200,
+    "screenshots": [
+      {
+        "path": "docs/screenshots/workspace.png",
+        "status": 200,
+        "sha256": "0e01d12dfd9e60fac38bc051cfdedc5ea3de8a5208aa0692b9555e16e2513299"
+      },
+      {
+        "path": "docs/screenshots/local-tools.png",
+        "status": 200,
+        "sha256": "84fc61a195ce918d81b87384f8020d1db6cd0e1ad6b18fb11b42c0f1024f8820"
+      }
+    ],
+    "installer": {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16597191,
+      "sha256": "4a5b18e14be2392e92fc455d9d58963fa9aad9a0ac7a7e7bf8756bb56def3d47",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    },
+    "portable": {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 17790393,
+      "sha256": "29854dcdcb84fdca308aac2cf8709f27fa717cf353d796f3ef2d2c7f0f073e17",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    }
+  },
+  "validation": {
+    "portable": [
+      "7-file package allowlist and checksums",
+      "relocated-folder relaunch",
+      "OCR PDF text independently extracted; scan rendering byte-identical",
+      "XLSX/ODS inventory exports independently checked"
+    ],
+    "installer": [
+      "same-machine current-user upgrade",
+      "installed version and Tauri NSIS bundle-marker-normalized executable matched",
+      "all three installed license files matched",
+      "original-text PDF preview/apply/export and Save As cancellation/retry",
+      "PDF syntax, text matrix, font size and unchanged second-page content checked independently",
+      "scanned-table OCR with XLSX/ODS cells/types/totals independently checked"
+    ]
+  },
+  "limitations": [
+    "Unsigned alpha; do not bypass Windows security or device policy.",
+    "Native OCR security review is incomplete; no security or Windows compliance certification.",
+    "Same-machine synthetic-document checks do not establish clean-machine install, uninstall, missing-runtime or disconnected-network OCR behavior.",
+    "Windows bundle graph excludes optional native Canvas; broader dependency license review remains open.",
+    "Table and original-text editing limits remain as documented in README."
+  ],
+  "historicalBuildMetadata": "BUILD_INFO.json retains pre-publication build state; this record describes subsequent validation and publication. No clearance is implied.",
+  "supersedes": ["private-test-20261020-2", "v0.1.0-alpha.20261024.1"]
+}
