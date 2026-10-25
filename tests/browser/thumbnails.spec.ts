@@ -204,10 +204,13 @@ test('VIEW-004 preserves pointer reorder across a virtual scroll and replaces so
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await last.press('Home');
   await expect(first.locator('..').locator('..')).toHaveAttribute('data-page-id', originalId);
-  page.once('dialog', (dialog) => void dialog.accept());
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/mixed-page-sizes.pdf'));
+  const confirmation = page.getByRole('alertdialog', { name: 'Discard unsaved work?' });
+  await expect(confirmation).toBeVisible();
+  await expect(page.locator('.status-bar')).toContainText('25 pages');
+  await confirmation.getByRole('button', { name: 'Discard and continue', exact: true }).click();
   await expect(page.locator('.status-bar')).toContainText('3 pages');
   await expect(list.getByRole('button')).toHaveCount(3);
   await expect(list.getByRole('button', { name: 'Page 1', exact: true })).toHaveAttribute(

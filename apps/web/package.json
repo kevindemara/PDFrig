@@ -20,7 +20,7 @@
     "@supabase/ssr": "catalog:",
     "@supabase/supabase-js": "catalog:",
     "aws4fetch": "catalog:",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "stripe": "catalog:",

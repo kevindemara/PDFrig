@@ -18,6 +18,7 @@ test('local portable build has tables/OCR, isolated identity and no signing/acco
   assert.equal(environment.TAURI_SIGNING_PRIVATE_KEY, undefined);
   assert.equal(environment.PDFMASON_WINDOWS_CERTIFICATE_THUMBPRINT, undefined);
   const config = portableBuildConfig();
+  assert.equal(config.version, '0.1.0-alpha.20261024.2');
   assert.equal(config.identifier, 'com.pdfrig.desktop.portabletest');
   assert.equal(config.bundle.active, false);
   assert.equal(config.bundle.createUpdaterArtifacts, false);

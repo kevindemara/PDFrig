@@ -39,7 +39,7 @@ export function portableBuildEnvironment(environment) {
 export function portableBuildConfig() {
   return {
     productName: 'PDFrig',
-    version: '0.1.0-alpha.20261024.1',
+    version: '0.1.0-alpha.20261024.2',
     identifier: 'com.pdfrig.desktop.portabletest',
     app: {
       windows: [
@@ -86,6 +86,7 @@ async function build(output) {
   // Source hygiene and dependency binding are mandatory even for a local test.
   run(['repo:check']);
   run(['secret:scan']);
+  run(['security:audit']);
   execFileSync(process.execPath, ['--test', 'scripts/table-dependency.test.mjs'], {
     cwd: root,
     env: environment,

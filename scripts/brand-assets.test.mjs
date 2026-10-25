@@ -125,6 +125,10 @@ test('internal installer orchestration stays separate from public distribution a
   assert.match(build, /PDFMASON_ALLOW_UNSIGNED_INTERNAL_ALPHA: 'true'/u);
   assert.match(build, /VITE_PDFMASON_PERMISSIONS_ENABLED: 'false'/u);
   assert.match(build, /VITE_PDFMASON_REDACTION_ENABLED: 'false'/u);
+  assert.match(build, /VITE_PDFMASON_TABLES_ENABLED: 'true'/u);
+  assert.match(build, /VITE_PDFMASON_OCR_ENABLED: 'true'/u);
+  assert.ok(build.includes("[pnpmCli, 'security:audit']"));
+  assert.ok(build.includes('INTERNAL_NATIVE_CANVAS_ABSENCE_UNPROVEN'));
   assert.match(build, /verify_updater_artifact/u);
   assert.match(build, /Refusing to replace existing test signing material/u);
   assert.match(build, /finally[\s\S]*await unlink\(keyFile\)/u);
@@ -134,8 +138,8 @@ test('internal installer orchestration stays separate from public distribution a
 
 test('branded private installer uses PDFrig labels without enabling production distribution', () => {
   const profile = internalWindowsProfile(['--private-test']);
-  assert.equal(profile.version, '0.1.0-alpha.20261020.2');
-  assert.equal(profile.buildId, 'private-test-20261020-no-replace-save');
+  assert.equal(profile.version, '0.1.0-alpha.20261024.2');
+  assert.equal(profile.buildId, 'private-test-20261024-security-patches');
   assert.equal(profile.identifier, 'com.pdfmason.desktop.privatetest');
   const config = applyInternalWindowsProfile(
     { bundle: {}, plugins: { updater: { active: false } } },

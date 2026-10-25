@@ -7,7 +7,7 @@ it is not bundled. Official runtime setup, subject to device policy:
 https://developer.microsoft.com/microsoft-edge/webview2/
 
 This unsigned alpha is version
-0.1.0-alpha.20261024.1. It includes PDF table extraction to XLSX/ODS, correction
+0.1.0-alpha.20261024.2. It includes PDF table extraction to XLSX/ODS, correction
 preview and local English/French OCR tables. BUILD_INFO.json records the original
 build provenance. The source snapshot and build-time acceptance fields describe
 the pre-publication build; see the release notes for manual acceptance.

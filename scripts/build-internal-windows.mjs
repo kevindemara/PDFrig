@@ -24,6 +24,7 @@ const cli = path.join(
 );
 const profile = internalWindowsProfile(process.argv.slice(2));
 const { version, buildId, productName } = profile;
+execFileSync(process.execPath, [pnpmCli, 'security:audit'], { cwd: root, stdio: 'inherit' });
 const output = path.join(root, 'apps/desktop/src-tauri/target', buildId);
 const privateDirectory = path.join(
   root,
@@ -75,8 +76,12 @@ try {
     VITE_PDFMASON_MEASUREMENT_ENABLED: 'true',
     VITE_PDFMASON_STAMPS_ENABLED: 'true',
     VITE_PDFMASON_TEXT_ENABLED: 'true',
+    VITE_PDFMASON_TABLES_ENABLED: 'true',
+    VITE_PDFMASON_OCR_ENABLED: 'true',
     VITE_PDFMASON_PERMISSIONS_ENABLED: 'false',
     VITE_PDFMASON_REDACTION_ENABLED: 'false',
+    // This also disables .env loading in Vite, keeping service configuration out.
+    PDFRIG_PORTABLE_AUDIT_OUTPUT: path.join(output, 'bundle-module-audit.json'),
   });
   execFileSync(process.execPath, ['scripts/create-tauri-release-config.mjs'], {
     env: environment,
@@ -91,6 +96,11 @@ try {
 
   // Conservative build-input inventory; not an independently reviewed release SBOM.
   const notices = await prepareDesktopNotices({ root, pnpmCli, output, productName, version });
+  const targetScope = JSON.parse(
+    await readFile(path.join(output, 'windows-msvc-scope.json'), 'utf8'),
+  );
+  if (targetScope.candidateGaps.some((gap) => gap !== '@napi-rs/canvas-win32-x64-msvc@1.0.7'))
+    throw new Error('INTERNAL_WINDOWS_NOTICE_GAPS');
   config.bundle.resources = {
     [path.join(output, 'PDFrig-LICENSE.txt')]: 'licenses/PDFrig-LICENSE.txt',
     [path.join(output, 'THIRD_PARTY_NOTICES.txt')]: 'licenses/THIRD_PARTY_NOTICES.txt',
@@ -115,6 +125,11 @@ try {
     { cwd: path.join(root, 'apps/desktop'), env: environment, stdio: 'inherit' },
   );
   const bundle = path.join(root, 'apps/desktop/src-tauri/target/release/bundle/nsis');
+  // The optional native package is not cleared by metadata: require the same
+  // positive bundle graph exclusion used by the portable build before staging.
+  const moduleAudit = JSON.parse(await readFile(environment.PDFRIG_PORTABLE_AUDIT_OUTPUT, 'utf8'));
+  if (moduleAudit.nativeCanvasIncluded !== false || !moduleAudit.modules.length)
+    throw new Error('INTERNAL_NATIVE_CANVAS_ABSENCE_UNPROVEN');
   const name = `${productName}_${version}_x64-setup.exe`;
   for (const suffix of ['', '.sig'])
     await copyFile(path.join(bundle, `${name}${suffix}`), path.join(output, `${name}${suffix}`));
