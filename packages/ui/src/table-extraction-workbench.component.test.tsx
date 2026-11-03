@@ -75,6 +75,90 @@ function setup(
   return { ...view, ui, document, open, ocr, exporting, choose, load, extract };
 }
 describe('CONV-007 correction preview and ownership', () => {
+  it.each(['Web', 'Windows'] as const)(
+    'restores grouped cells, structure, types and review gates on %s',
+    async (surface) => {
+      const save = vi.fn<PlatformAdapter['saveFile']>(() => Promise.resolve('saved'));
+      const { ui, load, extract, exporting } = setup(surface, true, save);
+      await load();
+      await extract();
+      const undo = () => ui.getByRole('button', { name: 'Undo table correction' });
+      const redo = () => ui.getByRole('button', { name: 'Redo table correction' });
+      const review = ui.getByLabelText('I checked the rows, columns and values against the PDF.');
+      expect(undo()).toBeDisabled();
+      expect(redo()).toBeDisabled();
+      const cell = ui.getByRole('textbox', { name: 'Row 2 column 2' });
+      fireEvent.change(cell, { target: { value: '1' } });
+      fireEvent.change(cell, { target: { value: '17.5' } });
+      fireEvent.blur(cell);
+      fireEvent.click(review);
+      fireEvent.click(undo());
+      expect(cell).toHaveValue('12.5');
+      expect(review).not.toBeChecked();
+      expect(ui.getByRole('button', { name: 'Save reviewed XLSX' })).toBeDisabled();
+      expect(undo()).toBeDisabled();
+      fireEvent.click(redo());
+      expect(cell).toHaveValue('17.5');
+      fireEvent.change(ui.getByLabelText('Column 2 type'), { target: { value: 'text' } });
+      fireEvent.click(ui.getByRole('button', { name: 'Delete column 1' }));
+      fireEvent.click(undo());
+      expect(ui.getByRole('textbox', { name: 'Row 2 column 1' })).toHaveValue('001');
+      expect(ui.getByLabelText('Column 2 type')).toHaveValue('text');
+      fireEvent.click(undo());
+      expect(ui.getByLabelText('Column 2 type')).toHaveValue('auto');
+      fireEvent.click(ui.getByRole('button', { name: 'Add row' }));
+      expect(redo()).toBeDisabled();
+      fireEvent.click(undo());
+      expect(ui.queryByRole('textbox', { name: 'Row 3 column 1' })).toBeNull();
+      fireEvent.click(ui.getByRole('button', { name: 'Add column' }));
+      fireEvent.click(undo());
+      expect(ui.queryByLabelText('Column 3 type')).toBeNull();
+      fireEvent.click(ui.getByRole('button', { name: 'Delete row 2' }));
+      fireEvent.click(undo());
+      expect(ui.getByRole('textbox', { name: 'Row 2 column 1' })).toHaveValue('001');
+      fireEvent.click(ui.getByLabelText('First row contains headers'));
+      fireEvent.click(undo());
+      expect(ui.getByLabelText('First row contains headers')).toBeChecked();
+      fireEvent.click(review);
+      // Windows uses native save, exercising the same corrected state as the browser export.
+      if (surface === 'Windows') {
+        fireEvent.click(ui.getByRole('button', { name: 'Save reviewed XLSX' }));
+        await waitFor(() => expect(save).toHaveBeenCalled());
+        expect(exporting.mock.calls[0]?.[0]).toEqual([
+          ['Code', 'Value'],
+          ['001', 17.5],
+        ]);
+      }
+      fireEvent.change(ui.getByLabelText('Table page'), { target: { value: '2' } });
+      expect(ui.queryByRole('button', { name: 'Undo table correction' })).toBeNull();
+      fireEvent.click(ui.getByRole('button', { name: 'Show page' }));
+      await waitFor(() =>
+        expect(ui.getByRole('button', { name: 'Extract selectable text' })).toBeEnabled(),
+      );
+      await extract();
+      expect(undo()).toBeDisabled();
+      expect(redo()).toBeDisabled();
+    },
+  );
+
+  it('restores OCR confidence markings and resets history when rebuilding boundaries', async () => {
+    const { ui, load, container } = setup();
+    await load();
+    fireEvent.click(ui.getByRole('button', { name: 'OCR scanned table' }));
+    await waitFor(() => expect(ui.getByRole('textbox', { name: 'Row 2 column 1' })).toBeVisible());
+    fireEvent.click(ui.getByRole('button', { name: 'Delete column 1' }));
+    expect(container.querySelectorAll('.table-cell-uncertain')).toHaveLength(2);
+    fireEvent.click(ui.getByRole('button', { name: 'Undo table correction' }));
+    expect(container.querySelectorAll('.table-cell-uncertain')).toHaveLength(4);
+    fireEvent.click(ui.getByRole('button', { name: 'Add row' }));
+    fireEvent.change(ui.getByLabelText('Column breaks (% across selection)'), {
+      target: { value: '50' },
+    });
+    expect(ui.getByRole('button', { name: 'Undo table correction' })).toBeDisabled();
+    fireEvent.click(ui.getByRole('button', { name: 'Rebuild grid from boundaries' }));
+    expect(ui.getByRole('button', { name: 'Undo table correction' })).toBeDisabled();
+    expect(ui.getByRole('button', { name: 'Redo table correction' })).toBeDisabled();
+  });
   it('paginates large corrections without dropping rows from the native export', async () => {
     const save = vi.fn<PlatformAdapter['saveFile']>(() => Promise.resolve('saved'));
     const { ui, document, load, exporting } = setup('Windows', true, save);

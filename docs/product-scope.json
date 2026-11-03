@@ -47,7 +47,7 @@
       "name": "Zoom, fit, rotate view, and presentation modes",
       "priority": "L",
       "target": "Launch",
-      "supportContract": "Keyboard, pointer, and accessible controls",
+      "supportContract": "Keyboard, pointer, and accessible controls; measured full-page and width fitting follow resize and rotation, with explicit manual zoom.",
       "state": "fixture_verified"
     },
     {
@@ -55,7 +55,7 @@
       "name": "Thumbnails and page navigation",
       "priority": "L",
       "target": "Launch",
-      "supportContract": "Virtualized for large documents",
+      "supportContract": "Virtualized for large documents; validated working-copy page jumps and Page Up/Down navigation outside typing controls and modal dialogs.",
       "state": "fixture_verified"
     },
     {
@@ -287,7 +287,7 @@
       "name": "PDF tables to XLSX or ODS",
       "priority": "P",
       "target": "Phase 3",
-      "supportContract": "Local current-page text or English/French OCR extraction, region and row/column guides, editable correction grid, reviewed literal/typed-cell XLSX/ODS export. Source PDF/scans unchanged. 500 rows/40 columns/20,000 cells; no formula recovery, merged-cell reconstruction, rotated/mixed OCR pages or cross-page inference. Production gated; manual compatibility review pending.",
+      "supportContract": "Local current-page text or English/French OCR extraction, region and row/column guides, editable correction grid with bounded session-only grouped undo/redo, reviewed literal/typed-cell XLSX/ODS export. Undo/redo clears review; source/page/region/extraction/rebuild changes reset history. Source PDF/scans unchanged. 500 rows/40 columns/20,000 cells; no formula recovery, merged-cell reconstruction, rotated/mixed OCR pages or cross-page inference. Production gated; manual compatibility review pending.",
       "state": "implemented"
     },
     {

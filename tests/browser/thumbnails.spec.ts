@@ -103,7 +103,8 @@ test('VIEW-004 virtualizes 500 mixed pages and preserves keyboard ordering/expor
   await properties.getByRole('button', { name: 'Move up', exact: true }).click();
   const moved = list.getByRole('button', { name: 'Page 499', exact: true });
   await expect(moved).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('.viewer-toolbar')).toContainText('499 / 500');
+  await expect(page.getByRole('textbox', { name: 'Go to page', exact: true })).toHaveValue('499');
+  await expect(page.locator('.page-jump')).toContainText('/ 500');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(last).toHaveAttribute('aria-current', 'page');
   await page.getByRole('button', { name: 'Redo', exact: true }).click();

@@ -117,3 +117,49 @@ test('VIEW-003 very tall synthetic pages fit below the old zoom floor and retain
   await page.getByRole('button', { name: 'Fit full page' }).click();
   await assertFullPage(page);
 });
+
+test('VIEW-003 Fit width follows resize, collapsed panels and rotation without changing manual zoom', async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/workspace');
+  await page
+    .getByLabel('Open PDF')
+    .setInputFiles(path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf'));
+  const width = page.getByRole('button', { name: 'Fit width', exact: true });
+  await width.click();
+  const assertWidth = async () => {
+    await expect(width).toHaveAttribute('aria-pressed', 'true');
+    await expect
+      .poll(() =>
+        page.locator('.pdf-page-canvas').evaluate((canvas) => {
+          const slot = canvas.closest('.page-pasteboard');
+          if (!slot) throw new Error('Missing page viewport');
+          const style = getComputedStyle(slot);
+          const available =
+            slot.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+          return Math.abs(available - canvas.getBoundingClientRect().width);
+        }),
+      )
+      .toBeLessThan(5);
+  };
+  await assertWidth();
+  await page.getByRole('button', { name: 'Collapse tools', exact: true }).click();
+  await page.getByRole('button', { name: 'Collapse tool options', exact: true }).click();
+  await assertWidth();
+  await page.getByRole('button', { name: 'Rotate right', exact: true }).click();
+  await assertWidth();
+  await page.setViewportSize({ width: 1100, height: 700 });
+  await assertWidth();
+  await page.screenshot({ path: info.outputPath('fit-width-rotated.png') });
+  await page.getByRole('button', { name: 'Actual size (100%)' }).click();
+  await expect(width).toHaveAttribute('aria-pressed', 'false');
+  await page.setViewportSize({ width: 1200, height: 750 });
+  await expect(page.locator('.pdf-page-canvas')).toHaveJSProperty('width', 792);
+  await width.click();
+  await assertWidth();
+  await page.getByRole('button', { name: 'Present', exact: true }).click();
+  await assertFullPage(page);
+  await page.keyboard.press('Escape');
+  await assertWidth();
+});

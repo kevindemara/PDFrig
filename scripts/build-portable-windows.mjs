@@ -39,7 +39,7 @@ export function portableBuildEnvironment(environment) {
 export function portableBuildConfig() {
   return {
     productName: 'PDFrig',
-    version: '0.1.0-alpha.20261024.2',
+    version: '0.1.0-alpha.20261103.1',
     identifier: 'com.pdfrig.desktop.portabletest',
     app: {
       windows: [

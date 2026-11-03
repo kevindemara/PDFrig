@@ -130,6 +130,13 @@ your chosen assistant's own usage terms are separate.
 text. Dismissing a notice does not grant permissions or bypass export checks.
 Unsaved work is session-only, so export before closing the tab or restarting.
 
+To jump through a long document, type a working-copy page number in **Page** and
+press **Enter** or **Go**. Invalid numbers leave your current page unchanged;
+**Escape** restores its number. **Page Up / Page Down** changes pages when you are
+not typing or using a dialog. **Fit** shows the full page; **Fit width** fills the
+available viewing width and follows window/panel resizing and page rotation.
+**100%** and manual zoom turn automatic fitting off.
+
 Choose **All tools** in the editor's top bar to open the utilities screen in either
 the browser or Windows app. If you have unexported edits, unapplied redaction marks
 or session-only measurement guides, a confirmation appears before switching.
@@ -162,6 +169,13 @@ and local OCR.
 6. Check the review box, then **Save reviewed XLSX** or **Save reviewed ODS**.
    Any cell, type or layout change clears the review. Check the exported data in
    your spreadsheet program before using it for calculations.
+
+Use **Undo table correction / Redo table correction** for cell edits, row/column
+changes, column types and the header setting. Typing in one cell is grouped until
+you leave it. History keeps up to 50 corrections, fewer for large tables, and is
+cleared when you select a new source/page/region or re-extract/rebuild the grid.
+Undo and redo always clear export approval; check the restored table and review
+it again. History is kept only in memory and disappears when you leave the tool.
 
 This first version uses text spacing, not guaranteed table semantics or border
 analysis. It handles one page/table at a time, up to 500 rows, 40 columns and

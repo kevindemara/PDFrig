@@ -138,8 +138,8 @@ test('internal installer orchestration stays separate from public distribution a
 
 test('branded private installer uses PDFrig labels without enabling production distribution', () => {
   const profile = internalWindowsProfile(['--private-test']);
-  assert.equal(profile.version, '0.1.0-alpha.20261024.2');
-  assert.equal(profile.buildId, 'private-test-20261024-security-patches');
+  assert.equal(profile.version, '0.1.0-alpha.20261103.1');
+  assert.equal(profile.buildId, 'private-test-20261103-usability');
   assert.equal(profile.identifier, 'com.pdfmason.desktop.privatetest');
   const config = applyInternalWindowsProfile(
     { bundle: {}, plugins: { updater: { active: false } } },

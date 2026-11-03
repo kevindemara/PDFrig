@@ -4,6 +4,7 @@ export const fitPageScale = (
   pageHeight: number,
   availableWidth: number,
   availableHeight: number,
+  mode: 'page' | 'width' = 'page',
 ): number | null => {
   if (
     ![pageWidth, pageHeight, availableWidth, availableHeight].every(
@@ -11,6 +12,10 @@ export const fitPageScale = (
     )
   )
     return null;
-  const scale = Math.min(2.5, availableWidth / pageWidth, availableHeight / pageHeight);
+  const scale = Math.min(
+    2.5,
+    availableWidth / pageWidth,
+    mode === 'page' ? availableHeight / pageHeight : Infinity,
+  );
   return Math.max(0.01, Math.floor(scale * 1000) / 1000);
 };

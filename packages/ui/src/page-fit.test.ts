@@ -24,4 +24,11 @@ describe('VIEW-003 measured full-page fit', () => {
     for (const value of [0, -1, Infinity, NaN])
       expect(fitPageScale(612, 792, value, 600)).toBeNull();
   });
+  it('fits width independently of page height, including rotated geometry and zoom bounds', () => {
+    expect(fitPageScale(612, 4000, 850, 550, 'width')).toBe(1.388);
+    expect(fitPageScale(792, 612, 850, 550, 'width')).toBe(1.073);
+    expect(fitPageScale(612, 792, 300, 550, 'width')).toBe(0.49);
+    expect(fitPageScale(100, 100, 1000, 100, 'width')).toBe(2.5);
+    expect(fitPageScale(612, 792, NaN, 550, 'width')).toBeNull();
+  });
 });

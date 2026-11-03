@@ -2083,6 +2083,31 @@ button:disabled {
   background: var(--border-default);
 }
 
+.page-jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+.page-jump input {
+  width: 4.5ch;
+  min-height: 34px;
+  padding: 0.25rem;
+  text-align: center;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.page-jump [role='alert'] {
+  flex-basis: 100%;
+  color: var(--text-primary);
+}
+
 .app-frame.app-frame--presenting {
   position: fixed;
   z-index: 40;

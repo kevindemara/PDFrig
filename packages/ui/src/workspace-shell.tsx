@@ -95,6 +95,7 @@ import { AnnotationPreview } from './annotation-preview.js';
 import { TextOverlay } from './text-overlay.js';
 import { PdfTextLayer } from './pdf-text-layer.js';
 import { fitPageScale } from './page-fit.js';
+import { PageJump } from './page-jump.js';
 import { ScriptSignaturePreview } from './script-signature-preview.js';
 import { confirmWorkspaceNavigation, hasUnsavedWorkspaceWork } from './workspace-navigation.js';
 import { useWorkspaceConfirmation } from './workspace-confirmation.js';
@@ -1716,7 +1717,7 @@ export const WorkspaceShell = ({
   const [splitRanges, setSplitRanges] = useState('1-2; 3-4');
   const [version, setVersion] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [autoFit, setAutoFit] = useState(true);
+  const [autoFit, setAutoFit] = useState<'page' | 'width' | false>('page');
   const [activeTool, setActiveTool] = useState<ToolMode>('pages');
   const [toolsCollapsed, setToolsCollapsed] = useState(false);
   const [contextCollapsed, setContextCollapsed] = useState(false);
@@ -1911,7 +1912,13 @@ export const WorkspaceShell = ({
         target.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 2;
       const height =
         target.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 24;
-      const scale = fitPageScale(metrics.width, metrics.height, width, height);
+      const scale = fitPageScale(
+        metrics.width,
+        metrics.height,
+        width,
+        height,
+        isPresenting || autoFit !== 'width' ? 'page' : 'width',
+      );
       if (scale !== null) setZoom(scale);
     };
     fit();
@@ -2030,6 +2037,12 @@ export const WorkspaceShell = ({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
+      if (
+        event.defaultPrevented ||
+        event.isComposing ||
+        document.querySelector('[aria-modal="true"]')
+      )
+        return;
       const target = event.target;
       if (
         target instanceof HTMLInputElement ||
@@ -2069,6 +2082,26 @@ export const WorkspaceShell = ({
         else sessionRef.current?.undo();
         setVersion((value) => value + 1);
       }
+      if (
+        !loading &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !event.shiftKey &&
+        (event.key === 'PageDown' || event.key === 'PageUp')
+      ) {
+        const nextPage =
+          pages[
+            Math.max(
+              0,
+              Math.min(pages.length - 1, selectedIndex + (event.key === 'PageDown' ? 1 : -1)),
+            )
+          ];
+        if (nextPage) {
+          event.preventDefault();
+          setSelectedId(nextPage.id);
+        }
+      }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') {
         event.preventDefault();
         sessionRef.current?.redo();
@@ -2077,7 +2110,7 @@ export const WorkspaceShell = ({
     };
     globalThis.addEventListener('keydown', onKeyDown);
     return () => globalThis.removeEventListener('keydown', onKeyDown);
-  }, [isPresenting, pages, selectedIndex, stopPresentation]);
+  }, [isPresenting, loading, pages, selectedIndex, stopPresentation]);
 
   useEffect(
     () => () => {
@@ -2230,7 +2263,7 @@ export const WorkspaceShell = ({
       setRedactionMarks([]);
       setRedactionStatus(null);
       setZoom(1);
-      setAutoFit(true);
+      setAutoFit('page');
       setVersion((value) => value + 1);
     } catch (openError) {
       const message = describeError(openError);
@@ -3967,9 +4000,12 @@ export const WorkspaceShell = ({
                       >
                         Previous
                       </button>
-                      <span>
-                        <strong>{selectedIndex + 1}</strong> / {pages.length}
-                      </span>
+                      <PageJump
+                        key={`${effectiveSelectedId}:${selectedIndex}:${pages.length}`}
+                        current={selectedIndex + 1}
+                        count={pages.length}
+                        onJump={selectIndex}
+                      />
                       <button
                         disabled={selectedIndex >= pages.length - 1}
                         onClick={() => selectIndex(selectedIndex + 1)}
@@ -4032,11 +4068,19 @@ export const WorkspaceShell = ({
                       </button>
                       <button
                         aria-label="Fit full page"
-                        aria-pressed={autoFit}
-                        onClick={() => setAutoFit(true)}
+                        aria-pressed={autoFit === 'page'}
+                        onClick={() => setAutoFit('page')}
                         type="button"
                       >
                         Fit
+                      </button>
+                      <button
+                        aria-label="Fit width"
+                        aria-pressed={autoFit === 'width'}
+                        onClick={() => setAutoFit('width')}
+                        type="button"
+                      >
+                        Fit width
                       </button>
                       <button
                         aria-label="Actual size (100%)"

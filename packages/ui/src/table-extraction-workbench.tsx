@@ -21,6 +21,13 @@ import {
   type TableColumnType,
   type TableWord,
 } from '@pdfmason/pdf-engine/browser';
+import {
+  createTableHistory,
+  commitTableCorrection,
+  undoTableCorrection,
+  redoTableCorrection,
+  type TableGrid,
+} from './table-correction-history.js';
 
 interface Props {
   readonly surface: 'Web' | 'Windows';
@@ -78,11 +85,20 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
   const [region, setRegion] = useState<NormalizedRect>(initialRegion),
     [columns, setColumns] = useState(''),
     [rowGuides, setRowGuides] = useState('');
-  const [rows, setRows] = useState<string[][]>([]),
-    [types, setTypes] = useState<TableColumnType[]>([]),
-    [uncertain, setUncertain] = useState<readonly string[]>([]);
-  const [header, setHeader] = useState(true),
-    [reviewed, setReviewed] = useState(false),
+  const [history, setHistory] = useState(() =>
+    createTableHistory({
+      rows: [],
+      types: [],
+      uncertain: [],
+      header: true,
+    }),
+  );
+  const { rows, types, uncertain, header } = history.present;
+  const changeGrid = (patch: Partial<TableGrid>, group: string | null = null) => {
+    setHistory((current) => commitTableCorrection(current, patch, group));
+    setReviewed(false);
+  };
+  const [reviewed, setReviewed] = useState(false),
     [busy, setBusy] = useState(false),
     [ready, setReady] = useState(false);
   const [message, setMessage] = useState(
@@ -117,9 +133,14 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
   const clearGrid = () => {
     setGuidesDirty(false);
     setGridPage(0);
-    setRows([]);
-    setTypes([]);
-    setUncertain([]);
+    setHistory((current) =>
+      createTableHistory({
+        rows: [],
+        types: [],
+        uncertain: [],
+        header: current.present.header,
+      }),
+    );
     setReviewed(false);
   };
   const invalidate = () => {
@@ -234,9 +255,14 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
       );
       wordsRef.current = words;
       setSource(ocr ? 'ocr' : 'text');
-      setRows(result.rows.map((r) => [...r]));
-      setTypes(Array.from({ length: result.columns.length + 1 }, () => 'auto'));
-      setUncertain(result.uncertainCells);
+      setHistory(
+        createTableHistory({
+          rows: result.rows,
+          types: Array.from({ length: result.columns.length + 1 }, () => 'auto'),
+          uncertain: result.uncertainCells,
+          header,
+        }),
+      );
       setColumns(result.columns.map((n) => (n * 100).toFixed(2)).join(', '));
       setRowGuides(result.rowBreaks.map((n) => (n * 100).toFixed(2)).join(', '));
       setMessage(
@@ -265,9 +291,14 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
         parseTableBreaks(columns),
         parseTableBreaks(rowGuides),
       );
-      setRows(result.rows.map((r) => [...r]));
-      setTypes(Array.from({ length: result.columns.length + 1 }, () => 'auto'));
-      setUncertain(result.uncertainCells);
+      setHistory(
+        createTableHistory({
+          rows: result.rows,
+          types: Array.from({ length: result.columns.length + 1 }, () => 'auto'),
+          uncertain: result.uncertainCells,
+          header,
+        }),
+      );
       setMessage(
         'Grid rebuilt from the source. Previous cell corrections were replaced; review again.',
       );
@@ -574,14 +605,42 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
           )}
           {rows.length > 0 ? (
             <>
+              <div className="table-actions" role="group" aria-label="Table correction history">
+                <button
+                  type="button"
+                  disabled={busy || guidesDirty || !history.past.length}
+                  onClick={() => {
+                    setHistory(undoTableCorrection);
+                    setReviewed(false);
+                    setMessage('Table correction undone. Check the restored grid before export.');
+                  }}
+                >
+                  Undo table correction
+                </button>
+                <button
+                  type="button"
+                  disabled={busy || guidesDirty || !history.future.length}
+                  onClick={() => {
+                    setHistory(redoTableCorrection);
+                    setReviewed(false);
+                    setMessage('Table correction redone. Check the restored grid before export.');
+                  }}
+                >
+                  Redo table correction
+                </button>
+              </div>
+              <p className="property-help">
+                Undo keeps up to 50 corrections, fewer for large tables. Changes in one cell are
+                grouped until you leave it. Extracting again or rebuilding boundaries clears
+                history. Undo and redo always require a new export review.
+              </p>
               <label>
                 <input
                   type="checkbox"
                   checked={header}
                   disabled={busy}
                   onChange={(event) => {
-                    setHeader(event.currentTarget.checked);
-                    setReviewed(false);
+                    changeGrid({ header: event.currentTarget.checked });
                   }}
                 />{' '}
                 First row contains headers
@@ -604,12 +663,11 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                               value={type}
                               disabled={busy}
                               onChange={(event) => {
-                                setTypes(
-                                  types.map((t, i) =>
+                                changeGrid({
+                                  types: types.map((t, i) =>
                                     i === c ? (event.currentTarget.value as TableColumnType) : t,
                                   ),
-                                );
-                                setReviewed(false);
+                                });
                               }}
                             >
                               {columnTypes.map(([value, label]) => (
@@ -624,17 +682,16 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                             aria-label={`Delete column ${c + 1}`}
                             disabled={busy || types.length === 1}
                             onClick={() => {
-                              setTypes(types.filter((_, i) => i !== c));
-                              setRows(rows.map((row) => row.filter((_, i) => i !== c)));
-                              setUncertain(
-                                uncertain.flatMap((cell) => {
+                              changeGrid({
+                                types: types.filter((_, i) => i !== c),
+                                rows: rows.map((row) => row.filter((_, i) => i !== c)),
+                                uncertain: uncertain.flatMap((cell) => {
                                   const [row = 0, column = 0] = cell.split(':').map(Number);
                                   return column === c
                                     ? []
                                     : [`${row}:${column > c ? column - 1 : column}`];
                                 }),
-                              );
-                              setReviewed(false);
+                              });
                             }}
                           >
                             Remove
@@ -675,17 +732,22 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                                   maxLength={TABLE_LIMITS.cellText}
                                   disabled={busy}
                                   onChange={(event) => {
-                                    setRows(
-                                      rows.map((line, i) =>
-                                        i === r
-                                          ? line.map((v, j) =>
-                                              j === c ? event.currentTarget.value : v,
-                                            )
-                                          : line,
-                                      ),
+                                    changeGrid(
+                                      {
+                                        rows: rows.map((line, i) =>
+                                          i === r
+                                            ? line.map((v, j) =>
+                                                j === c ? event.currentTarget.value : v,
+                                              )
+                                            : line,
+                                        ),
+                                      },
+                                      `cell:${r}:${c}`,
                                     );
-                                    setReviewed(false);
                                   }}
+                                  onBlur={() =>
+                                    setHistory((current) => ({ ...current, group: null }))
+                                  }
                                 />
                               </td>
                             ))}
@@ -695,16 +757,15 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                                 aria-label={`Delete row ${r + 1}`}
                                 disabled={busy || rows.length === 1}
                                 onClick={() => {
-                                  setRows(rows.filter((_, i) => i !== r));
-                                  setUncertain(
-                                    uncertain.flatMap((cell) => {
+                                  changeGrid({
+                                    rows: rows.filter((_, i) => i !== r),
+                                    uncertain: uncertain.flatMap((cell) => {
                                       const [row = 0, column = 0] = cell.split(':').map(Number);
                                       return row === r
                                         ? []
                                         : [`${row > r ? row - 1 : row}:${column}`];
                                     }),
-                                  );
-                                  setReviewed(false);
+                                  });
                                 }}
                               >
                                 Remove
@@ -719,8 +780,12 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
               <div className="table-actions">
                 <button
                   type="button"
-                  disabled={busy || gridPage === 0}
-                  onClick={() => setGridPage(Math.max(0, gridPage - 1))}
+                  disabled={busy || Math.min(gridPage, Math.floor((rows.length - 1) / 50)) === 0}
+                  onClick={() =>
+                    setGridPage(
+                      Math.max(0, Math.min(gridPage, Math.floor((rows.length - 1) / 50)) - 1),
+                    )
+                  }
                 >
                   Previous grid rows
                 </button>
@@ -749,8 +814,7 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                     (rows.length + 1) * types.length > TABLE_LIMITS.cells
                   }
                   onClick={() => {
-                    setRows([...rows, types.map(() => '')]);
-                    setReviewed(false);
+                    changeGrid({ rows: [...rows, types.map(() => '')] });
                   }}
                 >
                   Add row
@@ -763,9 +827,10 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
                     rows.length * (types.length + 1) > TABLE_LIMITS.cells
                   }
                   onClick={() => {
-                    setRows(rows.map((row) => [...row, '']));
-                    setTypes([...types, 'auto']);
-                    setReviewed(false);
+                    changeGrid({
+                      rows: rows.map((row) => [...row, '']),
+                      types: [...types, 'auto'],
+                    });
                   }}
                 >
                   Add column

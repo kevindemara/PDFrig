@@ -82,7 +82,24 @@ test('CONV-007 selectable tables, correction, local XLSX/ODS and unchanged scan 
   await review.check();
   await page.getByRole('textbox', { name: 'Row 2 column 4', exact: true }).fill('13.50');
   await expect(review).not.toBeChecked();
-  await page.getByRole('textbox', { name: 'Row 2 column 4', exact: true }).fill('12.50');
+  const undo = page.getByRole('button', { name: 'Undo table correction' });
+  const redo = page.getByRole('button', { name: 'Redo table correction' });
+  await undo.click();
+  await expect(page.getByRole('textbox', { name: 'Row 2 column 4', exact: true })).toHaveValue(
+    '12.50',
+  );
+  await review.check();
+  await redo.click();
+  await expect(review).not.toBeChecked();
+  await expect(page.getByRole('textbox', { name: 'Row 2 column 4', exact: true })).toHaveValue(
+    '13.50',
+  );
+  await undo.click();
+  await page.getByRole('button', { name: 'Delete column 1' }).click();
+  await undo.click();
+  await expect(page.getByRole('textbox', { name: 'Row 2 column 1', exact: true })).toHaveValue(
+    '00127',
+  );
   await save('inventory');
   const a11y = await new AxeBuilder({ page })
     .include('.table-workbench')
@@ -100,6 +117,8 @@ test('CONV-007 selectable tables, correction, local XLSX/ODS and unchanged scan 
   await expect(page.getByRole('button', { name: 'Extract selectable text' })).toBeEnabled();
   await select(24);
   await page.getByRole('button', { name: 'Extract selectable text' }).click();
+  await expect(undo).toBeDisabled();
+  await expect(redo).toBeDisabled();
   await expect(page.getByRole('textbox', { name: 'Row 2 column 4', exact: true })).toHaveValue(
     '=1+1',
   );
@@ -121,6 +140,9 @@ test('CONV-007 selectable tables, correction, local XLSX/ODS and unchanged scan 
     'Notebook',
     { timeout: 120_000 },
   );
+  await page.getByRole('textbox', { name: 'Row 2 column 2', exact: true }).fill('6');
+  await undo.click();
+  await expect(page.getByRole('textbox', { name: 'Row 2 column 2', exact: true })).toHaveValue('5');
   await save('ocr');
   execFileSync(python, [...prefix, 'scripts/verify-table-workbooks.py', outputs], {
     stdio: 'pipe',
