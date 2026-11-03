@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-03T23:58:07.873124+00:00",
+  "repository": "kevindemara/PDFrig",
+  "tag": "v0.1.0-alpha.20261103.2",
+  "version": "0.1.0-alpha.20261103.2",
+  "releaseUrl": "https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.2",
+  "downloadUrl": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-setup.exe",
+  "assetBytes": 16890381,
+  "assetSha256": "10d213821e1412bc77c2a7bd54709008a85cb0400f89b20b35d0aa941bfaa63c",
+  "draft": false,
+  "prerelease": true,
+  "sourceCommit": "b5441fe35e3c0bc31e2d92268b8ae50375249bca",
+  "validationCommit": "b5441fe35e3c0bc31e2d92268b8ae50375249bca",
+  "releaseTargetCommit": "b5441fe35e3c0bc31e2d92268b8ae50375249bca",
+  "validationSourceDifference": {
+    "files": [],
+    "reason": "Both exact Windows packages and both successful CI workflows use this source commit."
+  },
+  "featureIds": ["VIEW-001", "VIEW-004", "ORG-001", "EDIT-002"],
+  "pageLimits": {
+    "previous": 500,
+    "maximum": 1000,
+    "inclusive": true,
+    "maximumInputBytes": 52428800
+  },
+  "dependencyVersions": {
+    "next": "16.4.1",
+    "zod": "4.6.6"
+  },
+  "productionAudit": "No known vulnerabilities found",
+  "ci": [
+    {
+      "conclusion": "success",
+      "headSha": "b5441fe35e3c0bc31e2d92268b8ae50375249bca",
+      "name": "PDFrig CI",
+      "status": "completed",
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/41739990338"
+    },
+    {
+      "conclusion": "success",
+      "headSha": "b5441fe35e3c0bc31e2d92268b8ae50375249bca",
+      "name": "Windows shell",
+      "status": "completed",
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/41739990494"
+    }
+  ],
+  "assets": [
+    {
+      "name": "PDFrig-LICENSE.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-LICENSE.txt",
+      "status": 200,
+      "bytes": 1069,
+      "sha256": "8a753bd1af90dbf9a7756f5e73d372ebac08ec070b7d0033e053336babdc9eb4",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 18066408,
+      "sha256": "613f9717c3d1ea29e657c60ea47bbe3bff988aac0c3a289a035ef3b046dfb5a6",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16890381,
+      "sha256": "10d213821e1412bc77c2a7bd54709008a85cb0400f89b20b35d0aa941bfaa63c",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/SHA256SUMS.txt",
+      "status": 200,
+      "bytes": 449,
+      "sha256": "e1b51f824ff29b18a251009d1f6f1a4c2060ff77d6b82cc9a5f48f0f3e90ec09",
+      "checksumListingMatched": false
+    },
+    {
+      "name": "THIRD_PARTY_NOTICES.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/THIRD_PARTY_NOTICES.txt",
+      "status": 200,
+      "bytes": 10587,
+      "sha256": "4b7e1bad089df2d90cbd3cf9f742e1817e93f9be14bdbf54c155a635fb025e69",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "UPSTREAM-LICENSE-TEXTS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/UPSTREAM-LICENSE-TEXTS.txt",
+      "status": 200,
+      "bytes": 4412754,
+      "sha256": "5afaea84495c8bcb272420795f4e06e6162c205c757a14a256f79bb5cb0064df",
+      "checksumListingMatched": true
+    }
+  ],
+  "anonymousAccess": {
+    "visibility": "public",
+    "visibilityChangedByThisCheck": false,
+    "authenticationUsed": false,
+    "cookiesUsed": false,
+    "securityOrBillingSettingsChanged": false,
+    "method": "Fresh HTTPS GET requests with User-Agent and Accept only; no authentication, cookies or browser profile. Redirects restricted to HTTPS GitHub hosts.",
+    "repositoryPageStatus": 200,
+    "readmeStatus": 200,
+    "logoStatus": 200,
+    "setupGuideStatus": 200,
+    "screenshots": [
+      {
+        "path": "docs/screenshots/workspace.png",
+        "status": 200,
+        "sha256": "0e01d12dfd9e60fac38bc051cfdedc5ea3de8a5208aa0692b9555e16e2513299"
+      },
+      {
+        "path": "docs/screenshots/local-tools.png",
+        "status": 200,
+        "sha256": "84fc61a195ce918d81b87384f8020d1db6cd0e1ad6b18fb11b42c0f1024f8820"
+      }
+    ],
+    "installer": {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16890381,
+      "sha256": "10d213821e1412bc77c2a7bd54709008a85cb0400f89b20b35d0aa941bfaa63c",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    },
+    "portable": {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 18066408,
+      "sha256": "613f9717c3d1ea29e657c60ea47bbe3bff988aac0c3a289a035ef3b046dfb5a6",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    }
+  },
+  "nativePackageChecks": {
+    "portable": {
+      "packageIntegrity": true,
+      "launchSpacesUnicode": true,
+      "open1000": true,
+      "navigate1000": true,
+      "reject1001AndRetainDocument": true,
+      "editOriginalText1000": true,
+      "reviewActualPreview": true,
+      "nativePdfSaveCancelRetry": true,
+      "independentPdfVerification": true,
+      "pageNumberFullyVisible": true
+    },
+    "installer": {
+      "sameMachineUpgrade": true,
+      "versionPayloadNoticesShortcut": true,
+      "open1000": true,
+      "navigate1000": true,
+      "reject1001AndRetainDocument": true,
+      "editOriginalText1000": true,
+      "reviewActualPreview": true,
+      "nativePdfSave": true,
+      "independentPdfVerification": true,
+      "pageNumberFullyVisible": true
+    }
+  },
+  "validation": {
+    "local": [
+      "157 browser tests passed",
+      "340 component tests passed",
+      "382 PDF-engine tests and all root unit checks passed",
+      "Format/lint/types, desktop frontend build, sensitive-file and repository hygiene checks passed",
+      "Real 499/500/501/999/1000/1001-page browser boundaries and independent 1000-page reorder/export verification passed",
+      "Bounded parser measurement and independent utility/numbering/decoration fidelity checks passed"
+    ],
+    "native": [
+      "Both exact packages opened 1000-page PDFs and navigated to page 1000",
+      "Both rejected 1001 pages with the detected count while retaining the open document",
+      "Both edited original text on page 1000 through the actual-PDF preview and review step",
+      "Both saved native PDF exports; portable Save As cancellation/retry retained work",
+      "Independent qpdf/pypdf/Poppler checks confirmed 1000 pages, unchanged first 999 page streams, original font/size/placement and a localized final-page text change",
+      "Installed version/payload/notices/shortcut and portable archive/provenance/checksums verified"
+    ]
+  },
+  "limitations": [
+    "Unsigned alpha; do not bypass Windows security or device policy.",
+    "Native OCR security review is incomplete; no security or Windows compliance certification.",
+    "Same-machine synthetic-document checks do not establish clean-machine install, uninstall, missing-runtime or disconnected-network OCR behavior.",
+    "Optional native Canvas is excluded by the Windows bundle graph; broader dependency license review remains open.",
+    "A 1000-page count does not guarantee processing; existing file-size, pixel, selection, font/layout and document-risk limits still apply.",
+    "Table correction history and OCR/table recognition retain their documented limits and review requirements."
+  ],
+  "historicalBuildMetadata": "BUILD_INFO.json retains its pre-publication build state; this record describes subsequent validation and publication. No broad clearance is implied.",
+  "supersedes": ["v0.1.0-alpha.20261103.1"]
+}

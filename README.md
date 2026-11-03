@@ -217,23 +217,26 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-setup.exe)
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-setup.exe)
 
-- Windows x64, version `0.1.0-alpha.20261103.1`.
+- Windows x64, version `0.1.0-alpha.20261103.2`.
 
-Includes page jumping, automatic Fit width and table correction undo/redo, alongside
-PDF editing, table extraction to XLSX/ODS, local OCR and All tools navigation.
+Supports local PDFs up to **1,000 pages** with the existing 50 MB input limit.
+Includes page jumping, automatic Fit width, table correction undo/redo, PDF editing,
+table extraction to XLSX/ODS, local OCR and All tools navigation.
 
-The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.1)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.2)
 includes the finished installer,
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt)
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/SHA256SUMS.txt)
 and third-party notices. **You do not need to build the app.**
 
-This is an **unsigned alpha release**. The current installer was tested for
-same-machine upgrade, page jumping, fit modes, table undo/redo and native PDF/XLSX/ODS
-saving. Portable Save As cancellation/retry retained the work. Independent checks
-verified intended rotations, unchanged page content and spreadsheet values/types
-after undo/redo on synthetic documents. Browser regressions also cover original-text
+This is an **unsigned alpha release**. Both exact Windows packages were tested
+with 1,000-page PDFs: navigation, original-text editing on page 1,000, actual-PDF
+preview/review and native PDF saving. Both reject 1,001 pages with the detected
+count while retaining the open document. Portable Save As cancellation/retry
+retained the work. Independent checks verified all 1,000 pages, original font,
+size and position, unchanged first 999 page streams and the localized final-page
+text change. Browser regressions also cover table XLSX/ODS exports, original-text
 fidelity and visually unchanged OCR PDF exports.
 Clean-machine installation, disconnected-network OCR,
 uninstall and broader security checks remain open. Windows compliance is not certified.
@@ -269,7 +272,7 @@ If a direct download fails, open the linked release page and select its asset;
 do not bypass browser or Windows security warnings.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [release verification](docs/operations/windows-usability-release.json)
+the tracked source files. See the [release verification](docs/operations/windows-page-limit-release.json)
 for exact artifact hashes, binary source, CI validation commit and anonymous download checks.
 These are build/test records, not
 security certification or a complete license review.
@@ -277,8 +280,8 @@ For testing on another PC, use the [Windows release checklist](docs/operations/w
 
 ### Portable Windows ZIP
 
-[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-portable-windows-x64.zip)
-— Windows x64, version `0.1.0-alpha.20261103.1`.
+[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/PDFrig-portable-windows-x64.zip)
+— Windows x64, version `0.1.0-alpha.20261103.2`.
 
 This no-install app includes **PDF table extraction to XLSX/ODS, a correction
 preview and local OCR for scanned tables**. Scanned artwork stays unchanged.
@@ -286,7 +289,7 @@ Review every recognized value; OCR can make mistakes. Local automated and native
 application checks passed; broader platform testing remains open.
 
 Download the ZIP and its accompanying
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt).
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.2/SHA256SUMS.txt).
 Verify the ZIP with `Get-FileHash`, extract **all** files into a
 new folder, and run `PDFrig.exe`. Keep the `licenses` folder with it. No PDFrig
 installation, administrator privileges, Node.js or Rust are needed. Do not run
@@ -297,7 +300,7 @@ Get-FileHash .\PDFrig-portable-windows-x64.zip -Algorithm SHA256
 ```
 
 Compare the result with `SHA256SUMS.txt`. If the direct link fails, open the
-[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.1)
+[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.2)
 and choose the ZIP under **Assets**. No GitHub account is required.
 
 **Microsoft Edge WebView2 Runtime is required and is not bundled in this ZIP.**
@@ -425,11 +428,9 @@ requirements. Office conversion is not available in this version. The
 - **Signatures and redaction:** visual signatures are not certificate-backed
   signatures or proof of identity. Editing can invalidate existing digital
   signatures. Redaction beta is gated and is not approved for public use.
-- **Bounds:** current source builds allow 50 MB per input, 1,000 pages and 1,000 added
+- **Bounds:** editor limits are 50 MB per input, 1,000 pages and 1,000 added
   marks. OCR has a 20-megapixel limit and a three-minute deadline. Individual tools
   have additional limits; large or complex documents can be refused.
-  The Windows downloads at version `0.1.0-alpha.20261103.1` still use the earlier
-  500-page limit; they must be rebuilt to include this source change.
 
 ## Privacy and hosting
 

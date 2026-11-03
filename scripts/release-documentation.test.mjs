@@ -114,7 +114,7 @@ test('portable download instructions retain exact asset, runtime and separate-pr
     readme.indexOf('### Upgrade and uninstall'),
   );
   for (const phrase of [
-    '0.1.0-alpha.20261103.1',
+    '0.1.0-alpha.20261103.2',
     'PDFrig-portable-windows-x64.zip',
     'Get-FileHash',
     'Extract',
@@ -128,9 +128,9 @@ test('portable download instructions retain exact asset, runtime and separate-pr
   ])
     assert.ok(section.toLowerCase().includes(phrase.toLowerCase()), phrase);
   assert.ok(
-    section.includes('releases/download/v0.1.0-alpha.20261103.1/PDFrig-portable-windows-x64.zip'),
+    section.includes('releases/download/v0.1.0-alpha.20261103.2/PDFrig-portable-windows-x64.zip'),
   );
-  assert.ok(section.includes('releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt'));
+  assert.ok(section.includes('releases/download/v0.1.0-alpha.20261103.2/SHA256SUMS.txt'));
   assert.ok(section.includes('The ZIP creates no shortcuts'));
   assert.doesNotMatch(section, /awaiting manual|has not been uploaded/iu);
 });
@@ -227,7 +227,7 @@ test('public-facing installer instructions use the exact published asset, checks
   );
   const release = JSON.parse(
     await readFile(
-      new URL('../docs/operations/windows-usability-release.json', import.meta.url),
+      new URL('../docs/operations/windows-page-limit-release.json', import.meta.url),
       'utf8',
     ),
   );
@@ -268,7 +268,7 @@ test('public-facing installer instructions use the exact published asset, checks
     assert.match(asset.sha256, /^[a-f0-9]{64}$/u);
     assert.ok(asset.bytes > 0);
   }
-  assert.equal(release.sourceCommit, 'e3f883ce2e0255747f7d901eccfef3c171a32405');
+  assert.equal(release.sourceCommit, 'b5441fe35e3c0bc31e2d92268b8ae50375249bca');
   assert.deepEqual(release.dependencyVersions, { next: '16.4.1', zod: '4.6.6' });
   assert.equal(release.ci.length, 2);
   assert.ok(
@@ -278,11 +278,15 @@ test('public-facing installer instructions use the exact published asset, checks
   );
   assert.match(release.validationCommit, /^[a-f0-9]{40}$/u);
   assert.equal(release.releaseTargetCommit, release.validationCommit);
-  assert.deepEqual(release.validationSourceDifference.files, [
-    'apps/worker/Dockerfile.office',
-    'scripts/workspace-scripts.test.mjs',
-  ]);
-  assert.deepEqual(release.featureIds, ['VIEW-003', 'VIEW-004', 'CONV-007']);
+  assert.deepEqual(release.validationSourceDifference.files, []);
+  assert.equal(release.validationCommit, release.sourceCommit);
+  assert.equal(release.pageLimits.maximum, 1000);
+  assert.equal(release.pageLimits.maximumInputBytes, 50 * 1024 * 1024);
+  for (const platform of ['portable', 'installer'])
+    assert.ok(
+      Object.values(release.nativePackageChecks[platform]).every((value) => value === true),
+    );
+  assert.deepEqual(release.featureIds, ['VIEW-001', 'VIEW-004', 'ORG-001', 'EDIT-002']);
   assert.ok(
     release.limitations.some((limit) => limit.includes('Native OCR security review is incomplete')),
   );
