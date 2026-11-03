@@ -217,24 +217,24 @@ environment-variable names retain the original PDFMason name for compatibility.
 
 ### Install the finished Windows app
 
-[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-setup.exe)
+[**Download PDFrig-setup.exe**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-setup.exe)
 
-- Windows x64, version `0.1.0-alpha.20261024.2`.
+- Windows x64, version `0.1.0-alpha.20261103.1`.
 
-Includes table extraction, its correction preview, XLSX/ODS exports, local OCR
-and the All tools button. Both Windows downloads contain the patched Zod dependency;
-the browser source also updates Next.js. Use this release instead of older downloads.
+Includes page jumping, automatic Fit width and table correction undo/redo, alongside
+PDF editing, table extraction to XLSX/ODS, local OCR and All tools navigation.
 
-The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.2)
+The [Windows release](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.1)
 includes the finished installer,
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt)
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt)
 and third-party notices. **You do not need to build the app.**
 
 This is an **unsigned alpha release**. The current installer was tested for
-same-machine upgrade, original-text editing/export, native Save As cancellation/retry
-and scanned-table OCR spreadsheet exports. Independent checks verified text placement,
-font size, unchanged page content and spreadsheet values/types on synthetic documents.
-The portable build also passed OCR PDF export with unchanged scan appearance.
+same-machine upgrade, page jumping, fit modes, table undo/redo and native PDF/XLSX/ODS
+saving. Portable Save As cancellation/retry retained the work. Independent checks
+verified intended rotations, unchanged page content and spreadsheet values/types
+after undo/redo on synthetic documents. Browser regressions also cover original-text
+fidelity and visually unchanged OCR PDF exports.
 Clean-machine installation, disconnected-network OCR,
 uninstall and broader security checks remain open. Windows compliance is not certified.
 
@@ -269,16 +269,16 @@ If a direct download fails, open the linked release page and select its asset;
 do not bypass browser or Windows security warnings.
 
 Installers are GitHub Release assets: no Windows installer EXE is included in
-the tracked source files. See the [release verification](docs/operations/windows-security-patch-release.json)
-for exact artifact hashes, source commit, passing CI and anonymous download checks.
+the tracked source files. See the [release verification](docs/operations/windows-usability-release.json)
+for exact artifact hashes, binary source, CI validation commit and anonymous download checks.
 These are build/test records, not
 security certification or a complete license review.
 For testing on another PC, use the [Windows release checklist](docs/operations/windows-release-checklist.txt).
 
 ### Portable Windows ZIP
 
-[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/PDFrig-portable-windows-x64.zip)
-— Windows x64, version `0.1.0-alpha.20261024.2`.
+[**Download PDFrig-portable-windows-x64.zip**](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-portable-windows-x64.zip)
+— Windows x64, version `0.1.0-alpha.20261103.1`.
 
 This no-install app includes **PDF table extraction to XLSX/ODS, a correction
 preview and local OCR for scanned tables**. Scanned artwork stays unchanged.
@@ -286,7 +286,7 @@ Review every recognized value; OCR can make mistakes. Local automated and native
 application checks passed; broader platform testing remains open.
 
 Download the ZIP and its accompanying
-[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261024.2/SHA256SUMS.txt).
+[SHA256SUMS.txt](https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt).
 Verify the ZIP with `Get-FileHash`, extract **all** files into a
 new folder, and run `PDFrig.exe`. Keep the `licenses` folder with it. No PDFrig
 installation, administrator privileges, Node.js or Rust are needed. Do not run
@@ -297,7 +297,7 @@ Get-FileHash .\PDFrig-portable-windows-x64.zip -Algorithm SHA256
 ```
 
 Compare the result with `SHA256SUMS.txt`. If the direct link fails, open the
-[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261024.2)
+[portable release page](https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.1)
 and choose the ZIP under **Assets**. No GitHub account is required.
 
 **Microsoft Edge WebView2 Runtime is required and is not bundled in this ZIP.**

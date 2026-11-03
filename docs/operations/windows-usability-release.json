@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-03T18:53:40.988605+00:00",
+  "repository": "kevindemara/PDFrig",
+  "tag": "v0.1.0-alpha.20261103.1",
+  "version": "0.1.0-alpha.20261103.1",
+  "releaseUrl": "https://github.com/kevindemara/PDFrig/releases/tag/v0.1.0-alpha.20261103.1",
+  "downloadUrl": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-setup.exe",
+  "assetBytes": 16590798,
+  "assetSha256": "6dcea2b8f34aede2150ea52cdaefde21ad6e36fb695889710901d4e784ba74da",
+  "draft": false,
+  "prerelease": true,
+  "sourceCommit": "e3f883ce2e0255747f7d901eccfef3c171a32405",
+  "featureIds": ["VIEW-003", "VIEW-004", "CONV-007"],
+  "dependencyVersions": {
+    "next": "16.4.1",
+    "zod": "4.6.6"
+  },
+  "productionAudit": "No known vulnerabilities found",
+  "ci": [
+    {
+      "conclusion": "success",
+      "headSha": "70937a91920be00edc6dcac7c1be2b8584494a05",
+      "name": "PDFrig CI",
+      "status": "completed",
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/41695681336"
+    },
+    {
+      "conclusion": "success",
+      "headSha": "70937a91920be00edc6dcac7c1be2b8584494a05",
+      "name": "Windows shell",
+      "status": "completed",
+      "url": "https://github.com/kevindemara/PDFrig/actions/runs/41695681208"
+    }
+  ],
+  "assets": [
+    {
+      "name": "PDFrig-LICENSE.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-LICENSE.txt",
+      "status": 200,
+      "bytes": 1069,
+      "sha256": "8a753bd1af90dbf9a7756f5e73d372ebac08ec070b7d0033e053336babdc9eb4",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 17794116,
+      "sha256": "3331c0e6588d29f4b9126ca142afc828465a9829f0e3c8afc578830514a76808",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16590798,
+      "sha256": "6dcea2b8f34aede2150ea52cdaefde21ad6e36fb695889710901d4e784ba74da",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/SHA256SUMS.txt",
+      "status": 200,
+      "bytes": 454,
+      "sha256": "aab58d00d5363fb7ea84fc357a299c843cfca2794acea48929a1a776c3b4c4f2",
+      "checksumListingMatched": false
+    },
+    {
+      "name": "THIRD_PARTY_NOTICES.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/THIRD_PARTY_NOTICES.txt",
+      "status": 200,
+      "bytes": 10587,
+      "sha256": "4b7e1bad089df2d90cbd3cf9f742e1817e93f9be14bdbf54c155a635fb025e69",
+      "checksumListingMatched": true
+    },
+    {
+      "name": "UPSTREAM-LICENSE-TEXTS.txt",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/UPSTREAM-LICENSE-TEXTS.txt",
+      "status": 200,
+      "bytes": 4412754,
+      "sha256": "5afaea84495c8bcb272420795f4e06e6162c205c757a14a256f79bb5cb0064df",
+      "checksumListingMatched": true
+    }
+  ],
+  "anonymousAccess": {
+    "visibility": "public",
+    "visibilityChangedByThisCheck": false,
+    "authenticationUsed": false,
+    "cookiesUsed": false,
+    "securityOrBillingSettingsChanged": false,
+    "method": "Fresh HTTPS GET requests with User-Agent and Accept only; no authentication, cookies or browser profile. Redirects restricted to HTTPS GitHub hosts.",
+    "repositoryPageStatus": 200,
+    "readmeStatus": 200,
+    "logoStatus": 200,
+    "setupGuideStatus": 200,
+    "screenshots": [
+      {
+        "path": "docs/screenshots/workspace.png",
+        "status": 200,
+        "sha256": "0e01d12dfd9e60fac38bc051cfdedc5ea3de8a5208aa0692b9555e16e2513299"
+      },
+      {
+        "path": "docs/screenshots/local-tools.png",
+        "status": 200,
+        "sha256": "84fc61a195ce918d81b87384f8020d1db6cd0e1ad6b18fb11b42c0f1024f8820"
+      }
+    ],
+    "installer": {
+      "name": "PDFrig-setup.exe",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-setup.exe",
+      "status": 200,
+      "bytes": 16590798,
+      "sha256": "6dcea2b8f34aede2150ea52cdaefde21ad6e36fb695889710901d4e784ba74da",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    },
+    "portable": {
+      "name": "PDFrig-portable-windows-x64.zip",
+      "url": "https://github.com/kevindemara/PDFrig/releases/download/v0.1.0-alpha.20261103.1/PDFrig-portable-windows-x64.zip",
+      "status": 200,
+      "bytes": 17794116,
+      "sha256": "3331c0e6588d29f4b9126ca142afc828465a9829f0e3c8afc578830514a76808",
+      "checksumListingMatched": true,
+      "releaseDraft": false
+    }
+  },
+  "validation": {
+    "local": [
+      "Full format/lint/types/unit/component/license/hygiene checks and production builds passed",
+      "155 browser tests passed",
+      "340 component tests passed",
+      "Native Rust formatting, lint and 21+3 tests passed",
+      "Independent PDF corpus/utilities/decorations/permissions and original-text fidelity checks passed"
+    ],
+    "portable": [
+      "Package/provenance/CRC/seven-file allowlist and before/after-run hashes verified",
+      "Launched from folder with spaces and a non-ASCII character",
+      "Valid/invalid page jumps, Page Up and typing-focus guard",
+      "Fit width, panel collapse, rotation and 100% mode",
+      "Native PDF Save As cancellation/retry; correct rotation and unchanged page streams verified independently",
+      "Cell undo/redo, column-addition undo, redo invalidation and review reset",
+      "Native XLSX/ODS exports independently verified for cells/types/leading zeros/totals"
+    ],
+    "installer": [
+      "Same-machine current-user upgrade; version and Start-menu shortcut verified",
+      "Expected Tauri NSIS marker-normalized executable and three notices exactly matched",
+      "Page jump with Enter, invalid-number feedback and Escape reset",
+      "Fit width, collapsed options, rotation and full-page fitting",
+      "Native PDF save; correct rotation and unchanged page streams verified independently",
+      "Local scanned-table OCR, correction undo/redo and review gate",
+      "Native OCR XLSX/ODS exports independently verified for cells/types/totals"
+    ]
+  },
+  "limitations": [
+    "Unsigned alpha; do not bypass Windows security or device policy.",
+    "Native OCR security review is incomplete; no security or Windows compliance certification.",
+    "Same-machine synthetic-document checks do not establish clean-machine install, uninstall, missing-runtime or disconnected-network OCR behavior.",
+    "Optional native Canvas is excluded by the Windows bundle graph; broader dependency license review remains open.",
+    "Document-dependent original-text and table/OCR limitations remain as described in README.",
+    "Correction history is session-only, at most 50 changes and fewer for large tables; source/page/region/extraction/rebuild changes reset it."
+  ],
+  "historicalBuildMetadata": "BUILD_INFO.json retains its pre-publication build state; this record describes subsequent validation and publication. No broad clearance is implied.",
+  "supersedes": ["v0.1.0-alpha.20261024.2"],
+  "validationCommit": "70937a91920be00edc6dcac7c1be2b8584494a05",
+  "releaseTargetCommit": "70937a91920be00edc6dcac7c1be2b8584494a05",
+  "validationSourceDifference": {
+    "files": ["apps/worker/Dockerfile.office", "scripts/workspace-scripts.test.mjs"],
+    "reason": "The Office sandbox CI download had moved from stable to the official archive. Only its Docker download URL/version spelling and regression test changed. The archived tarball has the same pinned SHA-256; Windows application, dependencies and build inputs are unchanged from the exact tested binary source commit."
+  }
+}
