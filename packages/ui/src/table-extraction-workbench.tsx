@@ -12,6 +12,7 @@ import {
   extractTable,
   exportTableWorkbook,
   openBrowserPdf,
+  LOCAL_PDF_LIMITS,
   parseTableBreaks,
   recognizeLocalPage,
   tableValues,
@@ -427,7 +428,7 @@ export const TableExtractionWorkbench = ({ surface, ocrEnabled, saveFile }: Prop
           <input
             type="number"
             min="1"
-            max={pageCount || 500}
+            max={pageCount || LOCAL_PDF_LIMITS.maximumPages}
             value={pageNumber}
             disabled={busy || !file}
             onChange={(event) => {

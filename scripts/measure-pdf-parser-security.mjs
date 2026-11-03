@@ -19,7 +19,7 @@ const harnessTimeoutMs = 10_000;
 
 const caseDefinitions = Object.freeze([
   { expectedOutcome: 'success', id: 'baseline' },
-  { expectedOutcome: 'success', id: 'page-boundary-500', pageCount: 500 },
+  { expectedOutcome: 'success', id: 'page-boundary-1000', pageCount: 1000 },
   { expectedOutcome: 'success', id: 'object-breadth-2048', objectBreadth: 2_048 },
   { expectedOutcome: 'success', id: 'nested-array-depth-48', nestingDepth: 48 },
   { expectedOutcome: 'success', expandedStreamBytes: 4 * 1024 * 1024, id: 'flate-4mib' },
@@ -77,9 +77,10 @@ const createDiagnostic = async (definition, smoke, incremental) => {
   if (definition.id === 'damaged-object') return mutateSameLength(smoke, /1 0 obj/u, '1 0 obx');
 
   const source = await PDFDocument.load(smoke, { updateMetadata: false });
-  if (definition.id === 'page-boundary-500') {
+  if (definition.id === 'page-boundary-1000') {
     const document = await PDFDocument.create({ updateMetadata: false });
-    for (const page of await document.copyPages(source, Array(500).fill(0))) document.addPage(page);
+    for (const page of await document.copyPages(source, Array(1000).fill(0)))
+      document.addPage(page);
     return document.save({ addDefaultPage: false, useObjectStreams: true });
   }
   const document = await PDFDocument.load(smoke, { updateMetadata: false });

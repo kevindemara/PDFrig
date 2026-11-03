@@ -121,7 +121,7 @@ describe('ORG-011 / ORG-012 fail-closed numbering placement', () => {
       expect(result.report).toMatchObject({
         appliedPages: 1,
         sourcePages: 2,
-        operationVersion: '1.0.3',
+        operationVersion: '1.1.0',
       });
       expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(2);
     }

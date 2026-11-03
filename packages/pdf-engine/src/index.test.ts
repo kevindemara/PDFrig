@@ -523,7 +523,7 @@ describe('local assembly adapter', () => {
       firstIdentifier: 'A-i',
       kind: 'page-labels',
       lastIdentifier: 'A-ii',
-      operationVersion: '1.0.3',
+      operationVersion: '1.1.0',
       range: { endPage: 3, startPage: 2 },
       sourcePages: 4,
     });
@@ -632,7 +632,7 @@ describe('local assembly adapter', () => {
     expect(result.report).toMatchObject({
       appliedPages: 2,
       kind: 'crop',
-      operationVersion: '1.0.0',
+      operationVersion: '1.1.0',
       range: { endPage: 2, startPage: 1 },
       sourcePages: 2,
     });

@@ -557,13 +557,13 @@ describe('shared application shell', () => {
     const local = within(view.container);
     fireEvent.click(local.getByRole('button', { name: /Create blank PDF/u }));
     const count = local.getByLabelText('Number of pages');
-    for (const value of ['', '0', '-1', '1.5', '501']) {
+    for (const value of ['', '0', '-1', '1.5', '1001']) {
       fireEvent.change(count, { target: { value } });
       expect(local.getByRole('button', { name: 'Create export' })).toBeDisabled();
       expect(count).toHaveAttribute('aria-invalid', 'true');
-      expect(local.getByRole('alert')).toHaveTextContent('whole page count from 1 to 500');
+      expect(local.getByRole('alert')).toHaveTextContent('whole page count from 1 to 1000');
     }
-    for (const value of ['1', '3', '500']) {
+    for (const value of ['1', '3', '1000']) {
       fireEvent.change(count, { target: { value } });
       expect(local.getByRole('button', { name: 'Create export' })).toBeEnabled();
       expect(count).toHaveAttribute('aria-invalid', 'false');
@@ -845,7 +845,7 @@ describe('ORG-011 / ORG-012 result lifecycle', () => {
                 firstIdentifier: identifier,
                 lastIdentifier: identifier,
                 kind: request.options.kind,
-                operationVersion: '1.0.3',
+                operationVersion: '1.1.0',
                 range: { startPage: 1, endPage: 1 },
                 sourcePages: 1,
               },

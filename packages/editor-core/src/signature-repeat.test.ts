@@ -46,10 +46,10 @@ describe('SIGN-003 bounded explicit session reuse', () => {
     expect(session.undo().state).toBe(before);
     expect(session.redo().state).toBe(preview);
   });
-  it('resolves deterministic ranges, refuses duplicates and enforces 20 / 500 page bounds', () => {
+  it('resolves deterministic ranges, refuses duplicates and enforces 20 / 1000 page bounds', () => {
     expect(signatureRepeatPageIndices('4, 2-3', 4)).toEqual([1, 2, 3]);
-    expect(signatureRepeatPageIndices('2-21', 500)).toHaveLength(20);
-    expect(signatureRepeatPageIndices('500', 500)).toEqual([499]);
+    expect(signatureRepeatPageIndices('2-21', 1000)).toHaveLength(20);
+    expect(signatureRepeatPageIndices('1000', 1000)).toEqual([999]);
     for (const range of [
       '',
       'all',
@@ -66,8 +66,8 @@ describe('SIGN-003 bounded explicit session reuse', () => {
       '<script>',
     ])
       expect(() => signatureRepeatPageIndices(range, 4)).toThrow('SIGNATURE_REPEAT_INVALID');
-    expect(() => signatureRepeatPageIndices('1-21', 500)).toThrow();
-    expect(() => signatureRepeatPageIndices('1', 501)).toThrow();
+    expect(() => signatureRepeatPageIndices('1-21', 1000)).toThrow();
+    expect(() => signatureRepeatPageIndices('1', 1001)).toThrow();
     expect(() => signatureRepeatPageIndices('1', 0)).toThrow();
   });
   it('rejects stale, duplicate, occupied and missing targets before modifying state', () => {

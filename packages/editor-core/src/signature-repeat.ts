@@ -18,14 +18,14 @@ export const signatureRepeatPageIndices = (range: string, pageCount: number): re
   if (
     !Number.isInteger(pageCount) ||
     pageCount < 1 ||
-    pageCount > 500 ||
+    pageCount > 1_000 ||
     range.length === 0 ||
     range.length > SIGNATURE_REPEAT_LIMITS.maximumRangeCharacters
   )
     return invalid();
   const selected = new Set<number>();
   for (const part of range.split(',')) {
-    const match = /^\s*([1-9]\d{0,2})\s*(?:-\s*([1-9]\d{0,2})\s*)?$/u.exec(part);
+    const match = /^\s*([1-9]\d{0,3})\s*(?:-\s*([1-9]\d{0,3})\s*)?$/u.exec(part);
     if (match === null) return invalid();
     const start = Number(match[1]);
     const end = Number(match[2] ?? match[1]);

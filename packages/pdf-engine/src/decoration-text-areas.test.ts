@@ -109,7 +109,7 @@ describe('EDIT-006 estimated text-area placement hints', () => {
     await expect(measureDecorationTextAreas(page, options, 0, 11)).rejects.toThrow(
       'DECORATION_PAGE_RANGE_INVALID',
     );
-    await expect(measureDecorationTextAreas(page, options, 1, 501)).rejects.toThrow(
+    await expect(measureDecorationTextAreas(page, options, 1, 1001)).rejects.toThrow(
       'DECORATION_PAGE_LIMIT',
     );
     await expect(

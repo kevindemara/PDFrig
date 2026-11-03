@@ -1,3 +1,4 @@
+import { LOCAL_PDF_LIMITS } from './browser-document.js';
 import {
   PDFArray,
   PDFDict,
@@ -54,7 +55,7 @@ export interface PdfNumberingReport {
   readonly firstIdentifier: string;
   readonly kind: PdfNumberingOptions['kind'];
   readonly lastIdentifier: string;
-  readonly operationVersion: '1.0.3';
+  readonly operationVersion: '1.1.0';
   readonly range: { readonly endPage: number; readonly startPage: number };
   readonly sourcePages: number;
 }
@@ -81,11 +82,11 @@ const isBaseOptions = (value: Record<string, unknown>): boolean =>
   (value.alignment === 'center' || value.alignment === 'left' || value.alignment === 'right') &&
   typeof value.color === 'string' &&
   /^#[0-9a-f]{6}$/iu.test(value.color) &&
-  (value.endPage === null || isIntegerBetween(value.endPage, 1, 500)) &&
+  (value.endPage === null || isIntegerBetween(value.endPage, 1, LOCAL_PDF_LIMITS.maximumPages)) &&
   isIntegerBetween(value.fontSize, 6, 24) &&
   isIntegerBetween(value.marginPoints, 12, 72) &&
   (value.position === 'footer' || value.position === 'header') &&
-  isIntegerBetween(value.startPage, 1, 500);
+  isIntegerBetween(value.startPage, 1, LOCAL_PDF_LIMITS.maximumPages);
 
 const isPageLabelStyle = (value: unknown): value is PageLabelStyle =>
   value === 'decimal' ||
@@ -218,7 +219,7 @@ export const previewNumbering = (options: PdfNumberingOptions, count = 3): reado
   if (!validOptions(options) || !isIntegerBetween(count, 1, 10)) {
     fail('NUMBERING_OPTIONS_INVALID');
   }
-  const lastPage = options.endPage ?? 500;
+  const lastPage = options.endPage ?? LOCAL_PDF_LIMITS.maximumPages;
   if (lastPage < options.startPage) fail('NUMBERING_PAGE_RANGE_INVALID');
   formatNumberingIdentifier(options, 0);
   if (options.endPage !== null) formatNumberingIdentifier(options, lastPage - options.startPage);
@@ -268,7 +269,7 @@ const setPageLabels = (
   }
   if (options.style === 'letters-lower' || options.style === 'letters-upper') {
     // Reader implementations disagree on /A and /a. Standard prefix-only entries are exact
-    // across readers and bounded to the existing 500-page / 120-character limits (ADR 0019).
+    // across readers and bounded to the existing page-count / 120-character limits (ADR 0019).
     for (let page = options.startPage; page <= endPage; page++) {
       nums.push(PDFNumber.of(page - 1));
       nums.push(
@@ -380,7 +381,7 @@ export const numberPdf = async (
       firstIdentifier: formatNumberingIdentifier(options, 0),
       kind: options.kind,
       lastIdentifier: formatNumberingIdentifier(options, appliedPages - 1),
-      operationVersion: '1.0.3',
+      operationVersion: '1.1.0',
       range: { endPage, startPage: options.startPage },
       sourcePages: pageCount,
     },

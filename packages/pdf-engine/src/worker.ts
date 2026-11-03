@@ -404,11 +404,11 @@ const hasOnlyKeys = (value: Record<string, unknown>, keys: readonly string[]): b
 const isNumberingBase = (value: Record<string, unknown>): boolean =>
   (value.alignment === 'center' || value.alignment === 'left' || value.alignment === 'right') &&
   isColor(value.color) &&
-  (value.endPage === null || isIntegerInRange(value.endPage, 1, 500)) &&
+  (value.endPage === null || isIntegerInRange(value.endPage, 1, LOCAL_PDF_LIMITS.maximumPages)) &&
   isIntegerInRange(value.fontSize, 6, 24) &&
   isIntegerInRange(value.marginPoints, 12, 72) &&
   (value.position === 'footer' || value.position === 'header') &&
-  isIntegerInRange(value.startPage, 1, 500);
+  isIntegerInRange(value.startPage, 1, LOCAL_PDF_LIMITS.maximumPages);
 
 const isIntegerInRange = (value: unknown, minimum: number, maximum: number): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= minimum && value <= maximum;

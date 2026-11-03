@@ -47,7 +47,7 @@ const errorCopy = (error: unknown): string => {
       'Adding marks would invalidate a certificate signature. This PDF is blocked.',
     DECORATION_PASSWORD_REQUIRED: 'Unlock an authorized copy before adding marks.',
     DECORATION_XFA_BLOCKED: 'This PDF uses unsupported XFA forms. Adding marks is blocked.',
-    DECORATION_PAGE_LIMIT: 'Choose a PDF with no more than 500 pages.',
+    DECORATION_PAGE_LIMIT: 'Choose a PDF with no more than 1,000 pages.',
     LIMIT_BYTES: 'The preview exceeds the 50 MB local limit.',
   };
   return `${messages[code] ?? 'The preview could not be built safely. Check the file and settings, then try again.'} Your original is unchanged.`;
@@ -323,7 +323,7 @@ export const DecorationWorkbench = ({ createWorker }: Props) => {
           +
         </span>
         <strong>Choose a PDF</strong>
-        <span>One PDF · up to 50 MB and 500 pages · never uploaded</span>
+        <span>One PDF · up to 50 MB and 1,000 pages · never uploaded</span>
       </label>
       <div className="decoration-panel">
         <div className="metadata-grid">

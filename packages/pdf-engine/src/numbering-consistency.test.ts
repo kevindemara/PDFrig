@@ -120,7 +120,7 @@ describe('ORG-011 / ORG-012 identifier consistency', () => {
   );
 
   it('previews only the explicit range or remaining supported values', () => {
-    expect(previewNumbering({ ...bates, startPage: 500 })).toEqual(['000001']);
+    expect(previewNumbering({ ...bates, startPage: 1000 })).toEqual(['000001']);
     expect(previewNumbering({ ...labels, startPage: 2, endPage: 2 })).toEqual(['1']);
     expect(previewNumbering({ ...labels, style: 'roman-upper', startNumber: 3_999 })).toEqual([
       'MMMCMXCIX',

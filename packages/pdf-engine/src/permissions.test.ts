@@ -238,7 +238,7 @@ describe('SEC-003 bounded permission engine', () => {
       },
       {
         bytes: await synthetic((doc) => {
-          for (let index = 1; index < 501; index += 1) doc.addPage();
+          for (let index = 1; index < 1001; index += 1) doc.addPage();
         }),
         code: 'PERMISSIONS_PAGE_LIMIT',
       },
@@ -321,7 +321,7 @@ describe('SEC-003 bounded permission engine', () => {
     );
   });
 
-  it('refuses PDF/A encryption and allows exactly 500 blank pages without weakening flags', async () => {
+  it('refuses PDF/A encryption and allows exactly 1000 blank pages without weakening flags', async () => {
     const archivalMarker = await PDFDocument.create({ updateMetadata: false });
     archivalMarker.addPage();
     // A synthetic XMP claim tests refusal; it is not an archival-certification fixture.
@@ -341,9 +341,9 @@ describe('SEC-003 bounded permission engine', () => {
       /^UTILITY_PERMISSIONS_VERIFICATION_FAILED$/u,
     );
     const maximum = await PDFDocument.create({ updateMetadata: false });
-    for (let index = 0; index < 500; index += 1) maximum.addPage();
+    for (let index = 0; index < 1000; index += 1) maximum.addPage();
     const bytes = await setPdfPermissions(await maximum.save(), restricted, owner, open, true);
-    expect((await PDFDocument.load(bytes, { password: open })).getPageCount()).toBe(500);
+    expect((await PDFDocument.load(bytes, { password: open })).getPageCount()).toBe(1000);
   }, 30000);
 
   it('validates exact worker requests and emits only sanitized failure codes', async () => {

@@ -162,7 +162,7 @@ try {
           };
     const result = await numberPdf(input, plan);
     assert.deepEqual(input, snapshot);
-    assert.equal(result.report.operationVersion, '1.0.3');
+    assert.equal(result.report.operationVersion, '1.1.0');
     if (item.kind === 'page-labels' && item.expectedIdentifiers !== undefined) {
       const reader = getDocument({
         data: result.bytes.slice(),

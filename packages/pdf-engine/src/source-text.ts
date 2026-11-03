@@ -1,3 +1,4 @@
+import { LOCAL_PDF_MAXIMUM_PAGES } from '@pdfmason/contracts';
 /** EDIT-002: bounded original-operator editing. No covering rectangle, raster or font substitution. */
 import {
   PDFArray,
@@ -371,7 +372,11 @@ export async function loadLocalTextDocument(bytes: Uint8Array): Promise<PDFDocum
   )
     return fail('SOURCE_TEXT_INPUT_UNSUPPORTED');
   const document = await PDFDocument.load(new Uint8Array(bytes), { updateMetadata: false });
-  if (document.isEncrypted || document.getPageCount() > 500 || findPdfModificationRisk(document))
+  if (
+    document.isEncrypted ||
+    document.getPageCount() > LOCAL_PDF_MAXIMUM_PAGES ||
+    findPdfModificationRisk(document)
+  )
     return fail('SOURCE_TEXT_INPUT_UNSUPPORTED');
   return document;
 }

@@ -123,6 +123,7 @@ test('VIEW-003 Fit width follows resize, collapsed panels and rotation without c
 }, info) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/workspace');
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .getByLabel('Open PDF')
     .setInputFiles(path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf'));

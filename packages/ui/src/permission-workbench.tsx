@@ -45,7 +45,7 @@ const safeFailure = (error: unknown): string => {
       'This PDF declares extensions that are not verified for encryption.',
     UTILITY_PDFA_ENCRYPTION_BLOCKED:
       'PDF/A does not permit encryption. No permission copy was made.',
-    UTILITY_PERMISSIONS_PAGE_LIMIT: 'Choose a PDF with at most 500 pages.',
+    UTILITY_PERMISSIONS_PAGE_LIMIT: 'Choose a PDF with at most 1,000 pages.',
     UTILITY_PDF_MALFORMED:
       'This PDF has damaged or incomplete structure. No permission copy was made.',
     UTILITY_INCREMENTAL_REVISIONS_BLOCKED:
@@ -193,7 +193,7 @@ export const PermissionWorkbench = ({ createWorker }: { readonly createWorker?: 
           +
         </span>
         <strong>Choose an unencrypted PDF</strong>
-        <span>One PDF · up to 50 MB and 500 pages · never uploaded</span>
+        <span>One PDF · up to 50 MB and 1,000 pages · never uploaded</span>
       </label>
       <div className="metadata-grid">
         <label className="field-label">

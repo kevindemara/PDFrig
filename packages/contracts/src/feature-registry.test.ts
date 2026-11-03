@@ -62,15 +62,15 @@ describe('feature registry', () => {
     expect(PDF_OPERATION_REGISTRY['create.blank.pdf']).toMatchObject({
       featureIds: ['CREATE-001'],
       input: { acceptedMimeTypes: [], maximumFiles: 0 },
-      version: '1.1.0',
+      version: '1.2.0',
     });
     expect(PDF_OPERATION_REGISTRY['create.images.pdf']).toMatchObject({
       input: { acceptedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'] },
       version: '1.1.0',
     });
     expect(PDF_OPERATION_REGISTRY['convert.pdf.image']).toMatchObject({
-      input: { maximumFiles: 1, maximumPages: 500 },
-      version: '1.1.0',
+      input: { maximumFiles: 1, maximumPages: 1000 },
+      version: '1.2.0',
     });
     expect(PDF_OPERATION_REGISTRY['convert.pdf.image'].options.map(({ key }) => key)).toEqual([
       'format',
@@ -86,7 +86,7 @@ describe('feature registry', () => {
     });
     expect(PDF_OPERATION_REGISTRY['pages.assemble']).toMatchObject({
       featureIds: ['ORG-001', 'ORG-003', 'ORG-004', 'ORG-005', 'ORG-007', 'ORG-008'],
-      version: '1.0.1',
+      version: '1.1.0',
     });
     expect(PDF_OPERATION_REGISTRY['pages.assemble'].warningCodes).toEqual(
       expect.arrayContaining([
@@ -97,15 +97,15 @@ describe('feature registry', () => {
     );
     expect(PDF_OPERATION_REGISTRY['pages.extract']).toMatchObject({
       featureIds: ['ORG-002', 'ORG-006'],
-      version: '1.0.1',
+      version: '1.1.0',
     });
     expect(PDF_OPERATION_REGISTRY['ocr.searchable.pdf'].featureIds).toEqual(['OCR-001']);
     expect(PDF_OPERATION_REGISTRY['document.decorate'].featureIds).toEqual([
       'EDIT-006',
       'EDIT-007',
     ]);
-    expect(PDF_OPERATION_REGISTRY['document.decorate'].version).toBe('1.1.1');
-    expect(PDF_OPERATION_REGISTRY['document.number'].version).toBe('1.0.3');
+    expect(PDF_OPERATION_REGISTRY['document.decorate'].version).toBe('1.2.0');
+    expect(PDF_OPERATION_REGISTRY['document.number'].version).toBe('1.1.0');
     expect(PDF_OPERATION_REGISTRY['document.decorate'].warningCodes).toContain(
       'PLACEMENT_REQUIRES_VISUAL_REVIEW',
     );
@@ -128,14 +128,14 @@ describe('feature registry', () => {
     expect(PDF_OPERATION_REGISTRY['document.number'].featureIds).toEqual(['ORG-011', 'ORG-012']);
     expect(PDF_OPERATION_REGISTRY['optimize.compress']).toMatchObject({
       featureIds: ['OPT-001', 'SEC-006', 'SEC-007'],
-      version: '1.0.5',
+      version: '1.1.0',
     });
     expect(FEATURE_REGISTRY['SEC-007'].state).toBe('implemented');
     expect(FEATURE_REGISTRY['FORM-003'].state).toBe('implemented');
     expect(FEATURE_REGISTRY['SIGN-003'].state).toBe('implemented');
     expect(PDF_OPERATION_REGISTRY['signatures.visual']).toMatchObject({
       featureIds: ['SIGN-001', 'SIGN-002', 'SIGN-003'],
-      version: '1.1.0',
+      version: '1.2.0',
       secretOptionKeys: ['visualAppearance', 'destinationPageIds'],
     });
     expect(PDF_OPERATION_REGISTRY['signatures.visual'].warningCodes).toContain(
@@ -151,7 +151,7 @@ describe('feature registry', () => {
     );
     expect(PDF_OPERATION_REGISTRY['security.protect'].secretOptionKeys).toEqual(['password']);
     for (const operation of ['security.protect', 'security.decrypt'] as const) {
-      expect(PDF_OPERATION_REGISTRY[operation].version).toBe('1.0.1');
+      expect(PDF_OPERATION_REGISTRY[operation].version).toBe('1.1.0');
       expect(PDF_OPERATION_REGISTRY[operation].fidelityEffects).toEqual([]);
       expect(PDF_OPERATION_REGISTRY[operation].warningCodes).toContain('SIGNATURES_BLOCKED');
     }

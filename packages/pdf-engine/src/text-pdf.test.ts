@@ -52,16 +52,16 @@ describe('CONV-005 bounded plain-text PDF', () => {
   it('enforces inclusive byte and page bounds without truncation', () => {
     expect(
       layoutTextPdf(new Uint8Array(TEXT_PDF_LIMITS.maximumBytes).fill(65), options).pages.length,
-    ).toBeLessThanOrEqual(500);
+    ).toBeLessThanOrEqual(1000);
     expect(() => layoutTextPdf(new Uint8Array(TEXT_PDF_LIMITS.maximumBytes + 1), options)).toThrow(
       'UTILITY_TEXT_SIZE_LIMIT',
     );
     expect(() => layoutTextPdf(new Uint8Array(), options)).toThrow('UTILITY_TEXT_SIZE_LIMIT');
-    expect(layoutTextPdf(encode('\n'.repeat(48 * 500 - 1)), options).pages.length).toBe(500);
-    expect(() => layoutTextPdf(encode('\n'.repeat(48 * 500)), options)).toThrow(
+    expect(layoutTextPdf(encode('\n'.repeat(48 * 1000 - 1)), options).pages.length).toBe(1000);
+    expect(() => layoutTextPdf(encode('\n'.repeat(48 * 1000)), options)).toThrow(
       'UTILITY_TEXT_PAGE_LIMIT',
     );
-    expect(() => layoutTextPdf(encode('\t'.repeat(500_000)), options)).toThrow(
+    expect(() => layoutTextPdf(encode('\t'.repeat(1_000_000)), options)).toThrow(
       'UTILITY_TEXT_PAGE_LIMIT',
     );
   });
@@ -92,10 +92,10 @@ describe('CONV-005 bounded plain-text PDF', () => {
       'request is invalid',
     );
   });
-  it('builds and reopens the inclusive 500-page text layout boundary', async () => {
-    const output = await textToPdf(encode('\n'.repeat(48 * 500 - 1)), options);
+  it('builds and reopens the inclusive 1000-page text layout boundary', async () => {
+    const output = await textToPdf(encode('\n'.repeat(48 * 1000 - 1)), options);
     const document = await PDFDocument.load(output, { updateMetadata: false });
-    expect(document.getPageCount()).toBe(500);
+    expect(document.getPageCount()).toBe(1000);
     expect(document.getPages().every((page) => page.node.Contents() === undefined)).toBe(true);
   });
   it('creates deterministic searchable-page structure without source/date metadata, capturing mutable input before awaits', async () => {

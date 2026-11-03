@@ -43,18 +43,18 @@ describe('CREATE-001 bounded multi-page blank output', () => {
     }
   });
 
-  it('accepts the inclusive 500-page boundary through the worker schema and engine', async () => {
-    const options = { ...base, pageCount: 500 };
+  it('accepts the inclusive 1000-page boundary through the worker schema and engine', async () => {
+    const options = { ...base, pageCount: 1000 };
     expect(parsePdfWorkerRequest({ id: 'blank-max', kind: 'blank-pdf', options })).toMatchObject({
       options,
     });
     const output = await PDFDocument.load(await createBlankPdf(options));
-    expect(output.getPageCount()).toBe(500);
+    expect(output.getPageCount()).toBe(1000);
     expect(output.getPages().every((page) => page.node.Contents() === undefined)).toBe(true);
   });
 
   it('rejects malformed, non-integer and excessive counts at both boundaries', async () => {
-    for (const pageCount of [undefined, null, '3', 0, -1, 1.5, 501, NaN, Infinity]) {
+    for (const pageCount of [undefined, null, '3', 0, -1, 1.5, 1001, NaN, Infinity]) {
       const options = { ...base, pageCount };
       expect(isBlankPdfOptions(options)).toBe(false);
       expect(() =>
@@ -78,7 +78,7 @@ describe('CREATE-001 bounded multi-page blank output', () => {
   it('captures count and margins before asynchronous creation', async () => {
     const options = { ...base, pageCount: 3, marginPoints: 36 };
     const creating = createBlankPdf(options);
-    options.pageCount = 501;
+    options.pageCount = 1001;
     options.marginPoints = 144;
     const output = await PDFDocument.load(await creating, { updateMetadata: false });
     expect(output.getPageCount()).toBe(3);

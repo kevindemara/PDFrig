@@ -425,9 +425,11 @@ requirements. Office conversion is not available in this version. The
 - **Signatures and redaction:** visual signatures are not certificate-backed
   signatures or proof of identity. Editing can invalidate existing digital
   signatures. Redaction beta is gated and is not approved for public use.
-- **Bounds:** typical editor limits are 50 MB per input, 500 pages and 1,000 added
+- **Bounds:** current source builds allow 50 MB per input, 1,000 pages and 1,000 added
   marks. OCR has a 20-megapixel limit and a three-minute deadline. Individual tools
   have additional limits; large or complex documents can be refused.
+  The Windows downloads at version `0.1.0-alpha.20261103.1` still use the earlier
+  500-page limit; they must be rebuilt to include this source change.
 
 ## Privacy and hosting
 

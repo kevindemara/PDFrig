@@ -22,6 +22,7 @@ describe('PDF page-image options', () => {
   });
 
   it('allows a bounded selection from a larger document', () => {
+    expect(resolvePdfImagePages({ ...options, pageRange: '951-1000' }, 1000)).toHaveLength(50);
     expect(resolvePdfImagePages({ ...options, pageRange: '451-500' }, 500)).toHaveLength(50);
     expect(() => resolvePdfImagePages(options, 51)).toThrow('UTILITY_RENDER_PAGE_LIMIT');
   });

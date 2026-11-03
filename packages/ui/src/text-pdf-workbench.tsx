@@ -20,7 +20,7 @@ const safeFailure = (error: unknown): string => {
     UTILITY_TEXT_CHARACTER_UNSUPPORTED:
       'This build supports printable ASCII, tabs and line breaks only. No characters were replaced or omitted.',
     UTILITY_TEXT_SIZE_LIMIT: 'Choose a non-empty text file no larger than 1 MiB.',
-    UTILITY_TEXT_PAGE_LIMIT: 'This layout exceeds 500 pages. Split the text into smaller files.',
+    UTILITY_TEXT_PAGE_LIMIT: 'This layout exceeds 1,000 pages. Split the text into smaller files.',
   };
   return `${messages[error instanceof Error ? error.message : ''] ?? 'The PDF or preview could not be verified. Try a supported text file again.'} Your original is unchanged.`;
 };
@@ -233,7 +233,7 @@ export const TextPdfWorkbench = ({ createWorker }: Props) => {
         </select>
       </label>
       <p className="fidelity-note">
-        Printable ASCII only, with tabs and line breaks. Courier 12 pt · 36 pt margins · up to 500
+        Printable ASCII only, with tabs and line breaks. Courier 12 pt · 36 pt margins · up to 1,000
         pages. Tabs expand at four-column source-line stops. Long lines wrap without trimming; blank
         lines remain. Markup stays literal. Other characters stop conversion, never substitute.
       </p>

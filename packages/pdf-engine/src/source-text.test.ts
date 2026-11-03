@@ -13,6 +13,24 @@ import { embedSignatureFont } from './signature-font.js';
 const fixture = (name: string) =>
   readFile(new URL(`../../test-corpus/fixtures/${name}`, import.meta.url));
 describe('EDIT-002 genuine bounded source text replacement', () => {
+  it('edits original text on page 1000 without changing its font or neighboring pages', async () => {
+    const document = await PDFDocument.load(await fixture('smoke-one-page.pdf'));
+    const [last] = await document.copyPages(document, [0]);
+    if (!last) throw new Error('Missing synthetic page');
+    for (let i = 1; i < 999; i += 1) document.addPage();
+    document.addPage(last);
+    const source = await document.save();
+    const run = (await inspectSourceText(source, 999))[0];
+    if (!run) throw new Error('Missing source text at new boundary');
+    const output = await replaceSourceText(source, run.id, run.text, 'EDIT');
+    expect((await PDFDocument.load(output)).getPageCount()).toBe(1000);
+    expect(await inspectSourceText(output, 999)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: 'EDIT', fontName: run.fontName, fontSize: run.fontSize }),
+      ]),
+    );
+    expect(await inspectSourceText(output, 0)).toEqual(await inspectSourceText(source, 0));
+  });
   it('does not guess geometry after unsupported quote operators or degenerate transforms', async () => {
     const document = await PDFDocument.create(),
       page = document.addPage();

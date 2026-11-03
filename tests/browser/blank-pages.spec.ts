@@ -13,14 +13,14 @@ test('CREATE-001 multi-page blank output stays empty and count changes invalidat
   await page.getByRole('button', { name: /Create blank PDF/u }).click();
   const count = page.getByLabel('Number of pages');
   const create = page.getByRole('button', { name: 'Create export' });
-  for (const value of ['', '0', '-1', '1.5', '501']) {
+  for (const value of ['', '0', '-1', '1.5', '1001']) {
     await count.fill(value);
     await expect(create).toBeDisabled();
     await expect(page.locator('.utility-bench').getByRole('alert')).toContainText(
-      'whole page count from 1 to 500',
+      'whole page count from 1 to 1000',
     );
   }
-  await count.fill('500');
+  await count.fill('1000');
   await expect(create).toBeEnabled();
   await count.fill('3');
   await page.getByLabel('Page size').selectOption('a4');

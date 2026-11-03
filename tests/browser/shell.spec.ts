@@ -866,13 +866,13 @@ test('OPT-001 rejects malformed structures with content-free recovery', async ({
   expect(await readFile(source)).toEqual(sourceBytes);
 });
 
-test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', async ({
+test('OPT-001 rejects 1001 pages and recovers with a verified 1000-page export', async ({
   page,
 }, testInfo) => {
   const fixture = path.resolve('packages/test-corpus/fixtures/smoke-one-page.pdf');
   const fixtureBytes = await readFile(fixture);
-  const supported = testInfo.outputPath('synthetic-500.pdf');
-  const oversized = testInfo.outputPath('synthetic-501.pdf');
+  const supported = testInfo.outputPath('synthetic-1000.pdf');
+  const oversized = testInfo.outputPath('synthetic-1001.pdf');
   await mkdir(path.dirname(supported), { recursive: true });
   const python =
     process.env.PDFMASON_PYTHON_PATH ?? (process.platform === 'win32' ? 'py' : 'python');
@@ -884,7 +884,7 @@ test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', a
     [
       ...prefix,
       '-c',
-      'import sys; from pypdf import PdfReader,PdfWriter; r=PdfReader(sys.argv[1]); w=PdfWriter(); [w.add_page(r.pages[0]) for _ in range(500)]; w.write(sys.argv[2]); w.add_page(r.pages[0]); w.write(sys.argv[3])',
+      'import sys; from pypdf import PdfReader,PdfWriter; r=PdfReader(sys.argv[1]); w=PdfWriter(); [w.add_page(r.pages[0]) for _ in range(1000)]; w.write(sys.argv[2]); w.add_page(r.pages[0]); w.write(sys.argv[3])',
       fixture,
       supported,
       oversized,
@@ -899,7 +899,7 @@ test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', a
     await page.getByRole('radio', { name: label }).check();
     await page.getByRole('button', { name: 'Create export' }).click();
     await expect(page.getByRole('status')).toHaveText(
-      'Compression supports PDFs up to 500 pages. Choose a smaller PDF. Your original was not changed.',
+      'Compression supports PDFs up to 1,000 pages. Choose a smaller PDF. Your original was not changed.',
     );
     await expect(page.getByRole('button', { name: 'Download new copy' })).toHaveCount(0);
     await expect(page.getByText('UTILITY_PDF_PAGE_LIMIT', { exact: true })).toHaveCount(0);
@@ -909,7 +909,7 @@ test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', a
   await expect(page.getByRole('status')).toContainText('Export ready');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download new copy' }).click();
-  const output = testInfo.outputPath('compressed-500.pdf');
+  const output = testInfo.outputPath('compressed-1000.pdf');
   await (await downloadPromise).saveAs(output);
   expect((await readFile(output)).byteLength).toBeLessThanOrEqual(original.byteLength);
   const qpdf =
@@ -921,7 +921,7 @@ test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', a
     [
       ...prefix,
       '-c',
-      'import sys; from pypdf import PdfReader; a,b=map(PdfReader,sys.argv[1:]); assert len(a.pages)==len(b.pages)==500; assert a.metadata==b.metadata; assert [(list(p.mediabox),list(p.cropbox),p.rotation,p.extract_text()) for p in a.pages]==[(list(p.mediabox),list(p.cropbox),p.rotation,p.extract_text()) for p in b.pages]',
+      'import sys; from pypdf import PdfReader; a,b=map(PdfReader,sys.argv[1:]); assert len(a.pages)==len(b.pages)==1000; assert a.metadata==b.metadata; assert [(list(p.mediabox),list(p.cropbox),p.rotation,p.extract_text()) for p in a.pages]==[(list(p.mediabox),list(p.cropbox),p.rotation,p.extract_text()) for p in b.pages]',
       supported,
       output,
     ],
@@ -932,8 +932,8 @@ test('OPT-001 rejects 501 pages and recovers with a verified 500-page export', a
       maxBuffer: 8 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-  // Structural/text checks cover all 500 pages; pixels sample first, middle, and last.
-  for (const pageNumber of [1, 250, 500])
+  // Structural/text checks cover all 1000 pages; pixels sample first, middle, and last.
+  for (const pageNumber of [1, 500, 1000])
     expect(render(output, pageNumber).equals(render(supported, pageNumber))).toBe(true);
   expect((await readFile(supported)).equals(original)).toBe(true);
   expect((await readFile(oversized)).equals(rejected)).toBe(true);
@@ -1349,7 +1349,7 @@ test('ORG-012 rejects clipped numbering without a partial result and recovers wi
   expect(report).toMatchObject({
     firstIdentifier: 'QA-000001',
     lastIdentifier: 'QA-000001',
-    operationVersion: '1.0.3',
+    operationVersion: '1.1.0',
     appliedPages: 1,
   });
   // Selecting a new input clears the previous successful PDF/report before another attempt.
@@ -1391,7 +1391,7 @@ test('ORG-011 alphabetic boundaries and literal prefixes agree in preview and re
     firstIdentifier: ' QA  Z',
     lastIdentifier: ' QA  BB',
     appliedPages: 3,
-    operationVersion: '1.0.3',
+    operationVersion: '1.1.0',
   });
   await page.locator('input[type="file"]').setInputFiles([]);
   await page.getByLabel('Start number').fill('999999999');
@@ -1443,7 +1443,7 @@ for (const mode of ['page-labels', 'bates'] as const) {
       firstIdentifier: identifiers[0],
       lastIdentifier: identifiers[2],
       appliedPages: 3,
-      operationVersion: '1.0.3',
+      operationVersion: '1.1.0',
       kind: mode,
     });
     const pdfDownload = page.waitForEvent('download');
@@ -2010,6 +2010,7 @@ test('passwords stay ephemeral and risky documents lock organizer export', async
   await expect(page.getByRole('button', { name: 'Review export' })).toBeDisabled();
 
   await page.reload();
+  await expect(page.getByLabel('Open PDF')).toBeEnabled();
   await page
     .locator('input[type="file"]')
     .first()

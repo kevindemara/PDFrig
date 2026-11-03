@@ -101,7 +101,7 @@ const setup = () => {
             firstPageAfter: { ...sourcePage, visibleHeight: height, visibleWidth: width },
             firstPageBefore: sourcePage,
             kind: options.kind,
-            operationVersion: '1.0.0',
+            operationVersion: '1.1.0',
             range: { startPage: options.startPage, endPage: options.endPage ?? 3 },
             sourcePages: 3,
           },

@@ -68,7 +68,7 @@ export const parseDecorationPageRange = (input: string, pageCount: number): read
   if (parts.length > 100) return invalid();
   const pages = new Set<number>();
   for (const part of parts) {
-    const match = /^\s*([1-9]\d{0,2})\s*(?:-\s*([1-9]\d{0,2})\s*)?$/u.exec(part);
+    const match = /^\s*([1-9]\d{0,3})\s*(?:-\s*([1-9]\d{0,3})\s*)?$/u.exec(part);
     if (match === null) return invalid();
     const start = Number(match[1]);
     const end = Number(match[2] ?? match[1]);

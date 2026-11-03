@@ -51,7 +51,7 @@ export const resolvePdfImagePages = (
   if (parts.length > 100) throw new Error('UTILITY_RENDER_PAGE_RANGE_INVALID');
   const selected = new Set<number>();
   for (const part of parts) {
-    const match = /^\s*([1-9]\d{0,2})\s*(?:-\s*([1-9]\d{0,2})\s*)?$/u.exec(part);
+    const match = /^\s*([1-9]\d{0,3})\s*(?:-\s*([1-9]\d{0,3})\s*)?$/u.exec(part);
     if (match === null) throw new Error('UTILITY_RENDER_PAGE_RANGE_INVALID');
     const start = Number(match[1]);
     const end = Number(match[2] ?? match[1]);

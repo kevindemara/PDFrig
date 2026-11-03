@@ -138,7 +138,7 @@ describe.each(['Web', 'Windows'] as const)('OPT-001 %s completed-result ownershi
     );
     test.noDownload();
     expect(test.ui.getByRole('status')).toHaveTextContent(
-      'Compression supports PDFs up to 500 pages. Choose a smaller PDF. Your original was not changed.',
+      'Compression supports PDFs up to 1,000 pages. Choose a smaller PDF. Your original was not changed.',
     );
     expect(test.ui.queryByText(/UTILITY_PDF_PAGE_LIMIT/u)).toBeNull();
     test.select();

@@ -42,6 +42,7 @@ import {
   inspectPdfRevisionStructure,
   LOCAL_PDF_LIMITS,
   openBrowserPdf,
+  PdfPageLimitError,
   validatePdfImagePixelCount,
   type AssemblyPage,
   type BrowserPdfDocument,
@@ -1395,8 +1396,10 @@ const RedactionDialog = ({ loading, markCount, onApply, onClose }: RedactionDial
 const describeError = (error: unknown): string => {
   if (!(error instanceof Error)) return 'The PDF could not be processed on this device.';
   if (error.message === 'LIMIT_BYTES') return 'That PDF exceeds the 50 MB local workspace limit.';
+  if (error instanceof PdfPageLimitError)
+    return `This PDF contains ${error.pageCount.toLocaleString('en-US')} pages. The local workspace supports up to ${LOCAL_PDF_LIMITS.maximumPages.toLocaleString('en-US')} pages.`;
   if (error.message === 'LIMIT_PAGES')
-    return 'That PDF exceeds the 500-page local workspace limit.';
+    return 'That PDF exceeds the 1,000-page local workspace limit.';
   if (error.message === 'NOT_PDF') return 'This file does not have a valid PDF header.';
   if (error.message === 'UTILITY_IMAGE_INVALID') return 'Choose a valid PNG, JPEG, or WebP image.';
   if (error.message.startsWith('ORGANIZER_')) {
@@ -2529,7 +2532,7 @@ export const WorkspaceShell = ({
               : code === 'INSERT_TOTAL_SIZE_LIMIT'
                 ? 'Adding that PDF would exceed the 100 MB organizer-source limit. Your current document was not changed.'
                 : code === 'INSERT_PAGE_LIMIT'
-                  ? 'Adding that PDF would exceed the 500-page local workspace limit. Your current document was not changed.'
+                  ? 'Adding that PDF would exceed the 1,000-page local workspace limit. Your current document was not changed.'
                   : describeError(insertError),
       );
     } finally {
@@ -3875,7 +3878,7 @@ export const WorkspaceShell = ({
                   <p className="eyebrow">Private by default</p>
                   <h1 id="workspace-title">Drop in a PDF.</h1>
                   <p>
-                    View and organize up to 500 pages or 50 MB. Your document stays{' '}
+                    View and organize up to 1,000 pages or 50 MB. Your document stays{' '}
                     {surface === 'Windows' ? 'in this app on your device' : 'in this browser tab'}{' '}
                     and is never uploaded.
                   </p>

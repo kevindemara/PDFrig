@@ -20,7 +20,7 @@ beforeAll(async () => {
     { updateMetadata: false },
   );
   const document = await PDFDocument.create({ updateMetadata: false });
-  for (const page of await document.copyPages(source, Array<number>(500).fill(0)))
+  for (const page of await document.copyPages(source, Array<number>(1000).fill(0)))
     document.addPage(page);
   supported = await document.save();
   const [extra] = await document.copyPages(source, [0]);
@@ -38,20 +38,20 @@ afterEach(() => {
 
 describe('OPT-001 compression page boundary', () => {
   it('keeps the engine limit aligned with the versioned operation contract', () => {
-    expect(LOCAL_PDF_LIMITS.maximumPages).toBe(500);
+    expect(LOCAL_PDF_LIMITS.maximumPages).toBe(1000);
     expect(PDF_OPERATION_REGISTRY['optimize.compress']).toMatchObject({
       featureIds: ['OPT-001', 'SEC-006', 'SEC-007'],
       input: { maximumPages: LOCAL_PDF_LIMITS.maximumPages },
-      version: '1.0.5',
+      version: '1.1.0',
     });
   });
 
   it.each(compressionPresets)(
-    'accepts exactly 500 pages for %s without source mutation',
+    'accepts exactly 1000 pages for %s without source mutation',
     async (preset) => {
       const snapshot = supported.slice();
       const result = await compressPdfLosslessly(supported, preset);
-      expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(500);
+      expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(1000);
       expect(result.bytes.byteLength).toBeLessThanOrEqual(supported.byteLength);
       expect(result.report.preset).toBe(preset);
       expect(result.bytes).not.toBe(supported);
@@ -60,7 +60,7 @@ describe('OPT-001 compression page boundary', () => {
   );
 
   it.each(compressionPresets)(
-    'rejects 501 pages before saving or returning a fallback for %s',
+    'rejects 1001 pages before saving or returning a fallback for %s',
     async (preset) => {
       const snapshot = oversized.slice();
       const save = vi.spyOn(PDFDocument.prototype, 'save');
@@ -76,7 +76,7 @@ describe('OPT-001 compression page boundary', () => {
   it('counts actual page leaves rather than trusting a smaller catalog Count', async () => {
     const parsed = await PDFDocument.load(underreported, { updateMetadata: false });
     expect(parsed.catalog.Pages().lookup(PDFName.of('Count'), PDFNumber).asNumber()).toBe(1);
-    expect(parsed.getPageCount()).toBe(501);
+    expect(parsed.getPageCount()).toBe(1001);
     await expect(
       compressPdfLosslessly(underreported, 'balanced').then(() => undefined),
     ).rejects.toThrow(/^UTILITY_PDF_PAGE_LIMIT$/u);

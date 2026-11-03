@@ -26,6 +26,10 @@ const options: PdfDecorationOptions = {
 };
 
 describe('EDIT-006 / EDIT-007 exact range and placement contract', () => {
+  it('selects page 1000 while refusing ranges beyond the document', () => {
+    expect(parseDecorationPageRange('999-1000', 1000)).toEqual([999, 1000]);
+    expect(() => parseDecorationPageRange('1001', 1000)).toThrow();
+  });
   it('blocks unsupported characters instead of accepting the fork placeholder fallback', async () => {
     const document = await PDFDocument.create();
     document.addPage([612, 792]);
@@ -133,7 +137,7 @@ describe('EDIT-006 / EDIT-007 exact range and placement contract', () => {
       '1'.repeat(1001),
     ])
       expect(() => parseDecorationPageRange(range, 3)).toThrow('DECORATION_PAGE_RANGE_INVALID');
-    expect(() => parseDecorationPageRange('1', 501)).toThrow();
+    expect(() => parseDecorationPageRange('1', 1001)).toThrow();
     expect(() =>
       resolveDecorationPages(
         {

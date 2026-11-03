@@ -52,6 +52,6 @@ for case in json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")):
     assert report["appliedPages"] == case["pages"] - case["startPage"] + 1
     assert report["firstIdentifier"] == expected_identifiers[case["startPage"] - 1]
     assert report["lastIdentifier"] == expected_identifiers[-1]
-    assert report["operationVersion"] == "1.0.3"
+    assert report["operationVersion"] == "1.1.0"
 
 print("pypdf verified numbering labels, identifiers, reports, page geometry, forms, and unchanged pages.")

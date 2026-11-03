@@ -31,7 +31,8 @@ describe('PRINT-001 options', () => {
     expect(() => resolvePrintPageIndices({ pageRange: 'all', resolution: 2 }, 500)).toThrow(
       'PRINT_PAGE_LIMIT',
     );
-    expect(() => resolvePrintPageIndices({ pageRange: '1', resolution: 2 }, 501)).toThrow(
+    expect(resolvePrintPageIndices({ pageRange: '1000', resolution: 2 }, 1000)).toEqual([999]);
+    expect(() => resolvePrintPageIndices({ pageRange: '1', resolution: 2 }, 1001)).toThrow(
       'PRINT_OPTIONS_INVALID',
     );
     expect(() => resolvePrintPageIndices({ pageRange: '1', resolution: 4 } as never, 1)).toThrow(

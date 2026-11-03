@@ -1,3 +1,4 @@
+import { LOCAL_PDF_LIMITS } from './browser-document.js';
 import { PDFArray, PDFDocument, PDFName, PDFNumber, type PDFPage } from '@cantoo/pdf-lib';
 
 import { loadPageModificationDocument, savePageModificationDocument } from './decorations.js';
@@ -52,7 +53,7 @@ export interface PdfGeometryReport {
   readonly firstPageAfter: PdfPageGeometry;
   readonly firstPageBefore: PdfPageGeometry;
   readonly kind: PdfGeometryOptions['kind'];
-  readonly operationVersion: '1.0.0';
+  readonly operationVersion: '1.1.0';
   readonly range: { readonly endPage: number; readonly startPage: number };
   readonly sourcePages: number;
 }
@@ -86,8 +87,8 @@ const isFiniteBetween = (value: unknown, minimum: number, maximum: number): valu
   typeof value === 'number' && Number.isFinite(value) && value >= minimum && value <= maximum;
 
 const validRange = (value: Record<string, unknown>): boolean =>
-  (value.endPage === null || isIntegerBetween(value.endPage, 1, 500)) &&
-  isIntegerBetween(value.startPage, 1, 500);
+  (value.endPage === null || isIntegerBetween(value.endPage, 1, LOCAL_PDF_LIMITS.maximumPages)) &&
+  isIntegerBetween(value.startPage, 1, LOCAL_PDF_LIMITS.maximumPages);
 
 export const isPdfGeometryOptions = (value: unknown): value is PdfGeometryOptions => {
   if (!isRecord(value) || !validRange(value)) return false;
@@ -331,7 +332,7 @@ export const modifyPdfGeometry = async (
       firstPageAfter,
       firstPageBefore,
       kind: options.kind,
-      operationVersion: '1.0.0',
+      operationVersion: '1.1.0',
       range: { endPage, startPage: options.startPage },
       sourcePages: snapshot.pageCount,
     },

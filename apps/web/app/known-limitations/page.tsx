@@ -18,17 +18,17 @@ const limits = [
   [
     'SEC-001 · SEC-002 · SEC-003',
     'Protection copies',
-    'Add-password and authorized unlock create new local copies within 50 MiB and 500 pages. New passwords support 12–127 printable ASCII characters without substitution. Signed, active, attached-file, XFA, damaged/incremental and unsupported string layouts stop without an export; adding protection also refuses PDF/A and existing extensions. Content, metadata and source objects are verified before returning a copy. Passwords clear after each attempt; authority resets for each source, and changing settings discards results. JavaScript cannot guarantee memory erasure. Inspect saved copies in your reader. Development-gated permission controls use separate owner/open passwords and explicit setting review. An empty open password lets anyone open and extract the file. Flags are reader-enforced requests, not unbreakable DRM, and accessibility extraction is always allowed without certifying accessibility. Production/distribution defaults remain off. No broad-reader or native release certification is claimed.',
+    'Add-password and authorized unlock create new local copies within 50 MiB and 1,000 pages. New passwords support 12–127 printable ASCII characters without substitution. Signed, active, attached-file, XFA, damaged/incremental and unsupported string layouts stop without an export; adding protection also refuses PDF/A and existing extensions. Content, metadata and source objects are verified before returning a copy. Passwords clear after each attempt; authority resets for each source, and changing settings discards results. JavaScript cannot guarantee memory erasure. Inspect saved copies in your reader. Development-gated permission controls use separate owner/open passwords and explicit setting review. An empty open password lets anyone open and extract the file. Flags are reader-enforced requests, not unbreakable DRM, and accessibility extraction is always allowed without certifying accessibility. Production/distribution defaults remain off. No broad-reader or native release certification is claimed.',
   ],
   [
     'CONV-005',
     'Plain-text conversion',
-    'One UTF-8 .txt file up to 1 MiB supports printable ASCII, tabs and line breaks only. Invalid encoding, unsupported characters or layouts over 500 pages stop without substitution or truncation. A4/Letter portrait uses Courier 12 pt, 36 pt margins and 15 pt line spacing. Tabs expand at four-column source-line stops, long lines wrap and blank lines remain; markup is literal. Review the actual output before saving. The selectable-text PDF is untagged, not an accessible PDF certification or byte-identical text archive. Rich text, Unicode fonts, custom typography and native release verification remain outside this contract.',
+    'One UTF-8 .txt file up to 1 MiB supports printable ASCII, tabs and line breaks only. Invalid encoding, unsupported characters or layouts over 1,000 pages stop without substitution or truncation. A4/Letter portrait uses Courier 12 pt, 36 pt margins and 15 pt line spacing. Tabs expand at four-column source-line stops, long lines wrap and blank lines remain; markup is literal. Review the actual output before saving. The selectable-text PDF is untagged, not an accessible PDF certification or byte-identical text archive. Rich text, Unicode fonts, custom typography and native release verification remain outside this contract.',
   ],
   [
     'VIEW-001',
     'Local file bounds',
-    'The shared viewer currently accepts PDFs up to 50 MB and 500 pages. The Windows bridge streams in chunks, but the PDF engine still assembles a final contiguous buffer.',
+    'The shared viewer currently accepts PDFs up to 50 MB and 1,000 pages. The Windows bridge streams in chunks, but the PDF engine still assembles a final contiguous buffer.',
   ],
   [
     'VIEW-003',

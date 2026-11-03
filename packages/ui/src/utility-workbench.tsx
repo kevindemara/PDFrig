@@ -206,7 +206,7 @@ const errorCopy = (error: unknown): string => {
     DECORATION_ATTACHMENTS_BLOCKED:
       'This PDF contains file attachments. Decorations are blocked because attachment fidelity is not verified.',
     DECORATION_PASSWORD_REQUIRED: 'Unlock an authorized copy before adding decorations.',
-    DECORATION_PAGE_LIMIT: 'This PDF contains more than 500 pages.',
+    DECORATION_PAGE_LIMIT: 'This PDF contains more than 1,000 pages.',
     DECORATION_SIGNATURES_BLOCKED:
       'Certificate-signed PDFs are not decorated because any added mark would invalidate the signature.',
     DECORATION_TEXT_ENCODING_UNSUPPORTED:
@@ -224,7 +224,7 @@ const errorCopy = (error: unknown): string => {
       'Resize is not available for interactive forms because widget positions are not yet transformed safely. Crop mode remains available.',
     GEOMETRY_PAGE_BOX_UNSUPPORTED:
       'A page has missing, invalid, or unusually large geometry that this build cannot change safely.',
-    GEOMETRY_PAGE_LIMIT: 'This PDF contains more than 500 pages.',
+    GEOMETRY_PAGE_LIMIT: 'This PDF contains more than 1,000 pages.',
     GEOMETRY_PAGE_RANGE_INVALID: 'Use a page range that exists in this PDF.',
     GEOMETRY_PASSWORD_REQUIRED: 'Unlock an authorized copy before changing page geometry.',
     GEOMETRY_PREPRESS_RESIZE_BLOCKED:
@@ -247,7 +247,7 @@ const errorCopy = (error: unknown): string => {
     NUMBERING_OPTIONS_INVALID: 'Enter a valid positive sequence and page range.',
     NUMBERING_PAGE_LABELS_EXIST:
       'This PDF already has logical page labels. Confirm replacement or use Bates numbering, which preserves them.',
-    NUMBERING_PAGE_LIMIT: 'This PDF contains more than 500 pages.',
+    NUMBERING_PAGE_LIMIT: 'This PDF contains more than 1,000 pages.',
     NUMBERING_PAGE_BOX_UNSUPPORTED:
       'A selected page has unsupported page bounds or physical units. Choose a supported copy or a range that excludes it. Your original was not changed.',
     NUMBERING_PAGE_RANGE_INVALID: 'Use a page range that exists in this PDF.',
@@ -267,7 +267,7 @@ const errorCopy = (error: unknown): string => {
     NUMBERING_XFA_BLOCKED:
       'XFA documents are not numbered because their form behavior cannot be preserved safely.',
     LIMIT_BYTES: 'This PDF is larger than the 50 MB local limit.',
-    LIMIT_PAGES: 'This PDF contains more than 500 pages.',
+    LIMIT_PAGES: 'This PDF contains more than 1,000 pages.',
     NOT_PDF: 'Choose a valid PDF file.',
     UTILITY_AUTHORIZATION_REQUIRED: 'Confirm that you are authorized to remove this protection.',
     UTILITY_BLANK_OPTIONS_INVALID:
@@ -300,7 +300,7 @@ const errorCopy = (error: unknown): string => {
     UTILITY_PASSWORD_CHARACTERS_UNSUPPORTED:
       'Use 12–127 printable ASCII characters for a new password. No characters are substituted.',
     UTILITY_PERMISSIONS_PAGE_LIMIT:
-      'Protection supports PDFs up to 500 pages. Choose a smaller PDF. Your original was not changed.',
+      'Protection supports PDFs up to 1,000 pages. Choose a smaller PDF. Your original was not changed.',
     UTILITY_PERMISSIONS_STRING_LAYOUT_BLOCKED:
       'This PDF has a string layout the protection engine cannot safely encrypt. No export was made; your original is unchanged.',
     UTILITY_PERMISSIONS_EXTENSIONS_BLOCKED:
@@ -311,7 +311,7 @@ const errorCopy = (error: unknown): string => {
       'Password removal could not be verified without changing document content. No export was made; your original is unchanged.',
     UTILITY_PDF_MALFORMED:
       'This PDF has damaged or incomplete structure that PDFrig cannot safely process. Try exporting a fresh copy from the source application. Your original was not changed.',
-    UTILITY_PDF_PAGE_LIMIT: `Compression supports PDFs up to ${LOCAL_PDF_LIMITS.maximumPages} pages. Choose a smaller PDF. Your original was not changed.`,
+    UTILITY_PDF_PAGE_LIMIT: `Compression supports PDFs up to ${LOCAL_PDF_LIMITS.maximumPages.toLocaleString('en-US')} pages. Choose a smaller PDF. Your original was not changed.`,
     UTILITY_PRESERVATION_FAILED:
       'Compression stopped because PDFrig could not verify that the document structure was preserved. Your original was not changed.',
     UTILITY_SIGNATURES_BLOCKED:
@@ -373,7 +373,7 @@ export const UtilityWorkbench = ({
   const [blankPageCountInput, setBlankPageCountInput] = useState('1');
   const blankPageCount = Number(blankPageCountInput);
   const blankPageCountValid =
-    /^[1-9]\d{0,2}$/u.test(blankPageCountInput) && blankPageCount <= LOCAL_PDF_LIMITS.maximumPages;
+    /^[1-9]\d{0,3}$/u.test(blankPageCountInput) && blankPageCount <= LOCAL_PDF_LIMITS.maximumPages;
   const [compressionPreset, setCompressionPreset] = useState<CompressionPreset>('balanced');
   const [geometryBottom, setGeometryBottom] = useState('36');
   const [geometryEndPage, setGeometryEndPage] = useState('');
@@ -1044,7 +1044,7 @@ export const UtilityWorkbench = ({
                     ? 'Up to 100 images · 100 MB total · 20 megapixels each'
                     : active === 'render'
                       ? 'One PDF · up to 50 MB and 50 rendered pages'
-                      : 'One PDF · up to 50 MB and 500 pages'}
+                      : 'One PDF · up to 50 MB and 1,000 pages'}
                 </span>
               </label>
             )}
@@ -1345,7 +1345,7 @@ export const UtilityWorkbench = ({
                   First PDF page
                   <input
                     inputMode="numeric"
-                    max={500}
+                    max={LOCAL_PDF_LIMITS.maximumPages}
                     min={1}
                     onChange={(event) => setGeometryStartPage(event.currentTarget.value)}
                     type="number"
@@ -1356,7 +1356,7 @@ export const UtilityWorkbench = ({
                   Last PDF page (optional)
                   <input
                     inputMode="numeric"
-                    max={500}
+                    max={LOCAL_PDF_LIMITS.maximumPages}
                     min={1}
                     onChange={(event) => setGeometryEndPage(event.currentTarget.value)}
                     placeholder="Last page"
@@ -1677,7 +1677,7 @@ export const UtilityWorkbench = ({
                   First PDF page
                   <input
                     inputMode="numeric"
-                    max={500}
+                    max={LOCAL_PDF_LIMITS.maximumPages}
                     min={1}
                     onChange={(event) => setNumberingStartPage(event.currentTarget.value)}
                     type="number"
@@ -1688,7 +1688,7 @@ export const UtilityWorkbench = ({
                   Last PDF page (optional)
                   <input
                     inputMode="numeric"
-                    max={500}
+                    max={LOCAL_PDF_LIMITS.maximumPages}
                     min={1}
                     onChange={(event) => setNumberingEndPage(event.currentTarget.value)}
                     placeholder="Last page"

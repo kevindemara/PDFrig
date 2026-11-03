@@ -133,11 +133,13 @@ export const pdfOperationContractSchema = z
     }
   });
 
+export const LOCAL_PDF_MAXIMUM_PAGES = 1_000;
+
 const localInput = Object.freeze({
   acceptedMimeTypes: Object.freeze(['application/pdf']),
   maximumBytes: 50 * 1024 * 1024,
   maximumFiles: 20,
-  maximumPages: 500,
+  maximumPages: LOCAL_PDF_MAXIMUM_PAGES,
   passwordHandling: 'memory-only' as const,
 });
 
@@ -197,7 +199,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.3.0',
+    version: '1.4.0',
     warningCodes: Object.freeze([
       'ANNOTATIONS_FLATTENED',
       'TEXT_ENCODING_LIMITED',
@@ -230,7 +232,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying appearances' }),
     ]),
     provenance,
-    version: '1.0.1',
+    version: '1.1.0',
     warningCodes: Object.freeze(['UNSUPPORTED_FORM_FIELD_BLOCKED']),
   }),
   'forms.data.exchange': Object.freeze({
@@ -295,7 +297,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ATTACHMENTS_BLOCKED',
@@ -331,7 +333,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ANNOTATIONS_BLOCKED',
@@ -370,7 +372,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.1.1',
+    version: '1.2.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ATTACHMENTS_BLOCKED',
@@ -408,7 +410,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'report', label: 'Preparing local report' }),
     ]),
     provenance,
-    version: '1.0.3',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ATTACHMENTS_BLOCKED',
@@ -450,7 +452,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze(['FORM_EDITABILITY_REMOVED', 'FORM_SEMANTICS_REMOVED']),
   }),
   'pages.assemble': Object.freeze({
@@ -485,7 +487,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.1',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ATTACHMENTS_BLOCKED',
@@ -526,7 +528,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.1',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_BLOCKED',
       'ATTACHMENTS_BLOCKED',
@@ -574,7 +576,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
     ]),
     provenance,
     secretOptionKeys: Object.freeze(['visualAppearance', 'destinationPageIds']),
-    version: '1.1.0',
+    version: '1.2.0',
     warningCodes: Object.freeze([
       'VISUAL_MARK_FLATTENED',
       'VISUAL_SIGNATURE_NOT_DIGITAL',
@@ -602,7 +604,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
     ]),
     provenance,
     secretOptionKeys: Object.freeze(['password']),
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'ACTIVE_CONTENT_DISABLED',
       'ORGANIZER_LOCKED',
@@ -630,7 +632,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output' }),
     ]),
     provenance,
-    version: '1.0.5',
+    version: '1.1.0',
     warningCodes: Object.freeze(['ALREADY_OPTIMIZED', 'LOSSLESS_ONLY']),
   }),
   'security.protect': Object.freeze({
@@ -655,7 +657,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
     ]),
     provenance,
     secretOptionKeys: Object.freeze(['password']),
-    version: '1.0.1',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'PASSWORD_NOT_RECOVERABLE',
       'PDF_VERSION_MAY_INCREASE',
@@ -710,7 +712,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
     ]),
     provenance,
     secretOptionKeys: Object.freeze(['ownerPassword', 'openPassword']),
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'PERMISSIONS_NOT_DRM',
       'EMPTY_OPEN_PASSWORD_NO_CONFIDENTIALITY',
@@ -741,7 +743,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
     ]),
     provenance,
     secretOptionKeys: Object.freeze(['password']),
-    version: '1.0.1',
+    version: '1.1.0',
     warningCodes: Object.freeze(['SIGNATURES_BLOCKED', 'UNSUPPORTED_STRING_LAYOUT_BLOCKED']),
   }),
   'metadata.edit': Object.freeze({
@@ -766,7 +768,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying metadata' }),
     ]),
     provenance,
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze(['SIGNATURES_INVALIDATED', 'XMP_REMOVED']),
   }),
   'convert.pdf.image': Object.freeze({
@@ -809,7 +811,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'package', label: 'Packaging images' }),
     ]),
     provenance,
-    version: '1.1.0',
+    version: '1.2.0',
     warningCodes: Object.freeze([
       'COLOUR_PROFILE_NOT_PRESERVED',
       'OUTPUT_RASTERIZED',
@@ -826,7 +828,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       acceptedMimeTypes: Object.freeze(['text/plain']),
       maximumBytes: 1_048_576,
       maximumFiles: 1,
-      maximumPages: 500,
+      maximumPages: LOCAL_PDF_MAXIMUM_PAGES,
       passwordHandling: 'never' as const,
     }),
     operation: 'convert.text.pdf',
@@ -840,7 +842,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
       Object.freeze({ cancellable: false, key: 'verify', label: 'Verifying output pages' }),
     ]),
     provenance,
-    version: '1.0.0',
+    version: '1.1.0',
     warningCodes: Object.freeze([
       'TEXT_LAYOUT_NORMALIZED',
       'OUTPUT_UNTAGGED',
@@ -881,7 +883,7 @@ export const PDF_OPERATION_REGISTRY = Object.freeze({
         'outputSha256',
       ] as const),
     }),
-    version: '1.1.0',
+    version: '1.2.0',
     warningCodes: Object.freeze(['ART_BOX_MAY_NOT_DISPLAY']),
   }),
   'create.images.pdf': Object.freeze({

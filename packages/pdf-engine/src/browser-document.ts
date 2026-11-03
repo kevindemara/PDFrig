@@ -1,3 +1,4 @@
+import { LOCAL_PDF_MAXIMUM_PAGES } from '@pdfmason/contracts';
 import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 
 import type { FormFieldType, NormalizedRect, QuarterTurn } from '@pdfmason/editor-core';
@@ -7,9 +8,16 @@ export const LOCAL_PDF_LIMITS = Object.freeze({
   maximumAssemblyBytes: 100 * 1024 * 1024,
   maximumBytes: 50 * 1024 * 1024,
   maximumImagePixels: 20_000_000,
-  maximumPages: 500,
+  maximumPages: LOCAL_PDF_MAXIMUM_PAGES,
   maximumSources: 20,
 });
+
+export class PdfPageLimitError extends Error {
+  constructor(readonly pageCount: number) {
+    super('LIMIT_PAGES');
+    this.name = 'PdfPageLimitError';
+  }
+}
 
 export type PdfRiskCode =
   | 'ACTIVE_CONTENT'
@@ -950,7 +958,7 @@ export const openBrowserPdf = async (
   });
   if (document.numPages > LOCAL_PDF_LIMITS.maximumPages) {
     await task.destroy();
-    throw new Error('LIMIT_PAGES');
+    throw new PdfPageLimitError(document.numPages);
   }
   return new BrowserPdfDocument(
     document,
