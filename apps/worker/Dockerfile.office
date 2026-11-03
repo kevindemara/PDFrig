@@ -7,14 +7,14 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @pdfmason/worker... build
 
 FROM node:22.19.0-bookworm-slim@sha256:4a4884e8a44826194dff92ba316264f392056cbe243dcc9fd3551e71cea02b90 AS runtime
-ARG LIBREOFFICE_VERSION=26.2.5
+ARG LIBREOFFICE_VERSION=26.2.5.2
 ARG LIBREOFFICE_SHA256=2f03bfb2ac9f33ea7c77331b4b7a23300fb0ed7443566046bf8b5bc51c1bed1e
 ENV NODE_ENV=production \
     PDFMASON_OFFICE_CONVERSION_ENABLED=true
 RUN apt-get update \
   && apt-get install --yes --no-install-recommends ca-certificates curl fontconfig fonts-dejavu-core fonts-liberation2 libcairo2 libice6 libsm6 libx11-6 libxinerama1 libxrandr2 libxrender1 libxt6 \
   && curl --fail --location --silent --show-error \
-    "https://download.documentfoundation.org/libreoffice/stable/${LIBREOFFICE_VERSION}/deb/x86_64/LibreOffice_${LIBREOFFICE_VERSION}_Linux_x86-64_deb.tar.gz" \
+    "https://downloadarchive.documentfoundation.org/libreoffice/old/${LIBREOFFICE_VERSION}/deb/x86_64/LibreOffice_${LIBREOFFICE_VERSION}_Linux_x86-64_deb.tar.gz" \
     --output /tmp/libreoffice.tar.gz \
   && echo "${LIBREOFFICE_SHA256}  /tmp/libreoffice.tar.gz" | sha256sum --check --strict \
   && mkdir /tmp/libreoffice \

@@ -11,6 +11,25 @@ import { containsSharpRuntime, reviewedSharpLicense } from './sharp-license-poli
 
 const packageJsonPath = new URL('../package.json', import.meta.url);
 
+test('Office worker uses the immutable official archive with the same verified release bytes', async () => {
+  const dockerfile = await readFile(
+    new URL('../apps/worker/Dockerfile.office', import.meta.url),
+    'utf8',
+  );
+  assert.match(dockerfile, /^ARG LIBREOFFICE_VERSION=26\.2\.5\.2$/mu);
+  assert.match(
+    dockerfile,
+    /^ARG LIBREOFFICE_SHA256=2f03bfb2ac9f33ea7c77331b4b7a23300fb0ed7443566046bf8b5bc51c1bed1e$/mu,
+  );
+  assert.ok(
+    dockerfile.includes(
+      'https://downloadarchive.documentfoundation.org/libreoffice/old/${LIBREOFFICE_VERSION}/deb/x86_64/LibreOffice_${LIBREOFFICE_VERSION}_Linux_x86-64_deb.tar.gz',
+    ),
+  );
+  assert.ok(dockerfile.includes('sha256sum --check --strict'));
+  assert.doesNotMatch(dockerfile, /libreoffice\/stable\//u);
+});
+
 test('feature-registry contract test cache includes the root scope authority', async () => {
   const turbo = JSON.parse(await readFile(new URL('../turbo.json', import.meta.url), 'utf8'));
   assert.deepEqual(turbo.tasks['@pdfmason/contracts#test'].inputs, [
