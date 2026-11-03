@@ -7,7 +7,8 @@ it is not bundled. Official runtime setup, subject to device policy:
 https://developer.microsoft.com/microsoft-edge/webview2/
 
 This unsigned alpha is version
-0.1.0-alpha.20261103.1. It includes page jumping, Fit width, table correction
+0.1.0-alpha.20261103.2. It supports up to 1,000 PDF pages with a 50 MB input limit,
+and includes page jumping, Fit width, table correction
 undo/redo, PDF table extraction to XLSX/ODS and local English/French OCR tables.
 BUILD_INFO.json records the original
 build provenance. The source snapshot and build-time acceptance fields describe
