@@ -57,6 +57,23 @@ test('VIEW-004/ORG-001 navigates and exports 1000 mixed pages with bounded thumb
   await jump.fill('1000');
   await jump.press('Enter');
   await expect(page.getByLabel('Rendered page 1000')).toBeVisible();
+  const visibleNumber = await jump.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const context = document.createElement('canvas').getContext('2d');
+    if (!context) throw new Error('Text measurement unavailable');
+    context.font = style.font;
+    const horizontalChrome = [
+      style.paddingLeft,
+      style.paddingRight,
+      style.borderLeftWidth,
+      style.borderRightWidth,
+    ].reduce((total, value) => total + parseFloat(value), 0);
+    return (
+      context.measureText((element as HTMLInputElement).value).width + horizontalChrome <=
+      element.getBoundingClientRect().width + 0.5
+    );
+  });
+  expect(visibleNumber).toBe(true);
   expect(await page.locator('.page-thumbnails canvas').count()).toBeLessThanOrEqual(16);
   await page
     .locator('.properties-panel')

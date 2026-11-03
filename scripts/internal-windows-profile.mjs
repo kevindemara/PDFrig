@@ -9,7 +9,7 @@ export function internalWindowsProfile(args = []) {
     branded
       ? {
           version: '0.1.0-alpha.20261103.2',
-          buildId: 'private-test-20261103-page-limit',
+          buildId: 'private-test-20261103-page-limit-final',
           productName: 'PDFrig',
           title: 'PDFrig',
           identifier: 'com.pdfmason.desktop.privatetest',
